@@ -1,0 +1,91 @@
+td.contactDept
+{ 
+background-color: #99CCCC;
+border: 1px #000000 solid;
+font-family: Verdana;
+font-weight: bold;
+font-size: 15px;
+color: #404040; 
+}
+
+
+td.GFS
+{
+border-bottom: 1px #6699CC dotted;
+text-align: left;
+font-family: Verdana, sans-serif, Arial;
+font-weight: normal;
+font-size: 14px;
+color: #404040;
+background-color: #ffe;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 8px;
+padding-right: 0px;
+}
+
+td.NFS
+{
+border-bottom: 1px #6699CC dotted;
+text-align: left;
+font-family: Verdana, sans-serif, Arial;
+font-weight: normal;
+font-size: 14px;
+color: #404040;
+background-color: #cef;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 8px;
+padding-right: 0px;
+}
+
+td.WRF
+{
+border-bottom: 1px #6699CC dotted;
+text-align: left;
+font-family: Verdana, sans-serif, Arial;
+font-weight: normal;
+font-size: 14px;
+color: #404040;
+background-color: #ddf;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 8px;
+padding-right: 0px;
+}
+
+td.EPS
+{
+border-bottom: 1px #6699CC dotted;
+text-align: left;
+font-family: Verdana, sans-serif, Arial;
+font-weight: normal;
+font-size: 14px;
+color: #404040;
+background-color: #fef;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 8px;
+padding-right: 0px;
+}
+
+td.hed
+{ 
+background-color: #BEC8D1;
+text-indent: 5px;
+font-family: Verdana;
+font-weight: bold;
+font-size: 15px;
+color: #404040; 
+text-align:center;
+}
+
+td.bod
+{
+text-align:center;
+text-indent: 10px;
+font-family: Verdana, sans-serif, Arial;
+font-weight: normal;
+font-size: 14px;
+color: #404040;
+background-color: #ded; }

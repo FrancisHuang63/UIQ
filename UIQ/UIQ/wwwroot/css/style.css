@@ -1,0 +1,274 @@
+/* remove bootstrap style*/
+body
+{
+    display: block;
+    margin: 8px;
+    line-height: unset !important;
+}
+
+*
+{
+    box-sizing: initial !important;
+}
+
+input
+{
+    color: initial;
+}
+
+#top
+{
+    margin: 0 auto;
+    width:970px;
+    left: 0;
+    right: 0;
+    background-color: white;
+}
+#menu
+{
+    margin: 0 auto;
+    width:970px;
+
+}
+#main
+{
+    margin: 0 auto;
+    width:970px;
+}
+#end
+{
+    margin: 0 auto;
+    width:970px;
+}
+#loading
+{
+    position:absolute;
+    top:0%;
+    left:90%;
+    width:10%;
+    height:4%;
+    font-family:"Verdana","Courier New";
+    font-size:14pt;
+    display:none;
+}
+.topic
+{
+    font-size:15px !important;
+    padding-left:10px !important;
+    background-color:#666666 !important;
+    color:#FFFFFF !important;
+    height:30px !important;
+    padding-top:6px !important;
+}
+.form
+{
+
+    margin-right: 3px;
+    margin-top:3px;
+    margin-bottom:3px;
+    font-size:1.1em;
+    font-family:"Verdana","Courier New";
+}
+
+div.enquire
+{
+    /*magin-left:10em;*/
+    font-size:1.2em;
+    height:320px;
+    font-family:"Verdana","Courier New";
+    color:#111;
+    overflow:auto;
+    border:1px solid #666;
+}
+div.huge
+{
+    font-size:1.2em;
+    height:700px;
+    font-family:"Verdana","Courier New";
+    color:#111;
+    overflow:auto;
+    border:1px solid #666;
+}
+div.short
+{
+    font-size:1.2em;
+    height:170px;
+    font-family:"Verdana","Courier New";
+    color:#111;
+    overflow:auto;
+    border:1px solid #666;
+}
+div.line
+{
+    font-size:1.2em;
+    height:30px;
+    font-family:"Verdana","Courier New";
+    color:#111;
+    overflow:auto;
+    border:1px solid #666;
+}
+h1
+{
+    font-family:"Verdana","Courier New";
+    font-size:1.3em;
+    color:#666;
+}
+td.summary
+{
+    font-size:1em;
+    text-align:center;
+    width:75pt;
+}
+td.title
+{
+    color:#556677;
+    font-size:1.1em;
+    text-align:center;
+    width:50pt;
+
+}
+
+/*HyperLink settings*/
+/* 未連結 */
+a:link{color:blue;text-decoration:none;}
+/* 已連結過 */
+a:visited{color:blue;}
+/* 滑鼠移至連結 */
+a:hover{color:orange;}
+#topright
+{
+    float:right;
+    font-size:0.8em;
+    font-family:Verdana, Arial, Helvetica, sans-serif;
+    padding-left:10px;
+}
+#topright a:link {color:white;}
+#topright a:visited {color:white;}
+#topright a:hover {color:orange;}
+textarea
+{
+    font-size:1.2em;
+    height:120px;
+    width:100%;
+    overflow:auto;
+    border:1px solid #666;
+}
+
+#status_table{
+    font-weight:bold;
+}
+td.model_name{
+    font-weight:bold;
+    width:12%;
+}
+td.member_name{
+    width:10%;
+}
+
+#detailed_status_top
+{
+    width:970px;
+    margin: 0 auto;
+    background-color: white;
+}
+
+#detail_link
+{
+    position: inherit !important;
+}
+
+.glyphicon.glyphicon-th-list
+{
+    position: inherit;
+}
+
+/*Commad Page*/
+mark
+{
+    font-weight:600;
+    padding: 2px 4px;
+    color: #c7254e !important;
+    background-color: #FFFF77 !important;
+    border-radius: 4px;
+}
+
+.warp_table
+{
+    border-collapse: collapse !important;
+    width: 100% !important;
+    border: 1px solid #4d9ab0 !important;
+    font-size: 16px !important;
+}
+
+.warp_table th
+{
+    border:1px solid #4d9ab0 !important;
+    text-align: center;
+}
+
+#edit_command_table textarea
+{
+    margin-bottom: 10px;
+}
+
+textarea#example, textarea#content{
+    height: 80px;
+}
+
+
+/*Model_member set page*/
+.check_point_dialog{
+    font-size: 16px;
+}
+
+th#batch_name{
+    border-right:none !important;
+    text-align: left;
+}
+
+th#add_check_btn{
+    border-left:none !important;
+    text-align: right;
+}
+
+/*Set typhoon data page*/
+#typhoon_data_form{
+    width: 45%;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#typhoon_file_info{
+    width: 50%;
+}
+
+#file_content div{
+    font-family: "Courier New","Verdana";
+}
+
+#typhoon_data_form table{
+    font-size: 14px;
+}
+
+#file_created_result{
+    margin-top:15px;
+}
+
+.typhoon_setting_block{
+    display: inline-block;
+    font-family: "Verdana","Courier New";
+    height: 80%;
+    border: solid 1px;
+    padding: 10px;
+    font-size: 16px;
+    overflow: auto;
+}
+
+.input_description{
+    font-size: 14px;
+    display: inline;
+}
+
+.typhoon_file_name{
+    margin-button: 5px;
+}

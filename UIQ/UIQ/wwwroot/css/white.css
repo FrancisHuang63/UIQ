@@ -1,0 +1,115 @@
+/* tables */
+table.tablesorter {
+    font-family:arial;
+    background-color: #CDCDCD;
+    margin:10px 0pt 15px;
+    font-size: 8pt;
+    width: 100%;
+    text-align: left;
+    border-spacing: 1px !important;
+    border-collapse: inherit;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+    background-color: #e6EEEE;
+    border: 1px solid #FFF;
+    font-size: 8pt;
+    padding: 4px;
+}
+table.tablesorter thead tr .header {
+	/*background-image:url(bg.gif);*/
+    background-repeat: no-repeat;
+    background-position: center right;
+    cursor: pointer;
+}
+table.tablesorter tbody td {
+    color: #3D3D3D;
+    padding: 4px;
+    background-color: #FFF;
+    vertical-align: top;
+}
+table.tablesorter tbody tr.odd td {
+    background-color:#F0F0F6;
+}
+table.tablesorter tbody tr.failed:nth-child(odd) td, #status_table tr:nth-child(odd) td.FAIL {
+    background-color:#ED6C9E;
+}
+table.tablesorter tbody tr.failed:nth-child(even) td, #status_table tr:nth-child(even) td.FAIL {
+    background-color:#E3007B;
+}
+table.tablesorter tbody tr.running:nth-child(odd) td, #status_table tr:nth-child(odd) td.RUNNING  {
+    background-color:#ABD46E;
+}
+table.tablesorter tbody tr.running:nth-child(even) td, #status_table tr:nth-child(even) td.RUNNING {
+    background-color:#7CC623;
+}
+table.tablesorter thead tr .headerSortUp {
+    background-image: url(asc.gif);
+}
+table.tablesorter thead tr .headerSortDown {
+    background-image: url(desc.gif);
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+    background-color: #8dbdd8;
+}
+#tablesorter-demo th, #tablesorter-demo2 th
+{
+    text-align:center;
+}
+#tablesorter-demo td, #tablesorter-demo2 td
+{
+    text-align:center;
+}
+
+#tablesorter-demo td.left, #tablesorter-demo2 td.left
+{
+    text-align:left;
+}
+
+#tablesorter-demo td.FAIL, #tablesorter-demo2 td.FAIL
+{
+    background-color:#ED6C9E;
+    border:1px inset white;
+}
+
+#tablesorter-demo td.delay10, #tablesorter-demo2 td.delay10, #status_table td.delay10
+{
+    background-color:#EF9C00;
+    border:1px inset white;
+}
+/*delay 20 mins style*/
+#tablesorter-demo td.delay20, #tablesorter-demo2 td.delay20, #status_table td.delay20
+{
+    background-color:#E8641B;
+    border:1px inset white;
+}
+/*delay 1 hour style*/
+#tablesorter-demo td.delay1h, #tablesorter-demo2 td.delay1h, #status_table td.delay1h
+{
+    background-color:#DF0024;
+    border:1px inset white;
+}
+/*halt 5 mins style*/
+#tablesorter-demo td.delay1h_s, #tablesorter-demo2 td.delay1h_s, #status_table td.delay1h_s
+{
+    background-color:#EF9C00;
+    border:1px inset white;
+}
+/*halt 30 mins style*/
+#tablesorter-demo td.delay2h_s, #tablesorter-demo2 td.delay2h_s, #status_table td.delay2h_s
+{
+    background-color:#E8641B;
+    border:1px inset white;
+}
+/*currently not used style*/
+#tablesorter-demo td.delay3h_s, #tablesorter-demo2 td.delay3h_s, #status_table td.delay3h_s
+{
+    background-color:#DF0024;
+    border:1px inset white;
+}
+
+/*cancelled style*/
+#tablesorter-demo td.cancelled, #status_table td.cancelled
+{
+    background-color:#FFFF66;
+    border:1px inset white;
+}
