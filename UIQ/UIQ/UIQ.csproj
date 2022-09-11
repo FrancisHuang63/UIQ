@@ -15,12 +15,14 @@
 
   <ItemGroup>
     <Compile Remove="Class\MySqlOptions.cs" />
+    <Compile Remove="Controllers\ReferenceInfoController.cs" />
     <Compile Remove="Services\Interfaces\ILoginService.cs" />
     <Compile Remove="Services\LoginService.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.8" />
     <PackageReference Include="MySqlConnector" Version="2.1.12" />
   </ItemGroup>
 

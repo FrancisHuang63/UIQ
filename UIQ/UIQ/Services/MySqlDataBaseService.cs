@@ -2,6 +2,7 @@
 using MySqlConnector;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using UIQ.Enums;
 using UIQ.Services.Interfaces;
 
 namespace UIQ.Services
@@ -9,10 +10,11 @@ namespace UIQ.Services
     public class MySqlDataBaseService : IDataBaseService
     {
         public string ConnectionString { get; set; }
+        public DataBaseEnum DataBase { get; }
 
-        public MySqlDataBaseService(IConfiguration _configuration)
+        public MySqlDataBaseService(IConfiguration _configuration, DataBaseEnum dataBase)
         {
-            ConnectionString = _configuration.GetConnectionString("MySqlOptions");
+            ConnectionString = _configuration.GetSection(dataBase.ToString()).GetConnectionString("MySqlOptions");
         }
 
         public async Task<int> DeleteAsync(string tableName, object parameter = null)

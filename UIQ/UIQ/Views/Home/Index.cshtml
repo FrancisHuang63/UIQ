@@ -1,8 +1,260 @@
-﻿@{
+﻿@using UIQ.ViewModels
+@model IEnumerable<Model>
+@{
+    IEnumerable<Member> members = ViewBag["Members"];
+    IEnumerable<MenuViewModel> menus = ViewBag["Menu"];
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>NWP monitor system</title>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+        <link href="./css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+        <link href="./css/style.css" rel="stylesheet" type="text/css" />
+        <link href="./css/white.css" rel="stylesheet" type="text/css" />
+
+        <script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="./js/jqueryslidemenu.js"></script>
+        <script type="text/javascript" src="./js/selectivizr.js"></script>
+        <script type="text/javascript" src="./js/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="./js/jquery-ui-dialog-enhancement/2017-07-25/build/jquery.dialogextend.min.js"></script>
+        <script type="text/javascript" src="./js/tool.js"></script>
+        <script type="text/javascript" src="./js/home.js"></script>
+
+        <script type="text/javascript">
+            $(function () {
+                $("#status_table").tablesorter({
+                    widgets: ['zebra'],
+                    headers: {
+                        0: {
+                            sorter: false
+                        }
+                    }
+                });
+                $("#tablesorter-demo2").tablesorter({widgets: ['zebra']});
+            });
+
+            //auto refresh,1000=1 second
+            function page_refresh()
+            {
+                window.location.reload();
+            }
+            setTimeout('page_refresh()',60000);
+
+        </script>
+    </head>
+
+    <body>
+        <div id='top'>
+            <table>
+                <tr>
+                    <?php include("./cfg/SV_PATH.php"); ?>
+                    <td height="107" valign="bottom" background="<?= $home_index_Site ?>">
+                        <div id="topright">welcome! <b>@(User.Identity?.Name)</b> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
+                        <div id="menu" class="jqueryslidemenu">
+                            <ul>
+                            @foreach(var menu in menus.OrderBy(x => x.Sort))
+                            {
+                                <li>
+                                    <a href='javascript:;'>@menu.Title</a>
+                                    <ul>
+                                        @foreach(var subMenu in menu.ChildItems.OrderBy(x => x.Sort))
+                                        {
+                                            <li>
+                                                <a href="@subMenu.LinkUrl" target='_blank'>@subMenu.Title</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                            </ul>
+                            <br style="clear: left" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <table id="status_table" class="tablesorter" cellspacing="1">
+                <thead>
+                    <tr>
+                        <th colspan="">STATUS TABLE
+                            <a href="@Url.Action("DetailedStatus")" target="_blank" class="btn"><span class="glyphicon glyphicon-th-list"></span></a>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @{var midiFlag = false;}
+                    @foreach(var model in Model)
+                    {
+                        <tr>
+                            <td class="model_name">@(model.ModelName)</td>
+                            @foreach(var member in members.Where(x => x.ModelId == model.ModelId))
+                            {
+                                    
+                            }
+                        </tr>
+                    }
+                    
+                    <?php foreach ($model_info as $model_name => $member_list): ?>
+                        <?php
+
+                        echo '<tr><td class="model_name">' . $model_name . '</td>';
+                        foreach ($member_list as $key => $member_info) {
+                            $td_text = $member_info['td_text'];
+                            $td_group_member = $member_info['td_group_member'];
+
+                            if($member_info['alert_flag'] === 'true'){
+                                $midi_flag = 'true';
+                            }
+
+                            if ($member_info['new_tr'] === 'true' && $member_info['td_end'] === 'false') {
+                                $html = '</tr><tr><td></td>';
+                                $html.= '<td class="member_name ' . $member_info['td_class'] . '">';
+                                $html.= '<a href="' . $member_info['href'] . '" title="' . $td_group_member . '" target="_blank">';
+                                $html.= $td_text . '</a>';
+                                $html.= '<br>' . $member_info['dtg'] . ' ' . $member_info['run_type'] . '</td>';
+                                echo $html;
+                            } elseif ($member_info['new_tr'] === 'false' && $member_info['td_end'] === 'true') {
+                                $html = '<td class="member_name ' . $member_info['td_class'] . '">';
+                                $html.= '<a href="' . $member_info['href'] . '" title="' . $td_group_member . '" target="_blank">';
+                                $html.= $td_text . '</a>';
+                                $html.= '<br>' . $member_info['dtg'] . ' ' . $member_info['run_type'] . '</td>';
+                                $html.= '</tr>';
+                                echo $html;
+                            } else {
+                                $html = '<td class="member_name ' . $member_info['td_class'] . '">';
+                                $html.= '<a href="' . $member_info['href'] . '" title="' . $td_group_member . '" target="_blank">';
+                                $html.= $td_text . '</a>';
+                                $html.= '<br>' . $member_info['dtg'] . ' ' . $member_info['run_type'] . '</td>';
+                                echo $html;
+                            }
+
+                            if ($member_info['last_member'] === 'true') {
+                                for ($td = 1; $td <= $member_info['additional_td_number']; $td++) {
+                                    echo '<td></td>';
+                                }
+                            }
+                        }
+                        ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="main">
+            <table id="tablesorter-demo2" class="tablesorter" cellspacing="1" border="5" bordercolor="red" >
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>DTG & RUN</th>
+                        <th>Start Time -> Predict End</th>
+                        <th>Stage start (Predict End)</th>
+                        <th>Run Status</th>
+                        <th>Comment</th>
+                        <th>Next Run</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($summary as $val): ?>
+                        <?php
+                        $fail_flag = 'false';
+
+                        if ('FAIL' == strtoupper($val->status)) {
+                            echo '<tr class="failed">';
+                        } elseif ('delay 10+ mins' == $val->comment) {
+                            echo '<tr>';
+                        } elseif ('delay 30+ mins' == $val->comment) {
+                            echo '<tr>';
+                        } elseif ('delay 1hr+' == $val->comment) {
+                            echo '<tr>';
+                        } elseif (eregi('halt 5min+', $val->comment)) {
+                            echo '<tr>';
+                        } elseif (eregi('halt 30min+', $val->comment)) {
+                            echo '<tr>';
+                        } elseif (eregi('halt 1hr+', $val->comment)) {
+                            echo '<tr>';
+                        } elseif (eregi('halt 2hr+', $val->comment)) {
+                            echo '<tr>';
+                        } else {
+                            continue;
+                        }
+                        ?>
+
+                        <td class = 'left'>
+                            <?php if ($group == 'ADM') {
+                                ?><a href="./setting/Edit/<?= $val->member_id ?>" target="_blank">
+                                    <img src="./images/edit.png" width="12"/></a><?php } ?>
+                            <a style="text-decoration:none; font-weight:bold" href="<?= base_url() ?>logview/index/<?= $val->model_name ?>/<?= $val->member_name ?>/<?= $val->account ?>"
+                               target='_blank'> <?= $val->model_name . '_' . $val->member_name . ' (' . $val->nickname . ')' ?></a>
+                        </td>
+
+                        <td class='left'><?= $val->dtg ?> <?= $val->run_type ?></td>
+
+                        <td><?= get_sortTime($val->start_time) ?> -> <?= get_sortTime($val->end_time) ?></td>
+
+                        <td  class='left' title='<?= $val->shell_name ?>'><?= $val->sms_name ?> (<?= get_sortTime($val->sms_time) ?> ->  <?= get_sortTime($val->pre_end) ?>)</td>
+
+                        <td class='left'><?php read_file(base_url() . 'logview/index/' . $val->model_name . '/' . $val->member_name. '/' . $val->account) ?></td>
+
+                        <?php
+                        if ('delay 10+ mins' == $val->comment) {
+                            echo "<td class='delay10'>$val->comment</td>";
+                        } elseif ('delay 30+ mins' == $val->comment) {
+                            echo "<td class='delay20'>$val->comment</td>";
+                        } elseif ('delay 1hr+' == $val->comment) {
+                            echo "<td class='delay1h'>$val->comment</td>";
+                        } elseif (eregi('halt 5min+', $val->comment)) {
+                            echo "<td class='delay1h_s'>$val->comment</td>";
+                        } elseif (eregi('halt 30min+', $val->comment)) {
+                            echo "<td class='delay2h_s'>$val->comment</td>";
+                        } elseif (eregi('halt 1hr+', $val->comment)) {
+                            echo "<td class='delay2h_s'>$val->comment</td>";
+                        } elseif (eregi('halt 2hr+', $val->comment)) {
+                            echo "<td class='delay3h_s'>$val->comment</td>";
+                        } elseif (eregi('Cancelled', $val->comment)) {
+                            echo "<td class='cancelled'>$val->comment</td>";
+                        } else {
+                            echo "<td>$val->comment</td>";
+                        }
+                        ?>
+
+                        <?php if ('FAIL' != strtoupper($val->status) && 'RUNNING' != $val->status): ?>
+                            <td><?= get_sortTime($val->nextrun) ?></td>
+                            <?php
+                        else :
+                            if ('FAIL' == strtouppet($val->status)) {
+                                $fail_flag = 'true';
+                            }
+                            ?>
+                            <td><?= get_sortTime($val->nextrun) ?></td>
+                        <?php endif; ?>
+
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <input type=button style="display:scroll;position:fixed;bottom:5px;right:30px;width:80px;" value="Return top" onclick="window.scrollTo(0, 0);"></input>
+        </div>
+
+        <?php
+        if ($midi_flag == 'true') {
+            echo "<object >
+               <param name='vedio' value='./media/moscode.midi'>
+               <embed src='./media/moscode.midi' autostart='true' width=70 height=25>
+               </embed>";
+        }
+        ?>
+
+    </body>
+</html>

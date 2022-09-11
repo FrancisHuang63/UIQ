@@ -31,8 +31,7 @@ namespace UIQ.Controllers
 
             return LocalRedirectPermanent($"~/Home/{nameof(HomeController.Index)}");
         }
-
-        [HttpPost]
+        
         public async Task<IActionResult> Logout()
         {
             await _userService.Logout();

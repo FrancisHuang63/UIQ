@@ -1,9 +1,11 @@
 ﻿using System.Data;
+using UIQ.Enums;
 
 namespace UIQ.Services.Interfaces
 {
     public interface IDataBaseService
     {
+        DataBaseEnum DataBase { get; }
         string ConnectionString { get; set; }
 
         public Task<int> DeleteAsync(string tableName, object parameter = null);

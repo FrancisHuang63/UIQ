@@ -9,13 +9,13 @@ namespace UIQ.Services
     public class UserForDataBaseLoginService : IUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IDataBaseService _dataBaseService;
+        private readonly IDataBaseService _dataBaseNcsUiService;
         private HttpContext _httpContext;
 
-        public UserForDataBaseLoginService(IHttpContextAccessor httpContextAccessor, IDataBaseService dataBaseService)
+        public UserForDataBaseLoginService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices)
         {
             _httpContextAccessor = httpContextAccessor;
-            _dataBaseService = dataBaseService;
+            _dataBaseNcsUiService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsUi);
             _httpContext = _httpContextAccessor.HttpContext;
         }
 
@@ -42,7 +42,7 @@ namespace UIQ.Services
                          JOIN `group` ON `user`.`group_id` = `group`.`group_id`
                          WHERE `account` = @Account AND `passwd` = @Password";
 
-            return _dataBaseService.QueryAsync<UserViewModel>(sql, new { Account = userId, Password = password }).GetAwaiter().GetResult().Single();
+            return _dataBaseNcsUiService.QueryAsync<UserViewModel>(sql, new { Account = userId, Password = password }).GetAwaiter().GetResult().Single();
         }
 
         private async Task SetLogin(UserViewModel userInfo)
@@ -51,17 +51,13 @@ namespace UIQ.Services
             {
                 new Claim(ClaimTypes.Name, userInfo.Account),
                 new Claim("Id", userInfo.UserId.ToString()),
-                new Claim(ClaimTypes.Role, userInfo.GroupId.ToString()),
-                new Claim("GourpName", userInfo.GroupName),
+                new Claim(ClaimTypes.Role, userInfo.GroupName),
+                new Claim("GourpId", userInfo.GroupId.ToString()),
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await _httpContext.SignInAsync(new ClaimsPrincipal(claimsIdentity));
-
-            //Set session
-            _httpContext.Session.SetString("login", userInfo.Account);
-            _httpContext.Session.SetString("group", userInfo.GroupName);
         }
 
         #endregion Private Methods

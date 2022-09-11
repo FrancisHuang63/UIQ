@@ -9,8 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 //builder.Services.AddMvc();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddScoped<IDataBaseService, MySqlDataBaseService>();
+builder.Services.AddScoped<IDataBaseService, MySqlDataBaseNcsUiService>();
+builder.Services.AddScoped<IDataBaseService, MySqlDataBaseNcsLogService>();
 builder.Services.AddScoped<IUserService, UserForDataBaseLoginService>();
+builder.Services.AddScoped<IUiqService, UiqService>();
 
 //Login
 if (builder.Configuration.GetValue<bool>("IsLoginByOauth"))
