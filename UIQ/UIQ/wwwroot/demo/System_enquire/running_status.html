@@ -1,0 +1,68 @@
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script src="../js/jquery-1.3.2.min.js"></script>
+<script src="../js/tool.js"></script>
+<link rel=stylesheet type="text/css" href="../../css/style.css">
+<link rel=stylesheet type="text/css" href="../../css/fjstyle.css">
+<HTML><HEAD><TITLE>Runnning status</Title></Head>
+	
+<script type="text/javascript">
+	
+	function countSecond()
+	{
+		setTimeout("ReRunSend()", 10000);
+	}
+	function ReRunSend()
+	{
+		if(document.getElementById("SendMember") != null)
+		{
+			if(document.all) {
+					document.getElementById("SendMember").click();
+			}
+			
+			else {
+				var e = document.createEvent("MouseEvents");
+				e.initEvent("click", true, true);
+				document.getElementById("SendMember").dispatchEvent(e);
+			}
+		}
+		setTimeout("ReRunSend()", 10000);
+	}
+
+
+</script>
+
+<div class='topic'>Model enquire > Running status</div>
+<FORM Name="myForm" class="form">
+	Model:
+	<SELECT id="model" class="form" OnChange="Buildkey(this.selectedIndex);clear_nickname_options();">
+		<option>-----</option>
+	</Select>
+	
+	Member:
+	<SELECT id="member" class="form" OnChange="build_nickname_options();">
+		<option>-----</option>
+	</Select>
+
+	Nickname:
+	<SELECT id="nickname" class="form" OnChange="sendAJAXRequest('post', 'running_enquire.php', 'LogShow'); sendAJAXRequest('post', 'running_sms.php', 'sms');">
+		<option>-----</option>
+	</Select>
+
+	KeyWord:<input id="keyw" class="form" value="job" OnChange="sendAJAXRequest('post', 'running_enquire.php', 'LogShow');">
+
+</FORM>
+
+<div id="LogShow" class="form">
+	LogFile:
+	<select class="form">
+		<option>-----</option>
+	</select>
+	<input type="submit" value="enquire" class="form" >
+</div>
+<br>
+
+<h1>show the log file of the member</h1>
+<div id="show" class="enquire">
+show the current status...
+</div>
+        

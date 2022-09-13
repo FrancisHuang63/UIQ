@@ -1,0 +1,15 @@
+<script src="../js/jquery-1.3.2.min.js"></script>
+<script src="../js/tool.js"></script>
+<link rel="stylesheet" href="../../css/style.css" type="text/css">
+<TITLE>SLP for grapher</Title>
+<div class="topic">Rescue tools > slp for grapher</div>
+
+Default DTG <input id="dtg" type="text" class="form" value="$dtg">
+
+<input type="button" class="form" value="enquire"  OnClick="sendAJAXRequest('post', 'slp_data_dms_key.php', 'dms');$('#result').html('');">(the DTG format is yymmddhh) 
+<div id="dms" class="short">
+
+</div><br>
+
+<input type="button" class="form" value="redo" OnClick="sendAJAXRequest('post', 'slp_data_result.php', 'result');" ><br><br>
+<div id="result" class="enquire">the execution result...</div>

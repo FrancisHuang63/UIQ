@@ -1,0 +1,76 @@
+<?php
+include(dirname(__FILE__)."/../cfg/SV_PATH.php");
+$all_acc_path = shell_exec("sh ${UI_PATH}shell/log_path.sh");
+$all_acc_path = rtrim($all_acc_path);
+$all_acc_arr = preg_split('/ /', $all_acc_path);
+
+date_default_timezone_set("Asia/Taipei");
+$MMDD = date("md", time() - 86400);
+
+$filepath = "/ncs/${HpcCTL}/${Hpcdaily_log}/log." . $MMDD;
+$fp = fopen($filepath, "w");
+
+foreach($all_acc_arr as $acc_path){
+	$path_arr = preg_split('%/%', $acc_path);
+	$model = $path_arr[3];
+	$member = $path_arr[4];
+	if(preg_match("/E[0-9][0-9]/", $member)){
+		continue;
+	}
+
+	$LOGFILE = "${acc_path}/log/job." . $MMDD;
+	if(file_exists($LOGFILE)){
+		$log_cont = @file(${LOGFILE});
+	}else{
+		$print_str = "There is no log file ${LOGFILE}\n";
+		$print_str .= "---------------------------------------------------------\n";
+		@fwrite( $fp, $print_str, strlen($print_str) );
+		continue;
+	}
+
+	$flg = 0;
+	for($i = 0; $i < count($log_cont); $i++){
+		$j = $i + 1;
+		if(preg_match("/${model}/", $log_cont[$i]) && !preg_match("/^\[/", $log_cont[$i])){
+			if($flg == 1){
+				$print_str = "\n";
+				@fwrite( $fp, $print_str, strlen($print_str) );
+			}else{
+				$flg = 1;
+			}
+
+			$HEADER = $log_cont[$i];
+			$HEADER = rtrim($HEADER);
+			$HEAarr = preg_split("/ /", $HEADER);
+
+			$START  = $log_cont[$j];
+			$STAarr = preg_split("/ /", $START);
+			$S_TIME = $STAarr[0];
+
+			$print_str = sprintf("%-29s %-10s", $HEADER,$S_TIME);
+			@fwrite( $fp, $print_str, strlen($print_str) );
+
+		}elseif(preg_match("/finish|fail|cancelled/i", $log_cont[$i])){
+			$flg = 0;
+			$FINISH = $log_cont[$i];
+			$FINISH = rtrim($FINISH);
+
+			$FINarr = preg_split("/ /", $FINISH);
+
+			$F_TIME = $FINarr[0];
+			$F_RESU = end($FINarr);
+
+
+			$print_str = " ${F_TIME} ${F_RESU}\n";
+			@fwrite( $fp, $print_str, strlen($print_str) );
+		}
+	}
+
+	$print_str = "------------------------------------------------------------\n";
+	if($flg == 1){
+		$print_str = "\n".$print_str;
+		$flg = 0;
+	}
+	@fwrite( $fp, $print_str, strlen($print_str) );
+}
+fclose($fp);

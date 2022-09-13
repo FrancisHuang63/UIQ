@@ -1,0 +1,70 @@
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script src="../../js/jquery-1.3.2.min.js"></script>
+<script src="../../js/tool.js"></script>
+<link rel=stylesheet type="text/css" href="../../css/style.css">
+<link rel=stylesheet type="text/css" href="../../css/fjstyle.css">
+</head>
+
+     <div style="width: 33%; height: 100%; overflow: scroll; display:inline-block;">
+        <div class='topic'>Model enquire > Job log check</div>
+        <FORM Name="myForm" class="form">
+            Model:<SELECT id="model" class="form" OnChange="Buildkey(this.selectedIndex);clear_nickname_options();">
+                    <option>-----</option>
+                </Select>
+            Member:<SELECT id="member" class="form" OnChange="build_nickname_options();">
+                    <option>-----
+                    </Select><br><br>
+                    Nickname:<SELECT id="nickname" class="form" Onchange="sendAJAXRequest('post', 'model_log_enquire.php', 'show');$('#result').html('');">
+                        <option>-----
+                    </Select>
+        </FORM>
+        <div id="show" class="form">
+            Date:<select class="form"><option>-----</select><input type="submit" value="enquire" class="form">
+            </div>
+            <br>
+            <div id="result">
+        </div>
+    </div>
+    <div  style="width: 33%; height: 100%; overflow: scroll; display:inline-block;">
+        <div class='topic'>Model enquire > Job log check</div>
+        <FORM Name="myForm" class="form">
+            Model:<SELECT id="model" class="form" OnChange="Buildkey(this.selectedIndex);clear_nickname_options();">
+                    <option>-----</option>
+                </Select>
+            Member:<SELECT id="member" class="form" OnChange="build_nickname_options();">
+                    <option>-----
+                    </Select><br><br>
+                    Nickname:<SELECT id="nickname" class="form" Onchange="sendAJAXRequest('post', 'model_log_enquire.php', 'show');$('#result').html('');">
+                        <option>-----
+                    </Select>
+        </FORM>
+        <div id="show" class="form">
+            Date:<select class="form"><option>-----</select><input type="submit" value="enquire" class="form">
+            </div>
+            <br>
+            <div id="result">
+        </div>
+    </div>
+    <div style="width: 33%; height: 100%; overflow: scroll; display:inline-block;">
+        <div class='topic'>Model enquire > Job log check</div>
+        <FORM Name="myForm" class="form">
+            Model:<SELECT id="model" class="form" OnChange="Buildkey(this.selectedIndex);clear_nickname_options();">
+                    <option>-----</option>
+                </Select>
+            Member:<SELECT id="member" class="form" OnChange="build_nickname_options();">
+                    <option>-----
+                    </Select><br><br>
+                    Nickname:<SELECT id="nickname" class="form" Onchange="sendAJAXRequest('post', 'model_log_enquire.php', 'show');$('#result').html('');">
+                        <option>-----
+                    </Select>
+        </FORM>
+        <div id="show" class="form">
+            Date:<select class="form"><option>-----</select><input type="submit" value="enquire" class="form">
+            </div>
+            <br>
+            <div id="result">
+        </div>
+    </div>        
+</html>
