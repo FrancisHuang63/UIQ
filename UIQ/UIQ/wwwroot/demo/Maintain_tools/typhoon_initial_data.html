@@ -1,0 +1,18 @@
+<script src="../js/jquery-1.3.2.min.js"></script>
+<script src="../js/tool.js"></script>
+<link rel=stylesheet type="text/css" href="../../css/style.css">
+<TITLE>Set typhoon data</Title>
+<div class="topic">Maintain tools > Set typhoon data</div>
+<h1>Edit the typhoon initial data</h1>
+<b>Total Typhoon number<font color="red">* </font></b><input type="txt" id="adjust"><input type="submit" value="input" Onclick="sendAJAXRequest('post', 'typhoon_show.php', 'form_content')">
+<p class="input_description"> (請輸入目前TD+TY 總數量)</p>
+<br><hr><br>
+
+<div id="typhoon_data_form" class="typhoon_setting_block">
+    <div id="form_content">Typhoon Data...</div>
+</div>
+
+<div id="typhoon_file_info" class="typhoon_setting_block">
+    <div id="file_content">File Content...</div>
+    <div id="file_created_result"></div>
+</div>
