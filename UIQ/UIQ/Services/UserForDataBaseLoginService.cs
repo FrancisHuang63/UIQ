@@ -50,9 +50,9 @@ namespace UIQ.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, userInfo.Account),
-                new Claim("Id", userInfo.UserId.ToString()),
-                new Claim(ClaimTypes.Role, userInfo.GroupName),
-                new Claim("GourpId", userInfo.GroupId.ToString()),
+                new Claim("Id", userInfo.User_Id.ToString()),
+                new Claim(ClaimTypes.Role, userInfo.Group_Name),
+                new Claim("GourpId", userInfo.Group_Id.ToString()),
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

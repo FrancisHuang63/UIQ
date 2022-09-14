@@ -1,10 +1,11 @@
-﻿using UIQ.Enums;
+﻿using Microsoft.Extensions.Options;
+using UIQ.Enums;
 
 namespace UIQ.Services
 {
     public class MySqlDataBaseNcsUiService : MySqlDataBaseService
     {
-        public MySqlDataBaseNcsUiService(IConfiguration _configuration): base(_configuration, DataBaseEnum.NcsUi)
+        public MySqlDataBaseNcsUiService(IOptions<ConnectoinStringOption> connectoinStringConfigure) : base(connectoinStringConfigure, DataBaseEnum.NcsUi)
         {
         }
     }

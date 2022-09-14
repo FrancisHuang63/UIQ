@@ -5,24 +5,24 @@ namespace UIQ.ViewModels
     public class PreTimeByModelMemberViewModel
     {
         [JsonPropertyName("model_name")]
-        public string ModelName { get; set; }
+        public string Model_Name { get; set; }
 
         [JsonPropertyName("member_name")]
-        public string MemberName { get; set; }
+        public string Member_Name { get; set; }
 
         [JsonPropertyName("nickname")]
         public string Nickname { get; set; }
 
         [JsonPropertyName("typhoon_pre_time")]
-        public int TyphoonPreTime { get; set; }
+        public int Typhoon_Pre_Time { get; set; }
 
         [JsonPropertyName("normal_pre_time")]
-        public int NormalPreTime { get; set; }
+        public int Normal_Pre_Time { get; set; }
 
         [JsonPropertyName("cron_group")]
-        public string CronGroup { get; set; }
+        public string Cron_Group { get; set; }
 
         [JsonPropertyName("group_validation")]
-        public int GroupValidation { get; set; }
+        public int Group_Validation { get; set; }
     }
 }

@@ -5,12 +5,12 @@ namespace UIQ.ViewModels
     public class UnfinishCheckPointViewModel
     {
         [JsonPropertyName("avg_execution_time")]
-        public DateTime AvgExecutionTime { get; set; }
+        public DateTime Avg_Execution_Time { get; set; }
 
         [JsonPropertyName("batch_name")]
-        public string BatchName { get; set; }
+        public string Batch_Name { get; set; }
 
         [JsonPropertyName("shell_name")]
-        public string ShellName { get; set; }
+        public string Shell_Name { get; set; }
     }
 }

@@ -1,43 +1,57 @@
 ﻿namespace UIQ.ViewModels
 {
-    public class HomeTableViewModel
+    public class HomeTableViewModel : ModelConfigViewModel
     {
-        public string MemberName { get; set; }
-
-        public string Nickname { get; set; }
-
-        public string ModelGroup { get; set; }
-        
-        public string Dtg { get; set; }
-
-        public string RunType { get; set; }
-
-        public string Status { get; set; }
-
-        public string Comment { get; set; }
-
-        public int MaintainerStatus { get; set; }
-
-        public int MemberPosition { get; set; }
-
-        public int LId { get; set; }
-
         public bool AlertFlag { get; set; }
 
-        public string TdText { get { return $"{MemberName} ({Nickname})"; } }
+        public string TdText { get { return $"{Member_Name} ({Nickname})"; } }
 
-        public string TdGroupMember { get { return $"{MemberName}({Nickname})"; } }
+        public string TdGroupMember { get { return $"{Member_Name}({Nickname})"; } }
 
-        public string TdClass { get; set; }
+        public string TdClass 
+        { 
+            get
+            {
+                if (Status.ToUpper() == "FAIL" && AlertFlag) return "FAIL";
 
-        public int Sn { get; set; }
+                switch (Comment.ToLower())
+                {
+                    case "delay 10+ mins": return "delay10";
+                    case "delay 30+ mins": return "delay20"; 
+                    case "delay 1hr+": return "delay1h";
+                    case "halt 5min+": return "delay1h_s";
+                    case "halt 30min+":
+                    case "halt 1hr+": 
+                        return "delay2h_s";
+                    case "halt 2hr+": return "delay3h_s";
+                    case "cancelled": return "cancelled";
+                }
+
+                if (Status.ToUpper() == "RUNNING") return "RUNNING";
+
+                return string.Empty;
+            }
+        }
 
         public string Href { get; set; }
 
-        public bool NewTr { get; set; }
 
-        public bool TdEnd { get; set; }
+        public HomeTableViewModel()
+        {
 
-        public bool LastMember { get; set; }
+        }
+
+        public HomeTableViewModel(ModelConfigViewModel modelConfig)
+        {
+            var properties = this.GetType().GetProperties();
+            foreach (var property in properties)
+            {
+                if(modelConfig.GetType().GetProperties().Any(x => x.Name == property.Name))
+                {
+                    var val = property.GetValue(modelConfig, null);
+                    property.SetValue(this, val);
+                }
+            }
+        }
     }
 }

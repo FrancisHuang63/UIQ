@@ -6,6 +6,6 @@ namespace UIQ.ViewModels
     public class UserViewModel : UserModel
     {
         [JsonPropertyName("group_name")]
-        public string GroupName { get; set; }
+        public string Group_Name { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace UIQ.ViewModels
     public class BatchInfoViewModel
     {
         [JsonPropertyName("model_member_nick")]
-        public string ModelMemberNick { get; set; }
+        public string Model_Member_Nick { get; set; }
 
         [JsonPropertyName("batch")]
         public string Batch { get; set; }

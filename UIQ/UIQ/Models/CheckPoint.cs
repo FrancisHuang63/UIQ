@@ -5,18 +5,18 @@ namespace UIQ.Models
     public class CheckPoint
     {
         [JsonPropertyName("check_id")]
-        public int CheckId { get; set; }
+        public int Check_Id { get; set; }
 
         [JsonPropertyName("member_id")]
-        public int MemberId { get; set; }
+        public int Member_Id { get; set; }
 
         [JsonPropertyName("batch_id")]
-        public int BatchId { get; set; }
+        public int Batch_Id { get; set; }
 
         [JsonPropertyName("shell_name")]
-        public string ShellName { get; set; }
+        public string Shell_Name { get; set; }
 
         [JsonPropertyName("tolerance_time")]
-        public int ToleranceTime { get; set; }
+        public int Tolerance_Time { get; set; }
     }
 }

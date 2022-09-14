@@ -1,8 +1,13 @@
-﻿@using UIQ.ViewModels
-@model IEnumerable<Model>
+﻿@using Microsoft.AspNetCore.Hosting.Server
+@using Microsoft.AspNetCore.Hosting.Server.Features
+@using UIQ.ViewModels
+@inject IHttpContextAccessor httpContextAccessor
+@inject IServer server;
+@model IEnumerable<HomeTableViewModel>
 @{
-    IEnumerable<Member> members = ViewBag["Members"];
-    IEnumerable<MenuViewModel> menus = ViewBag["Menu"];
+    Layout = null;
+    var user = httpContextAccessor.HttpContext?.User;
+    IEnumerable<MenuViewModel> menus = ViewBag.Menu;
     ViewData["Title"] = "Home Page";
 }
 
@@ -16,18 +21,18 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" rel="stylesheet" type="text/css" />
-        <link href="./css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
-        <link href="./css/style.css" rel="stylesheet" type="text/css" />
-        <link href="./css/white.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/style.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/white.css" rel="stylesheet" type="text/css" />
 
-        <script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
-        <script type="text/javascript" src="./js/jqueryslidemenu.js"></script>
-        <script type="text/javascript" src="./js/selectivizr.js"></script>
-        <script type="text/javascript" src="./js/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="~/js/jqueryslidemenu.js"></script>
+        <script type="text/javascript" src="~/js/selectivizr.js"></script>
+        <script type="text/javascript" src="~/js/jquery.tablesorter.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="./js/jquery-ui-dialog-enhancement/2017-07-25/build/jquery.dialogextend.min.js"></script>
-        <script type="text/javascript" src="./js/tool.js"></script>
-        <script type="text/javascript" src="./js/home.js"></script>
+        <script type="text/javascript" src="~/js/jquery-ui-dialog-enhancement/2017-07-25/build/jquery.dialogextend.min.js"></script>
+        <script type="text/javascript" src="~/js/tool.js"></script>
+        <script type="text/javascript" src="~/js/home.js"></script>
 
         <script type="text/javascript">
             $(function () {
@@ -56,9 +61,8 @@
         <div id='top'>
             <table>
                 <tr>
-                    <?php include("./cfg/SV_PATH.php"); ?>
                     <td height="107" valign="bottom" background="<?= $home_index_Site ?>">
-                        <div id="topright">welcome! <b>@(User.Identity?.Name)</b> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
+                        <div id="topright">welcome! <b>@(user.Identity?.Name)</b> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
                             <ul>
                             @foreach(var menu in menus.OrderBy(x => x.Sort))
@@ -93,60 +97,28 @@
 
                 <tbody>
                     @{var midiFlag = false;}
-                    @foreach(var model in Model)
+                    @foreach(var groupModel in Model.GroupBy(x => x.Model_Name))
                     {
-                        <tr>
-                            <td class="model_name">@(model.ModelName)</td>
-                            @foreach(var member in members.Where(x => x.ModelId == model.ModelId))
-                            {
-                                    
-                            }
-                        </tr>
-                    }
-                    
-                    <?php foreach ($model_info as $model_name => $member_list): ?>
-                        <?php
-
-                        echo '<tr><td class="model_name">' . $model_name . '</td>';
-                        foreach ($member_list as $key => $member_info) {
-                            $td_text = $member_info['td_text'];
-                            $td_group_member = $member_info['td_group_member'];
-
-                            if($member_info['alert_flag'] === 'true'){
-                                $midi_flag = 'true';
-                            }
-
-                            if ($member_info['new_tr'] === 'true' && $member_info['td_end'] === 'false') {
-                                $html = '</tr><tr><td></td>';
-                                $html.= '<td class="member_name ' . $member_info['td_class'] . '">';
-                                $html.= '<a href="' . $member_info['href'] . '" title="' . $td_group_member . '" target="_blank">';
-                                $html.= $td_text . '</a>';
-                                $html.= '<br>' . $member_info['dtg'] . ' ' . $member_info['run_type'] . '</td>';
-                                echo $html;
-                            } elseif ($member_info['new_tr'] === 'false' && $member_info['td_end'] === 'true') {
-                                $html = '<td class="member_name ' . $member_info['td_class'] . '">';
-                                $html.= '<a href="' . $member_info['href'] . '" title="' . $td_group_member . '" target="_blank">';
-                                $html.= $td_text . '</a>';
-                                $html.= '<br>' . $member_info['dtg'] . ' ' . $member_info['run_type'] . '</td>';
-                                $html.= '</tr>';
-                                echo $html;
-                            } else {
-                                $html = '<td class="member_name ' . $member_info['td_class'] . '">';
-                                $html.= '<a href="' . $member_info['href'] . '" title="' . $td_group_member . '" target="_blank">';
-                                $html.= $td_text . '</a>';
-                                $html.= '<br>' . $member_info['dtg'] . ' ' . $member_info['run_type'] . '</td>';
-                                echo $html;
-                            }
-
-                            if ($member_info['last_member'] === 'true') {
-                                for ($td = 1; $td <= $member_info['additional_td_number']; $td++) {
-                                    echo '<td></td>';
+                        //依照MemberName分組
+                        var memberGroups = groupModel.GroupBy(x => x.Member_Name);
+                        //將每個Model的資料切成8個一組
+                        var datasFor8Diplay = memberGroups.Select((x, idx) => new { Index = idx, Value = x }).GroupBy(x => x.Index / 8).Select(x => x.Select(v => v.Value));
+                        @for (int i = 0; i < datasFor8Diplay.Count(); i++)
+                        {
+                            var setMember = datasFor8Diplay.ElementAt(i);
+                            <tr>
+                                <td class="@(i == 0 ? "model_name" : string.Empty)">@(i == 0 ? groupModel.Key : string.Empty)</td>
+                                @foreach (var memberDatas in setMember)
+                                {
+                                    var data = memberDatas.FirstOrDefault();
+                                    <td class="member_name @(data.TdClass)">
+                                        <a href="@(data.Href)" title="@(data.TdGroupMember)" target="_blank">@(data.TdText)</a>
+                                        <br>@($"{data.Dtg} {data.Run_Type}")
+                                    </td>
                                 }
-                            }
+                            </tr>
                         }
-                        ?>
-                        </tr>
-                    <?php endforeach; ?>
+                    }
                 </tbody>
             </table>
         </div>
@@ -165,96 +137,46 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($summary as $val): ?>
-                        <?php
-                        $fail_flag = 'false';
+                    @foreach (var item in Model)
+                    {
+                        var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
+                        var upperStatus = (item.Status ?? string.Empty).ToUpper();
+                        var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
+                        var logViewPath = baseUrl + Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account });
 
-                        if ('FAIL' == strtoupper($val->status)) {
-                            echo '<tr class="failed">';
-                        } elseif ('delay 10+ mins' == $val->comment) {
-                            echo '<tr>';
-                        } elseif ('delay 30+ mins' == $val->comment) {
-                            echo '<tr>';
-                        } elseif ('delay 1hr+' == $val->comment) {
-                            echo '<tr>';
-                        } elseif (eregi('halt 5min+', $val->comment)) {
-                            echo '<tr>';
-                        } elseif (eregi('halt 30min+', $val->comment)) {
-                            echo '<tr>';
-                        } elseif (eregi('halt 1hr+', $val->comment)) {
-                            echo '<tr>';
-                        } elseif (eregi('halt 2hr+', $val->comment)) {
-                            echo '<tr>';
-                        } else {
-                            continue;
-                        }
-                        ?>
+                        <tr class="@(trClass)">
+                            <td class="left">
+                                @if(user.IsInRole(UIQ.Enums.GroupNameEnum.ADM.ToString()))
+                                {
+                                    <a href="@(Url.Action("Edit","Setting", new{ memberId = item.Member_Id }))" target="_blank"> 
+                                        <img src="~/images/edit.png" width="12"/>
+                                    </a>
+                                }
+                                 <a style="text-decoration:none; font-weight:bold" href="@(Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
+                                     @($"{item.Model_Name}_{item.Member_Name} ({item.Nickname})")
+                               </a>
+                            </td>
 
-                        <td class = 'left'>
-                            <?php if ($group == 'ADM') {
-                                ?><a href="./setting/Edit/<?= $val->member_id ?>" target="_blank">
-                                    <img src="./images/edit.png" width="12"/></a><?php } ?>
-                            <a style="text-decoration:none; font-weight:bold" href="<?= base_url() ?>logview/index/<?= $val->model_name ?>/<?= $val->member_name ?>/<?= $val->account ?>"
-                               target='_blank'> <?= $val->model_name . '_' . $val->member_name . ' (' . $val->nickname . ')' ?></a>
-                        </td>
-
-                        <td class='left'><?= $val->dtg ?> <?= $val->run_type ?></td>
-
-                        <td><?= get_sortTime($val->start_time) ?> -> <?= get_sortTime($val->end_time) ?></td>
-
-                        <td  class='left' title='<?= $val->shell_name ?>'><?= $val->sms_name ?> (<?= get_sortTime($val->sms_time) ?> ->  <?= get_sortTime($val->pre_end) ?>)</td>
-
-                        <td class='left'><?php read_file(base_url() . 'logview/index/' . $val->model_name . '/' . $val->member_name. '/' . $val->account) ?></td>
-
-                        <?php
-                        if ('delay 10+ mins' == $val->comment) {
-                            echo "<td class='delay10'>$val->comment</td>";
-                        } elseif ('delay 30+ mins' == $val->comment) {
-                            echo "<td class='delay20'>$val->comment</td>";
-                        } elseif ('delay 1hr+' == $val->comment) {
-                            echo "<td class='delay1h'>$val->comment</td>";
-                        } elseif (eregi('halt 5min+', $val->comment)) {
-                            echo "<td class='delay1h_s'>$val->comment</td>";
-                        } elseif (eregi('halt 30min+', $val->comment)) {
-                            echo "<td class='delay2h_s'>$val->comment</td>";
-                        } elseif (eregi('halt 1hr+', $val->comment)) {
-                            echo "<td class='delay2h_s'>$val->comment</td>";
-                        } elseif (eregi('halt 2hr+', $val->comment)) {
-                            echo "<td class='delay3h_s'>$val->comment</td>";
-                        } elseif (eregi('Cancelled', $val->comment)) {
-                            echo "<td class='cancelled'>$val->comment</td>";
-                        } else {
-                            echo "<td>$val->comment</td>";
-                        }
-                        ?>
-
-                        <?php if ('FAIL' != strtoupper($val->status) && 'RUNNING' != $val->status): ?>
-                            <td><?= get_sortTime($val->nextrun) ?></td>
-                            <?php
-                        else :
-                            if ('FAIL' == strtouppet($val->status)) {
-                                $fail_flag = 'true';
-                            }
-                            ?>
-                            <td><?= get_sortTime($val->nextrun) ?></td>
-                        <?php endif; ?>
-
+                            <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
+                            <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
+                            <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({item.Sms_Time.ToString("HH:mm")} -> {item.Pre_End.ToString("HH:mm")})")</td>
+                            <td class="left">@Html.Raw(new System.Net.WebClient().DownloadString(logViewPath))</td>
+                            <td class="@item.TdClass">@item.Comment</td>
+                            <td>@item.NextRun</td>
                         </tr>
-                    <?php endforeach; ?>
+                    }
                 </tbody>
             </table>
 
             <input type=button style="display:scroll;position:fixed;bottom:5px;right:30px;width:80px;" value="Return top" onclick="window.scrollTo(0, 0);"></input>
         </div>
 
-        <?php
-        if ($midi_flag == 'true') {
-            echo "<object >
-               <param name='vedio' value='./media/moscode.midi'>
-               <embed src='./media/moscode.midi' autostart='true' width=70 height=25>
-               </embed>";
+        @if (Model.Any(x => x.AlertFlag)) 
+        {
+            <object>
+               <param name="vedio" value="~/media/moscode.midi" />
+               <embed src="~/media/moscode.midi" autostart="true" width=70 height=25 ></embed>
+            </object>
         }
-        ?>
-
     </body>
 </html>

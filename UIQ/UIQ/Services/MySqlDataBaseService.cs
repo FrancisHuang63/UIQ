@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.Extensions.Options;
 using MySqlConnector;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
@@ -12,9 +13,10 @@ namespace UIQ.Services
         public string ConnectionString { get; set; }
         public DataBaseEnum DataBase { get; }
 
-        public MySqlDataBaseService(IConfiguration _configuration, DataBaseEnum dataBase)
+        public MySqlDataBaseService(IOptions<ConnectoinStringOption> connectoinStringOption, DataBaseEnum dataBase)
         {
-            ConnectionString = _configuration.GetSection(dataBase.ToString()).GetConnectionString("MySqlOptions");
+            DataBase = dataBase;
+            ConnectionString = connectoinStringOption.Value.GetConnectoinString(dataBase);
         }
 
         public async Task<int> DeleteAsync(string tableName, object parameter = null)
@@ -35,17 +37,18 @@ namespace UIQ.Services
         {
             using (var conn = new MySqlConnection(ConnectionString))
             {
-                using (var transaction = conn.BeginTransaction())
+                conn.Open();
+                var transaction = conn.BeginTransaction();
+                try
                 {
-                    try
-                    {
-                        return await conn.ExecuteAsync(sql, parameter);
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
+                    var result = conn.ExecuteAsync(sql, parameter).GetAwaiter().GetResult();
+                    await transaction.CommitAsync();
+                    return result;
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
         }
@@ -79,17 +82,18 @@ namespace UIQ.Services
         {
             using (var conn = new MySqlConnection(ConnectionString))
             {
-                using (var transaction = conn.BeginTransaction())
+                conn.Open();
+                var transaction = conn.BeginTransaction();
+                try
                 {
-                    try
-                    {
-                        return conn.QueryAsync<T>(sql, parameter).GetAwaiter().GetResult();
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
+                    var result = conn.QueryAsync<T>(sql, parameter, transaction).GetAwaiter().GetResult();
+                    await transaction.CommitAsync();
+                    return result;
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
                 }
             }
         }

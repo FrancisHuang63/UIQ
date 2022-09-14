@@ -5,9 +5,9 @@ namespace UIQ.ViewModels
     public class ExecutingShellViewModel
     {
         [JsonPropertyName("batch_name")]
-        public string BatchName { get; set; }
+        public string Batch_Name { get; set; }
 
         [JsonPropertyName("shell_name")]
-        public string ShellName { get; set; }
+        public string Shell_Name { get; set; }
     }
 }
