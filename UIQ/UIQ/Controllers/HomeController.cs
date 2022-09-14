@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using UIQ.Enums;
 using UIQ.Models;
@@ -7,33 +8,35 @@ using UIQ.ViewModels;
 
 namespace UIQ.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUiqService _uiqService;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(IUiqService uiqService, ILogger<HomeController> logger)
+        public HomeController(IHttpContextAccessor httpContextAccessor, IUiqService uiqService, ILogger<HomeController> logger)
         {
-            if (User.IsInRole(GroupNameEnum.ADM.ToString()))
+            _httpContextAccessor = httpContextAccessor;
+            _uiqService = uiqService;
+            _logger = logger;
+
+            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
             {
                 //TODO
             }
-            _uiqService = uiqService;
-            _logger = logger;
         }
 
         public IActionResult Index()
         {
-            var models = _uiqService.GetModels();
-            var members = _uiqService.GetMembers();
+            var models = _uiqService.GetHomeTableDatas();
             var menus = GenerateMenuItems();
-
-            ViewBag["Members"] = members;
-            ViewBag["Menu"] = menus;
+            
+            ViewBag.Menu = menus;
             return View(models);
         }
 
-        public IActionResult DetailedStatus()
+        public IActionResult DetailedStatus(string modelMemberNickname)
         {
             //TODO
             return View();
@@ -46,15 +49,9 @@ namespace UIQ.Controllers
         }
 
         #region Private Methods
+
         private IEnumerable<MenuViewModel> GenerateMenuItems()
         {
-            new List<string>
-            {
-                { "si" },
-                {  "" },
-                { "AAA" }
-            };
-
             return new List<MenuViewModel>(new MenuViewModel[]
             {
                 //System enquire
@@ -103,6 +100,7 @@ namespace UIQ.Controllers
                 }),
             }); ;
         }
-        #endregion
+
+        #endregion Private Methods
     }
 }

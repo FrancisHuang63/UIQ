@@ -17,39 +17,42 @@ namespace UIQ.Services
 
         public IEnumerable<HomeTableViewModel> GetHomeTableDatas()
         {
-            var resultDatas = new List<HomeTableViewModel>();
+            var command = string.Empty;
+            var checkPointLid = ShellExecute(command);
+            
             var batchInfos = GetShowBatchInfos();
             var cronInfos = GetShowCronInfos();
             var modelConfigs = GetShowModelConfigs();
 
-            return resultDatas;
+            Parse(modelConfigs, cronInfos, checkPointLid);
+            var homeTableViewDatas = modelConfigs.Select((modelConfig, index) =>
+            {
+                var itemIndex = index + 1;
+                return new HomeTableViewModel(modelConfig)
+                {
+                    AlertFlag = (modelConfig.Status.ToUpper() == "FAIL" && modelConfig.Lid != Enums.LidEnum.Zero && modelConfig.Comment != "Cancelled"),
+                    Href = $"~/Home/DetailedStatus?modelMemberNickname={(System.Web.HttpUtility.UrlEncode($"{modelConfig.Model_Name}_{modelConfig.Member_Name}_{modelConfig.Nickname}"))}",
+                };
+            }).OrderBy(x => x.Member_Position).ToList();
+
+            return homeTableViewDatas;
         }
 
-        public IEnumerable<Member> GetMembers()
-        {
-            return _dataBaseNcsUiService.GetAllAsync<Member>("member").Result.OrderBy(x => x.MemberPosition);
-        }
-
-        public IEnumerable<Model> GetModels()
-        {
-            return _dataBaseNcsUiService.GetAllAsync<Model>("model").Result.OrderBy(x => x.ModelPosition);
-        }
-
-        public IEnumerable<ModelConfigViewModel> Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)
+        public void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)
         {
             foreach (var modelInfo in modelInfos)
             {
-                var maxPerRunTime = modelInfo.MemberDtgValue * 60 * 60;
+                var maxPerRunTime = modelInfo.Member_Dtg_Value * 60 * 60;
                 if (modelInfo.Status == "Cancelled" || modelInfo.Status.ToUpper() == "FAIL")
-                    WriteDebugMessage($"[{DateTime.Now.ToString("HH:mm:ss")}]${modelInfo.ModelName}_${modelInfo.MemberName}_${modelInfo.Nickname}(C) modelInfo->status, run_end:{modelInfo.RunEnd}\n");
+                    WriteDebugMessage($"[{DateTime.Now.ToString("HH:mm:ss")}]${modelInfo.Model_Name}_${modelInfo.Member_Name}_${modelInfo.Nickname}(C) modelInfo->status, run_end:{modelInfo.Run_End}\n");
 
-                modelInfo.PreTime = GetPreTime(modelInfo.ModelName, modelInfo.MemberName, modelInfo.Nickname);
+                modelInfo.PreTime = GetPreTime(modelInfo.Model_Name, modelInfo.Member_Name, modelInfo.Nickname);
 
                 #region consider delay 工作 啟始延遲判斷   (running)
 
-                var preStartTime = new DateTime(modelInfo.PreStart.Ticks);
+                var preStartTime = new DateTime(modelInfo.Pre_Start.Ticks);
                 var now = DateTime.Now;
-                var workStartTime = new DateTime(modelInfo.SmsTime.Ticks);
+                var workStartTime = new DateTime(modelInfo.Sms_Time.Ticks);
 
                 //若工作起始時間 > 現在時間 表跨天
                 if (workStartTime > now) workStartTime = workStartTime.AddDays(-1);
@@ -88,10 +91,10 @@ namespace UIQ.Services
 
                 #region 工作結束延遲   (running)
 
-                var end1 = new DateTime(modelInfo.PreEnd.Ticks);  //預測結束時間
+                var end1 = new DateTime(modelInfo.Pre_End.Ticks);  //預測結束時間
                 if (modelInfo.Status == "RUNNING")
                 {
-                    var start3 = new DateTime(modelInfo.StartTime.Ticks);    //工作起始時間
+                    var start3 = new DateTime(modelInfo.Start_Time.Ticks);    //工作起始時間
                     if (now < start3)
                     {
                         start3 = start3.AddDays(-2);
@@ -152,12 +155,12 @@ namespace UIQ.Services
                     {
                         var modelExeInfo = new CheckPointViewModelSearch
                         {
-                            ModelName = modelInfo.ModelName,
-                            MemberName = modelInfo.MemberName,
+                            ModelName = modelInfo.Model_Name,
+                            MemberName = modelInfo.Member_Name,
                             Account = modelInfo.Account,
-                            CompleteRunType = modelInfo.CompleteRunType,
-                            CronMode = modelInfo.CronMode.ToString(),
-                            TyphoonMode = (int)modelInfo.TyphoonMode,
+                            CompleteRunType = modelInfo.Complete_Run_Type,
+                            CronMode = modelInfo.Cron_Mode.ToString(),
+                            TyphoonMode = (int)modelInfo.Typhoon_Mode,
                             Dtg = modelInfo.Dtg,
                             DtgHour = modelInfo.Dtg.Substring(modelInfo.Dtg.Length - 3),
                         };
@@ -183,7 +186,7 @@ namespace UIQ.Services
                 #region consider next runtime  未啟動判斷 (not runnig)
 
                 var nextTime = string.Empty;
-                var cronStartTimes = cronInfos.Where(x => x.ModelMemberNick == $"{modelInfo.ModelName}{modelInfo.MemberName}{modelInfo.Nickname}").Select(x => x.Start);
+                var cronStartTimes = cronInfos.Where(x => x.Model_Member_Nick == $"{modelInfo.Model_Name}{modelInfo.Member_Name}{modelInfo.Nickname}").Select(x => x.Start);
                 if (modelInfo.Status == "PAUSING" || modelInfo.Status == "Cancelled")
                 {
                     var lastCount = 0;
@@ -196,9 +199,9 @@ namespace UIQ.Services
                             var nowTime = DateTime.Now;
                             var lastTime = string.Empty;
                             var tmpCronStartTime = DateTime.Parse(now.ToString("yyyy/MM/dd") + " " + cronStartTime).AddSeconds(modelInfo.PreTime);
-                            if (modelInfo.RunEnd > nowTime) nowTime.AddDays(1);
-                            if (modelInfo.RunEnd > tmpCronStartTime) tmpCronStartTime.AddDays(1);
-                            if (modelInfo.RunEnd < tmpCronStartTime && tmpCronStartTime < nowTime) //找出介於上次結束時間~現在時間的cron
+                            if (modelInfo.Run_End > nowTime) nowTime.AddDays(1);
+                            if (modelInfo.Run_End > tmpCronStartTime) tmpCronStartTime.AddDays(1);
+                            if (modelInfo.Run_End < tmpCronStartTime && tmpCronStartTime < nowTime) //找出介於上次結束時間~現在時間的cron
                             {
                                 lastCount++;
                                 if (lastTime == string.Empty) //表示第一筆cron未啟動
@@ -219,7 +222,7 @@ namespace UIQ.Services
                                 else //表示第二筆以上cron未啟動 (取最近)
                                 {
                                     var lastTimeRun = DateTime.Parse(DateTime.Now.ToString("yyyy/MM/dd") + " " + lastTime);
-                                    if (lastTimeRun < modelInfo.RunEnd)
+                                    if (lastTimeRun < modelInfo.Run_End)
                                     {
                                         lastTimeRun = lastTimeRun.AddDays(1);
                                     }
@@ -281,11 +284,11 @@ namespace UIQ.Services
                     {
                         var nowTime = DateTime.Now;
                         var tmpCronStartTime = DateTime.Parse(now.ToString("yyyy/MM/dd") + " " + cronStartTime).AddSeconds(modelInfo.PreTime);
-                        if (modelInfo.RunEnd > nowTime) //若上次結束時間比"現在"? 表跨天
+                        if (modelInfo.Run_End > nowTime) //若上次結束時間比"現在"? 表跨天
                         {
                             nowTime = nowTime.AddDays(1);
                         }
-                        if (modelInfo.RunEnd > tmpCronStartTime) //若上次結束 時間比cron時間? 表跨天
+                        if (modelInfo.Run_End > tmpCronStartTime) //若上次結束 時間比cron時間? 表跨天
                         {
                             tmpCronStartTime = tmpCronStartTime.AddDays(1);
                         }
@@ -318,8 +321,14 @@ namespace UIQ.Services
 
                 #endregion No matter what "$info->status" is, it is necessary to define $next_time.
             }
+        }
 
-            return modelInfos;
+        #region Private Methods
+
+        private string ShellExecute(string command)
+        {
+            //TODO
+            return string.Empty;
         }
 
         private void UpdateDelayCheckPoint(CheckPointViewModelSearch modelExeInfo, IEnumerable<CheckPointViewModel> unRunCheckPoints, DateTime modelStartTime)
@@ -332,13 +341,13 @@ namespace UIQ.Services
 
                 delayInfos.Add(new CheckPointDelay
                 {
-                    CronMode = modelExeInfo.CronMode,
-                    TyphoonMode = (Enums.TyphoonModeEnum)modelExeInfo.TyphoonMode,
+                    Cron_Mode = modelExeInfo.CronMode,
+                    Typhoon_Mode = (Enums.TyphoonModeEnum)modelExeInfo.TyphoonMode,
                     Dtg = modelExeInfo.Dtg,
-                    CheckId = unRunCheckPoint.CheckId,
-                    PredictedEndTime = predictedEndTime,
-                    ModelStartTime = modelStartTime,
-                    MonitoringTime = DateTime.Now,
+                    Check_Id = unRunCheckPoint.Check_Id,
+                    Predicted_End_Time = predictedEndTime,
+                    Model_Start_Time = modelStartTime,
+                    Monitoring_Time = DateTime.Now,
                 });
             }
 
@@ -369,13 +378,13 @@ namespace UIQ.Services
                 CronMode = modelExeInfo.CronMode,
                 TyphoonMode = modelExeInfo.TyphoonMode,
                 DtgHour = modelExeInfo.DtgHour,
-                BatchName = excutingShell.BatchName,
-                ShellName = excutingShell.ShellName,
+                BatchName = excutingShell.Batch_Name,
+                ShellName = excutingShell.Shell_Name,
             };
 
             var result = _dataBaseNcsLogService.QueryAsync<UnfinishCheckPointViewModel>(sql, param).Result;
-            return checkPoints.Where(x => result.Select(s => s.ShellName).Contains(x.ShellName)
-                            && result.Select(s => s.BatchName).Contains(x.BatchName));
+            return checkPoints.Where(x => result.Select(s => s.Shell_Name).Contains(x.Shell_Name)
+                            && result.Select(s => s.Batch_Name).Contains(x.Batch_Name));
         }
 
         private ExecutingShellViewModel GetExecutingShell(CheckPointViewModelSearch modelExeInfo)
@@ -471,15 +480,15 @@ namespace UIQ.Services
 
             var param = new
             {
-                ModelName = checkPoint.ModelName,
-                MemberName = checkPoint.MemberName,
+                ModelName = checkPoint.Model_Name,
+                MemberName = checkPoint.Member_Name,
                 Account = checkPoint.Account,
                 TyphoonMode = modelParam.TyphoonMode,
                 RunType = modelParam.CompleteRunType,
                 CronMode = modelParam.CronMode,
                 Round = modelParam.DtgHour,
-                BatchName = checkPoint.BatchName,
-                ShellName = checkPoint.ShellName,
+                BatchName = checkPoint.Batch_Name,
+                ShellName = checkPoint.Shell_Name,
             };
 
             return _dataBaseNcsLogService.QueryAsync<int>(sql, param).Result.FirstOrDefault();
@@ -538,14 +547,14 @@ namespace UIQ.Services
                             ,`monitoring_info`.`stage_flag`
                             ,`monitoring_info`.`status`
                             ,`monitoring_info`.`sms_name`
-                            ,`monitoring_info`.`sms_time`
-                            ,`monitoring_info`.`start_time`
-                            ,`monitoring_info`.`end_time`
-                            ,`monitoring_info`.`pre_start`
-                            ,`monitoring_info`.`pre_end`
-                            ,`monitoring_info`.`run_end`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`sms_time`) AS `sms_time`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`start_time`) AS `start_time`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`end_time`) AS `end_time`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`pre_start`) AS `pre_start`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`pre_end`) AS `pre_end`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`run_end`) AS `run_end`
                             ,`monitoring_info`.`shell_name`
-                            ,`monitoring_info`.`shell_time`
+                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`shell_time`) AS `shell_time`
                             ,`monitoring_info`.`error_message`
                         FROM `member`, `model`, `monitoring_info`
                         WHERE `member`.`model_id` = `model`.`model_id`
@@ -576,11 +585,13 @@ namespace UIQ.Services
             var result = _dataBaseNcsUiService.QueryAsync<PreTimeByModelMemberViewModel>(sql, new { ModelName = modelName, MemberName = memberName, Nickname = nickname }).Result.FirstOrDefault();
 
             if (result == null) return defaultPreTime;
-            if (string.IsNullOrWhiteSpace(result.CronGroup)) return defaultPreTime;
-            if (result.CronGroup.ToLower() == "normal") return result.NormalPreTime;
-            if (result.CronGroup.ToLower() == "typhoon") return result.TyphoonPreTime;
+            if (string.IsNullOrWhiteSpace(result.Cron_Group)) return defaultPreTime;
+            if (result.Cron_Group.ToLower() == "normal") return result.Normal_Pre_Time;
+            if (result.Cron_Group.ToLower() == "typhoon") return result.Typhoon_Pre_Time;
 
             return defaultPreTime;
         }
+
+        #endregion Private Methods
     }
 }

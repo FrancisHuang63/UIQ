@@ -9,30 +9,30 @@ namespace UIQ.Models
         public int Id { get; set; }
 
         [JsonPropertyName("check_id")]
-        public int CheckId { get; set; }
+        public int Check_Id { get; set; }
 
         [JsonPropertyName("is_processed")]
-        public bool IsProcessed { get; set; }
+        public bool Is_Processed { get; set; }
 
         [JsonPropertyName("run_type")]
-        public string RunType { get; set; }
+        public string Run_Type { get; set; }
 
         [JsonPropertyName("cron_mode")]
-        public string CronMode { get; set; }
+        public string Cron_Mode { get; set; }
 
         [JsonPropertyName("typhoon_mode")]
-        public TyphoonModeEnum TyphoonMode { get; set; }
+        public TyphoonModeEnum Typhoon_Mode { get; set; }
 
         [JsonPropertyName("dtg")]
         public string Dtg { get; set; }
 
         [JsonPropertyName("model_start_time")]
-        public DateTime ModelStartTime { get; set; }
+        public DateTime Model_Start_Time { get; set; }
 
         [JsonPropertyName("predicted_end_time")]
-        public DateTime PredictedEndTime { get; set; }
+        public DateTime Predicted_End_Time { get; set; }
 
         [JsonPropertyName("monitoring_time")]
-        public DateTime MonitoringTime { get; set; }
+        public DateTime Monitoring_Time { get; set; }
     }
 }

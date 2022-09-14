@@ -5,13 +5,13 @@ namespace UIQ.Models
     public class Member
     {
         [JsonPropertyName("member_id")]
-        public int MemberId { get; set; }
+        public int Member_Id { get; set; }
 
         [JsonPropertyName("model_id")]
-        public int ModelId { get; set; }
+        public int Model_Id { get; set; }
 
         [JsonPropertyName("member_name")]
-        public string MemberName { get; set; }
+        public string Member_Name { get; set; }
 
         [JsonPropertyName("nickname")]
         public string Nickname { get; set; }
@@ -20,42 +20,42 @@ namespace UIQ.Models
         public string Account { get; set; }
 
         [JsonPropertyName("model_group")]
-        public string ModelGroup { get; set; }
+        public string Model_Group { get; set; }
 
         [JsonPropertyName("member_path")]
-        public string MemberPath { get; set; }
+        public string Member_Path { get; set; }
 
         [JsonPropertyName("member_position")]
-        public int MemberPosition { get; set; }
+        public int Member_Position { get; set; }
 
         [JsonPropertyName("member_dtg_value")]
-        public int MemberDtgValue { get; set; }
+        public int Member_Dtg_Value { get; set; }
 
         [JsonPropertyName("reset_model")]
-        public string ResetModel { get; set; }
+        public string Reset_Model { get; set; }
 
         [JsonPropertyName("dtg_adjust")]
-        public string DtgAdjust { get; set; }
+        public string Dtg_Adjust { get; set; }
 
         [JsonPropertyName("fix_failed_model")]
-        public string FixFailedModel { get; set; }
+        public string Fix_Failed_Model { get; set; }
 
         [JsonPropertyName("submit_model")]
-        public string SubmitModel { get; set; }
+        public string Submit_Model { get; set; }
 
         [JsonPropertyName("fix_failed_target_directory")]
-        public string FixFailedTargetDirectory { get; set; }
+        public string Fix_Failed_Target_Directory { get; set; }
 
         [JsonPropertyName("maintainer_status")]
-        public int MaintainerStatus { get; set; }
+        public int Maintainer_Status { get; set; }
 
         [JsonPropertyName("normal_pre_time")]
-        public int NormalPreTime { get; set; }
+        public int Normal_Pre_Time { get; set; }
 
         [JsonPropertyName("typhoon_pre_time")]
-        public int TyphoonPreTime { get; set; }
+        public int Typhoon_Pre_Time { get; set; }
 
         [JsonPropertyName("typhoon_model")]
-        public int TyphoonModel { get; set; }
+        public int Typhoon_Model { get; set; }
     }
 }

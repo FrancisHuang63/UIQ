@@ -5,12 +5,12 @@ namespace UIQ.Models
     public class Model
     {
         [JsonPropertyName("model_id")]
-        public int ModelId { get; set; }
+        public int Model_Id { get; set; }
 
         [JsonPropertyName("model_name")]
-        public string ModelName { get; set; }
+        public string Model_Name { get; set; }
 
         [JsonPropertyName("model_position")]
-        public int ModelPosition { get; set; }
+        public int Model_Position { get; set; }
     }
 }
