@@ -1,4 +1,4 @@
-<script src="../js/jquery-1.3.2.min.js"></script>
+﻿<script src="../js/jquery-1.3.2.min.js"></script>
 <script src="../js/tool.js"></script>
 <link rel=stylesheet type="text/css" href="../../css/style.css">
 <TITLE>Set typhoon data</Title>
@@ -9,7 +9,116 @@
 <br><hr><br>
 
 <div id="typhoon_data_form" class="typhoon_setting_block">
-    <div id="form_content">Typhoon Data...</div>
+    <!--<div id="form_content">Typhoon Data...</div>-->
+    <form>
+        <table>
+            <tr>
+                <td>DTG<font color='red'>*</font>: </td>
+                <td><input id="dtg" type="text" value="$dtg" name="dtg"></td> 
+                <td class="input_description">(DTG:19122612)</td>
+            </tr>
+            <tr>
+                <td>Name<font color='red'>*</font>: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(颱風/TD 名稱：PHANFONE/TD201905)</td>
+            </tr>
+            <tr>
+                <td>Lat.<font color='red'>*</font>: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(緯度：13.9) (填寫範圍: 0.0~90.0)</td>
+            </tr>
+            <tr>
+                <td>Long.<font color='red'>*</font>: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(經度：117.7) (填寫範圍: 0.0~180.0)</td>
+            </tr>       
+            <tr>
+                <td>6-hr ago Lat.: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(6hr 前緯度：13.4) (填寫範圍: 0.0~90.0)</td>
+            </tr>
+            <tr>
+                <td>6-hr ago Long.: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(6hr 前經度：118.0) (填寫範圍: 0.0~180.0)</td>
+            </tr>
+            <tr>
+                <td>Center Pressure: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(中心氣壓：965)</td>
+            </tr>  
+            <tr>
+                <td>15M/S Radius: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(七級風暴風半徑：180)</td>
+            </tr>
+            <tr>
+                <td>Maximum Speed: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(最大風速：35)</td>
+            </tr>
+            <tr>
+                <td>25M/S Radius: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(十級風暴風半徑：50)</td>
+            </tr>                                   
+        </table>
+        <br><hr><br>
+        <table>
+            <tr>
+                <td>DTG<font color='red'>*</font>: </td>
+                <td><input id="dtg" type="text" value="$dtg" name="dtg"></td> 
+                <td class="input_description">(DTG:19122612)</td>
+            </tr>
+            <tr>
+                <td>Name<font color='red'>*</font>: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(颱風/TD 名稱：PHANFONE/TD201905)</td>
+            </tr>
+            <tr>
+                <td>Lat.<font color='red'>*</font>: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(緯度：13.9) (填寫範圍: 0.0~90.0)</td>
+            </tr>
+            <tr>
+                <td>Long.<font color='red'>*</font>: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(經度：117.7) (填寫範圍: 0.0~180.0)</td>
+            </tr>       
+            <tr>
+                <td>6-hr ago Lat.: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(6hr 前緯度：13.4) (填寫範圍: 0.0~90.0)</td>
+            </tr>
+            <tr>
+                <td>6-hr ago Long.: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(6hr 前經度：118.0) (填寫範圍: 0.0~180.0)</td>
+            </tr>
+            <tr>
+                <td>Center Pressure: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(中心氣壓：965)</td>
+            </tr>  
+            <tr>
+                <td>15M/S Radius: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(七級風暴風半徑：180)</td>
+            </tr>
+            <tr>
+                <td>Maximum Speed: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(最大風速：35)</td>
+            </tr>
+            <tr>
+                <td>25M/S Radius: </td>
+                <td><input id="Name" type="text" value="" name="Name"></td> 
+                <td class="input_description">(十級風暴風半徑：50)</td>
+            </tr>                                   
+        </table>  
+        <br><hr><br>
+        <input type="button" class="form" value="View" OnClick="sendTyphoonDataRequest('post', 'typhoon_preview.php', 'file_content', '9')"></td></tr>  
+    </form>
 </div>
 
 <div id="typhoon_file_info" class="typhoon_setting_block">

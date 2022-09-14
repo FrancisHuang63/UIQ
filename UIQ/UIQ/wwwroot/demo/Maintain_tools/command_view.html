@@ -1,20 +1,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <meta http-equiv="X-UA-Compatible" content="IE=9">
 
-<script type="text/javascript" src="./js/jquery-3.1.1.min.js"></script>
-<script type="text/javascript" src="./packages/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="./js/apprise-1.5.full.js"></script>
-<script type="text/javascript" src="./js/tool.js"></script>
-<script type="text/javascript" src="./js/command.js"></script>
+<script type="text/javascript" src="../../js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="../../packages/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/apprise-1.5.full.js"></script>
+<script type="text/javascript" src="../../js/tool.js"></script>
+<script type="text/javascript" src="../../js/command.js"></script>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link href="./packages/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-<link href="./packages/bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
-<link href="./css/style.css" rel="stylesheet" type="text/css" />
-<link href="./css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
-<link href="./css/apprise.css" rel="stylesheet" type="text/css" />
+<link href="../../packages/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="../../packages/bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../../css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+<link href="../../css/apprise.css" rel="stylesheet" type="text/css" />
 
 <script language="javascript"><!--
 window.onload = function(){
@@ -44,40 +44,22 @@ window.onload = function(){
         </tr>
     </thead>
     <tbody>
-<?php
-	include("./cfg/SV_PATH.php");
-    $order = array("\r\n","\r","\n");
-    $replace = "<br>";
-    //$contents = str_replace($order,$replace,$contents);
-    foreach ($command_info as $command){
-            print("<tr>");
-        //Command Name
-            print("<td>".$command['command_name']."</td>");
-        //Describe
-            print("<td>".str_replace($order,$replace,$command['command_desc'])."</td>");
-        //Execution Time
-            print("<td>".$command['execution_time']."</td>");
-        //Edit
-            if ($group == 'ADM'){
-                print("<td><input type='button' value='Edit' onclick='location.href=\"./command/Edit/".$command['command_id']."\"'></td>");
-            } else {
-                print("<td><input type='button' value='Edit' disabled='disabled'></td>");
-            }
-        //Execute
-            if ($group == 'ADM'){
-                print("<td><input id='exe_btn' type='button' id='Execute' value='Exe' onclick='showParameterModal(".$command['command_id'].",\"".$group."\");'></td>");
-            } else {
-                print("<td><input id='exe_botton'type='button' value='Exe' onclick='showParameterModal(".$command['command_id'].",\"".$group."\");'></td>");
-            }
-        //Delete
-            if ($group == 'ADM'){
-                print("<td><input type='button' class='tryit'value='Del' onclick='if (confirm(\"Delete this command?\")){location.href=\"./command/Del/".$command['command_id']."\"}'></td>");
-            } else {
-                print("<td><input type='button' value='Del' disabled='disabled'></td>");
-            }
-            print("</tr>");
-    }
-?>
+        <tr>
+            <td>Start CRON</td>
+            <td></td>
+            <td>1</td>
+            <td><input type='button' value='Edit' onclick='location.href=\"./command/Edit/".$command['command_id']."\"'></td>
+            <td><input id='exe_btn' type='button' id='Execute' value='Exe' onclick='showParameterModal(".$command['command_id'].",\"".$group."\");'></td>
+            <td><input id='exe_botton'type='button' value='Exe' onclick='showParameterModal(".$command['command_id'].",\"".$group."\");'></td>
+        </tr>
+        <tr>
+            <td>Stop CRON</td>
+            <td></td>
+            <td>1</td>
+            <td><input type='button' value='Edit' disabled='disabled'></td>
+            <td><input type='button' class='tryit'value='Del' onclick='if (confirm(\"Delete this command?\")){location.href=\"./command/Del/".$command['command_id']."\"}'></td>
+            <td><input type='button' value='Del' disabled='disabled'></td>
+        </tr>
     </tbody>
 </table>
 </div>

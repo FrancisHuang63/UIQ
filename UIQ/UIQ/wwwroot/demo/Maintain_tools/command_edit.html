@@ -1,48 +1,26 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<?php
-		include("./cfg/SV_PATH.php");
-    if (isset($command_info)){
-        $command_id = $command_info['command_id'];
-        $command_name = $command_info['command_name'];
-        $command_desc = $command_info['command_desc'];
-        $command_content = $command_info['command_content'];
-        $command_pwd = $command_info['command_pwd'];
-        $command_example = $command_info['command_example'];
-        $exec_time = $command_info['execution_time'];
-    } else {
-        $command_id = "";
-        $command_name = "";
-        $command_desc = "";
-        $command_content = "";
-        $command_pwd = "";
-        $command_example = "";
-        $exec_time = "";
-    }
-
-?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link href="<?php if ($command_id != ""){ print('../');}?>../packages/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-<link href="<?php if ($command_id != ""){ print('../');}?>../packages/bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
-<link href="<?php if ($command_id != ""){ print('../');}?>../css/style.css" rel="stylesheet" type="text/css" />
-<link href="<?php if ($command_id != ""){ print('../');}?>../css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+<link href="../../packages/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+<link href="../../packages/bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<link href="../../css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
 
-<script type="text/javascript" src="<?php if ($command_id != ""){ print('../');}?>../js/jquery-3.1.1.min.js"></script>
-<!-- <script type="text/javascript" src="<?php if ($command_id != ""){ print('../');}?>../js/jquery.min.js"></script> -->
-<script type="text/javascript" src="<?php if ($command_id != ""){ print('../');}?>../packages/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="<?php if ($command_id != ""){ print('../');}?>../js/tool.js"></script>
-<script type="text/javascript" src="<?php if ($command_id != ""){ print('../');}?>../js/command.js"></script>
+<script type="text/javascript" src="../../js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="../../packages/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../js/tool.js"></script>
+<script type="text/javascript" src="../../js/command.js"></script>
 
 <title>NWP Command List</title>
 </head>
 
 <body>
-<div id="loading"><img src="<?php if ($command_id != ""){ print('../');}?>../images/clock.gif"></div>
+<div id="loading"><img src="../../images/clock.gif"></div>
 <div class=topic>Maintain tools > Special Use command > Edit</div>
 
 <div>
-<form action='<?php if ($command_id != ""){ print('../Save');} else { print('./Save');}?>' method='post' class='form'>
+<form method='post' class='form'>
 <table width='100%' id="edit_command_table">
     <tbody>
         <tr>
@@ -81,11 +59,7 @@
 <div>
 <input type='submit' value='Save'>
 <input type='button' value='Execute' onclick='showParameterModal("<?= $command_id?>","ADM");'>
-<?php
-    if ($command_id != ""){
-        print("<input type='button' value='Exit' onclick='if (confirm(\"Exit this edit page without saving?\")){location.href=\"../../command\";}'>");}
-    else {  print("<input type='button' value='Exit' onclick='if (confirm(\"Exit this edit page without saving?\")){location.href=\"../command\";}'>");}
-?>
+<input type='button' value='Exit' onclick='if (confirm(\"Exit this edit page without saving?\")){location.href=\"../../command\";}'>
 </div>
 </form>
 </div>
