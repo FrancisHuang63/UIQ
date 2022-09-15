@@ -8,14 +8,12 @@
     Layout = null;
     var user = httpContextAccessor.HttpContext?.User;
     IEnumerable<MenuViewModel> menus = ViewBag.Menu;
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "DetailedStatus";
 }
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>NWP monitor system</title>
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -27,24 +25,15 @@
 
         <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
         <script type="text/javascript" src="~/js/jqueryslidemenu.js"></script>
-        <script type="text/javascript" src="~/js/selectivizr.js"></script>
         <script type="text/javascript" src="~/js/jquery.tablesorter.min.js"></script>
+        <script type="text/javascript" src="~/js/selectivizr.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-        <script type="text/javascript" src="~/js/jquery-ui-dialog-enhancement/2017-07-25/build/jquery.dialogextend.min.js"></script>
+		<script type="text/javascript" src="~/js/jquery-ui-dialog-enhancement/2017-07-25/build/jquery.dialogextend.min.js"></script>
         <script type="text/javascript" src="~/js/tool.js"></script>
-        <script type="text/javascript" src="~/js/home.js"></script>
-
+        <script type="text/javascript" src="~/js/detailed_status.js"></script>
         <script type="text/javascript">
             $(function () {
-                $("#status_table").tablesorter({
-                    widgets: ['zebra'],
-                    headers: {
-                        0: {
-                            sorter: false
-                        }
-                    }
-                });
-                $("#tablesorter-demo2").tablesorter({widgets: ['zebra']});
+                $("#tablesorter-demo").tablesorter({widgets: ['zebra']});
             });
 
             //auto refresh,1000=1 second
@@ -53,16 +42,15 @@
                 window.location.reload();
             }
             setTimeout('page_refresh()',60000);
-
         </script>
     </head>
 
     <body>
-        <div id='top'>
+        <div id="detailed_status_top">
             <table>
                 <tr>
                     <td height="107" valign="bottom" background="@Href("~/images/index_inside_01.jpg")">
-                        <div id="topright">welcome! <b>@(user.Identity?.Name)</b> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
+                        <div id="topright">welcome! <b>@(user.Identity?.Name)</b> <a href="@(Url.Action("LogOut", "Login"))">logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
                             <ul>
                             @foreach(var menu in menus.OrderBy(x => x.Sort))
@@ -85,45 +73,9 @@
                     </td>
                 </tr>
             </table>
-
-            <table id="status_table" class="tablesorter" cellspacing="1">
-                <thead>
-                    <tr>
-                        <th colspan="">STATUS TABLE
-                            <a href="@Url.Action("DetailedStatus")" target="_blank" class="btn"><span class="glyphicon glyphicon-th-list"></span></a>
-                        </th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach(var groupModel in Model.GroupBy(x => x.Model_Name))
-                    {
-                        //依照MemberName分組
-                        var memberGroups = groupModel.GroupBy(x => x.Member_Name);
-                        //將每個Model的資料切成8個一組
-                        var datasFor8Diplay = memberGroups.Select((x, idx) => new { Index = idx, Value = x }).GroupBy(x => x.Index / 8).Select(x => x.Select(v => v.Value));
-                        @for (int i = 0; i < datasFor8Diplay.Count(); i++)
-                        {
-                            var setMember = datasFor8Diplay.ElementAt(i);
-                            <tr>
-                                <td class="@(i == 0 ? "model_name" : string.Empty)">@(i == 0 ? groupModel.Key : string.Empty)</td>
-                                @foreach (var memberDatas in setMember)
-                                {
-                                    var data = memberDatas.FirstOrDefault();
-                                    <td class="member_name @(data.TdClass)">
-                                        <a href="@(data.Href)" title="@(data.TdGroupMember)" target="_blank">@(data.TdText)</a>
-                                        <br>@($"{data.Dtg} {data.Run_Type}")
-                                    </td>
-                                }
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
         </div>
-
         <div id="main">
-            <table id="tablesorter-demo2" class="tablesorter" cellspacing="1" border="5" bordercolor="red" >
+            <table id="tablesorter-demo" class="tablesorter" cellspacing="1">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -138,16 +90,19 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
-                        var upperStatus = (item.Status ?? string.Empty).ToUpper();
+                        var trClass = item.Status?.ToUpper() == "FAIL" && item.Lid == UIQ.Enums.LidEnum.Zero
+                            ? "failed"
+                            : item.Status == "RUNNING"
+                                ? "running"
+                                : string.Empty;
                         var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
                         var logViewPath = baseUrl + Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account });
 
-                        <tr class="@(trClass)">
+                        <tr class="@(trClass)" id="@($"{item.Model_Name}_{item.Member_Name}_{item.Nickname}")">
                             <td class="left">
-                                @if(user.IsInRole(UIQ.Enums.GroupNameEnum.ADM.ToString()))
+                                @if (user.IsInRole(UIQ.Enums.GroupNameEnum.ADM.ToString()))
                                 {
-                                    <a href="@(Url.Action("Edit","Setting", new{ memberId = item.Member_Id }))" target="_blank"> 
+                                    <a href="@Url.Action("Edit", "Setting", new{ memberId = item.Member_Id })" target="_blank">
                                         <img src="~/images/edit.png" width="12"/>
                                     </a>
                                 }
@@ -155,7 +110,6 @@
                                      @($"{item.Model_Name}_{item.Member_Name} ({item.Nickname})")
                                 </a>
                             </td>
-
                             <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
                             <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
                             <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({item.Sms_Time.ToString("HH:mm")} -> {item.Pre_End.ToString("HH:mm")})")</td>
@@ -167,15 +121,16 @@
                 </tbody>
             </table>
 
-            <input type=button style="display:scroll;position:fixed;bottom:5px;right:30px;width:80px;" value="Return top" onclick="window.scrollTo(0, 0);"></input>
+            <input type=button style="display:scroll;position:fixed;bottom:5px;right:30px;width:80px;" value="Return top" onclick="window.scrollTo(0, 0);">
         </div>
 
-        @if (Model.Any(x => x.AlertFlag)) 
+        @if (Model.Any(x => x.Status?.ToUpper() == "FAIL" && x.Lid != UIQ.Enums.LidEnum.Zero)) 
         {
             <object>
-               <param name="vedio" value="~/media/moscode.midi" />
-               <embed src="~/media/moscode.midi" autostart="true" width=70 height=25 ></embed>
+               <param name='vedio' value='~/media/moscode.midi'>
+               <embed src='~/media/moscode.midi' autostart='true' width=70 height=25></embed>
             </object>
         }
     </body>
 </html>
+

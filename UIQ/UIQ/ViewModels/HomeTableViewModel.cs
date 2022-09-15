@@ -14,18 +14,14 @@
             {
                 if (Status.ToUpper() == "FAIL" && AlertFlag) return "FAIL";
 
-                switch (Comment.ToLower())
-                {
-                    case "delay 10+ mins": return "delay10";
-                    case "delay 30+ mins": return "delay20"; 
-                    case "delay 1hr+": return "delay1h";
-                    case "halt 5min+": return "delay1h_s";
-                    case "halt 30min+":
-                    case "halt 1hr+": 
-                        return "delay2h_s";
-                    case "halt 2hr+": return "delay3h_s";
-                    case "cancelled": return "cancelled";
-                }
+                var lowerComment = Comment.ToLower();
+                if (lowerComment.Contains("delay 10+ mins")) return "delay10";
+                if (lowerComment.Contains("delay 30+ mins")) return "delay20";
+                if (lowerComment.Contains("delay 1hr+")) return "delay1h";
+                if (lowerComment.Contains("halt 5min+")) return "delay1h_s";
+                if (lowerComment.Contains("halt 30min+") || lowerComment.Contains("halt 1hr+")) return "delay2h_s";
+                if (lowerComment.Contains("halt 2hr+")) return "delay3h_s";
+                if (lowerComment.Contains("cancelled")) return "cancelled";
 
                 if (Status.ToUpper() == "RUNNING") return "RUNNING";
 

@@ -20,11 +20,6 @@ namespace UIQ.Controllers
             _httpContextAccessor = httpContextAccessor;
             _uiqService = uiqService;
             _logger = logger;
-
-            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
-            {
-                //TODO
-            }
         }
 
         public IActionResult Index()
@@ -38,8 +33,11 @@ namespace UIQ.Controllers
 
         public IActionResult DetailedStatus(string modelMemberNickname)
         {
-            //TODO
-            return View();
+            var models = _uiqService.GetHomeTableDatas();
+            var menus = GenerateMenuItems();
+
+            ViewBag.Menu = menus;
+            return View(models);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -52,7 +50,7 @@ namespace UIQ.Controllers
 
         private IEnumerable<MenuViewModel> GenerateMenuItems()
         {
-            return new List<MenuViewModel>(new MenuViewModel[]
+            var menus = new List<MenuViewModel>(new MenuViewModel[]
             {
                 //System enquire
                 new MenuViewModel("System enquire", 1, new List<MenuViewModel>
@@ -78,27 +76,36 @@ namespace UIQ.Controllers
                     { new MenuViewModel("Lid adjust", Url.Action(nameof(ModelRerunController.LidAdjust)), 3) },
                     { new MenuViewModel("Submit model", Url.Action(nameof(ModelRerunController.SubmitModel)), 4) },
                 }),
-                //Rescue tools
-                new MenuViewModel("Rescue tools", 4, new List<MenuViewModel>
+            });
+
+            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
+            {
+                menus.AddRange(new MenuViewModel[]
                 {
-                    { new MenuViewModel("Archive redo", Url.Action(nameof(RescueToolsController.ArchiveRedo)), 1) },
-                    { new MenuViewModel("Model output generate", Url.Action(nameof(RescueToolsController.FixFailedModel)), 2) },
-                }),
-                //Maintain tools
-                new MenuViewModel("Maintain tools", 5, new List<MenuViewModel>
-                {
-                    { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData)), 1) },
-                    { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command)), 2) },
-                    { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting)), 3) },
-                }),
-                //Reference info
-                new MenuViewModel("Reference info", 6, new List<MenuViewModel>
-                {
-                    { new MenuViewModel("Set typhoon data", "~/reference/user_guide.pdf", 1) },
-                    { new MenuViewModel("Special Use command", "~/reference/Monitor_reference.pdf", 2) },
-                    { new MenuViewModel("Cron_Mode set", "~/reference/Contact_list.pdf", 3) },
-                }),
-            }); ;
+                    //Rescue tools
+                    new MenuViewModel("Rescue tools", 4, new List<MenuViewModel>
+                    {
+                        { new MenuViewModel("Archive redo", Url.Action(nameof(RescueToolsController.ArchiveRedo)), 1) },
+                        { new MenuViewModel("Model output generate", Url.Action(nameof(RescueToolsController.FixFailedModel)), 2) },
+                    }),
+                    //Maintain tools
+                    new MenuViewModel("Maintain tools", 5, new List<MenuViewModel>
+                    {
+                        { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData)), 1) },
+                        { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command)), 2) },
+                        { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting)), 3) },
+                    }),
+                    //Reference info
+                    new MenuViewModel("Reference info", 6, new List<MenuViewModel>
+                    {
+                        { new MenuViewModel("Set typhoon data", "~/reference/user_guide.pdf", 1) },
+                        { new MenuViewModel("Special Use command", "~/reference/Monitor_reference.pdf", 2) },
+                        { new MenuViewModel("Cron_Mode set", "~/reference/Contact_list.pdf", 3) },
+                    }),
+                });
+            }
+
+            return menus;
         }
 
         #endregion Private Methods

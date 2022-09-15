@@ -31,7 +31,7 @@ namespace UIQ.Services
                 return new HomeTableViewModel(modelConfig)
                 {
                     AlertFlag = (modelConfig.Status.ToUpper() == "FAIL" && modelConfig.Lid != Enums.LidEnum.Zero && modelConfig.Comment != "Cancelled"),
-                    Href = $"~/Home/DetailedStatus?modelMemberNickname={(System.Web.HttpUtility.UrlEncode($"{modelConfig.Model_Name}_{modelConfig.Member_Name}_{modelConfig.Nickname}"))}",
+                    Href = $"/Home/DetailedStatus?modelMemberNickname={(System.Web.HttpUtility.UrlEncode($"{modelConfig.Model_Name}_{modelConfig.Member_Name}_{modelConfig.Nickname}"))}",
                 };
             }).OrderBy(x => x.Member_Position).ToList();
 
@@ -42,6 +42,9 @@ namespace UIQ.Services
         {
             foreach (var modelInfo in modelInfos)
             {
+                if($"{modelInfo.Model_Name}_{modelInfo.Member_Name}({modelInfo.Nickname})" == "GFS_MNH(T511)")
+                {
+                }
                 var maxPerRunTime = modelInfo.Member_Dtg_Value * 60 * 60;
                 if (modelInfo.Status == "Cancelled" || modelInfo.Status.ToUpper() == "FAIL")
                     WriteDebugMessage($"[{DateTime.Now.ToString("HH:mm:ss")}]${modelInfo.Model_Name}_${modelInfo.Member_Name}_${modelInfo.Nickname}(C) modelInfo->status, run_end:{modelInfo.Run_End}\n");
@@ -58,12 +61,12 @@ namespace UIQ.Services
                 if (workStartTime > now) workStartTime = workStartTime.AddDays(-1);
 
                 //若預測起始時間 > 現在時間 表跨天 (時間差異應6小時以上)
-                if (preStartTime > now && (preStartTime.Ticks - now.Ticks) > maxPerRunTime) preStartTime = preStartTime.AddDays(-1);
+                if (preStartTime > now && (preStartTime.GetUnixTimestamp() - now.GetUnixTimestamp()) > maxPerRunTime) preStartTime = preStartTime.AddDays(-1);
 
                 //若預測起始時間 < 現在時間 表跨天 (時間差異應6小時以上)
-                if (preStartTime < now && (now.Ticks - preStartTime.Ticks) > maxPerRunTime) preStartTime = preStartTime.AddDays(1);
+                if (preStartTime < now && (now.GetUnixTimestamp() - preStartTime.GetUnixTimestamp()) > maxPerRunTime) preStartTime = preStartTime.AddDays(1);
 
-                var diffMinutes = (workStartTime.Ticks - preStartTime.Ticks) / 60;
+                var diffMinutes = (workStartTime.GetUnixTimestamp() - preStartTime.GetUnixTimestamp()) / 60D;
                 modelInfo.Comment = "on time";
 
                 if (diffMinutes > 10)
@@ -98,7 +101,7 @@ namespace UIQ.Services
                     if (now < start3)
                     {
                         start3 = start3.AddDays(-2);
-                        end1 = (start3 < end1 && (end1.Ticks - start3.Ticks) > maxPerRunTime)
+                        end1 = (start3 < end1 && (end1.GetUnixTimestamp() - start3.GetUnixTimestamp()) > maxPerRunTime)
                             ? end1.AddDays(-2)
                             : end1;
                     }
@@ -107,7 +110,7 @@ namespace UIQ.Services
                         end1 = start3 > end1 ? end1.AddDays(2) : end1;
                     }
 
-                    diffMinutes = (now.Ticks - end1.Ticks) / 60;
+                    diffMinutes = (now.GetUnixTimestamp() - end1.GetUnixTimestamp()) / 60D;
                     if (modelInfo.Comment == "on time" && now > end1)
                     {
                         if (diffMinutes > 10)
@@ -199,15 +202,15 @@ namespace UIQ.Services
                             var nowTime = DateTime.Now;
                             var lastTime = string.Empty;
                             var tmpCronStartTime = DateTime.Parse(now.ToString("yyyy/MM/dd") + " " + cronStartTime).AddSeconds(modelInfo.PreTime);
-                            if (modelInfo.Run_End > nowTime) nowTime.AddDays(1);
-                            if (modelInfo.Run_End > tmpCronStartTime) tmpCronStartTime.AddDays(1);
+                            if (modelInfo.Run_End > nowTime) nowTime = nowTime.AddDays(1);
+                            if (modelInfo.Run_End > tmpCronStartTime) tmpCronStartTime = tmpCronStartTime.AddDays(1);
                             if (modelInfo.Run_End < tmpCronStartTime && tmpCronStartTime < nowTime) //找出介於上次結束時間~現在時間的cron
                             {
                                 lastCount++;
                                 if (lastTime == string.Empty) //表示第一筆cron未啟動
                                 {
                                     lastTime = cronStartTime;
-                                    var diff = (nowTime.Ticks - tmpCronStartTime.Ticks - modelInfo.PreTime) / 60;
+                                    var diff = (nowTime.GetUnixTimestamp() - tmpCronStartTime.GetUnixTimestamp() - modelInfo.PreTime) / 60D;
                                     if (diff > 30)
                                     {
                                         modelInfo.Comment = "halt 30min+";
@@ -229,7 +232,7 @@ namespace UIQ.Services
                                     if (nowTime - lastTimeRun > nowTime - tmpCronStartTime)
                                     {
                                         lastTime = cronStartTime;
-                                        var diff = (nowTime.Ticks - tmpCronStartTime.Ticks) / 60;
+                                        var diff = (nowTime.GetUnixTimestamp() - tmpCronStartTime.GetUnixTimestamp()) / 60D;
                                         if (diff > 30)
                                         {
                                             modelInfo.Comment = "halt 30min+";
@@ -258,7 +261,7 @@ namespace UIQ.Services
                                 {
                                     nextTimeRun = nextTimeRun.AddDays(1);
                                 }
-                                if (tmpCronStartTime.Ticks - nowTime.Ticks < nextTimeRun.Ticks - nowTime.Ticks)
+                                if (tmpCronStartTime.GetUnixTimestamp() - nowTime.GetUnixTimestamp() < nextTimeRun.GetUnixTimestamp() - nowTime.GetUnixTimestamp())
                                 {
                                     nextTime = cronStartTime;
                                 }
@@ -308,7 +311,7 @@ namespace UIQ.Services
                             {
                                 nextTimeRun = nextTimeRun.AddDays(1);
                             }
-                            if (tmpCronStartTime.Ticks - nowTime.Ticks < nextTimeRun.Ticks - nowTime.Ticks)
+                            if (tmpCronStartTime.GetUnixTimestamp() - nowTime.GetUnixTimestamp() < nextTimeRun.GetUnixTimestamp() - nowTime.GetUnixTimestamp())
                             {
                                 nextTime = cronStartTime;
                             }
