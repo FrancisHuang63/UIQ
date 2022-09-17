@@ -55,26 +55,26 @@ namespace UIQ.Controllers
                 //System enquire
                 new MenuViewModel("System enquire", 1, new List<MenuViewModel>
                 {
-                    { new MenuViewModel("NWP running jobs", Url.Action(nameof(HpcEnquireController.NwpRunningJobs)), 1) },
-                    { new MenuViewModel("CRON table status", Url.Action(nameof(HpcEnquireController.CronStatus)), 2) },
-                    { new MenuViewModel("HPC system status", Url.Action(nameof(HpcEnquireController.HpcStatus)), 3)},
+                    { new MenuViewModel("NWP running jobs", Url.Action(nameof(HpcEnquireController.NwpRunningJobs), "HpcEnquire"), 1) },
+                    { new MenuViewModel("CRON table status", Url.Action(nameof(HpcEnquireController.CronStatus), "HpcEnquire"), 2) },
+                    { new MenuViewModel("HPC system status", Url.Action(nameof(HpcEnquireController.HpcStatus), "HpcEnquire"), 3)},
                 }),
                 //Model enquire
                 new MenuViewModel("Model enquire", 2, new List<MenuViewModel>
                 {
-                    { new MenuViewModel("Job log check", Url.Action(nameof(ModelEnquireController.ModelLogFiles)), 1) },
-                    { new MenuViewModel("Running status", Url.Action(nameof(ModelEnquireController.RunningStatus)), 2) },
-                    { new MenuViewModel("Daily report", Url.Action(nameof(ModelEnquireController.DailyReport)), 3)},
-                    { new MenuViewModel("Typhoon data check", Url.Action(nameof(ModelEnquireController.TyphoonInitialData)), 4) },
-                    { new MenuViewModel("Batch history", Url.Action(nameof(ModelEnquireController.BatchHistory)), 5) },
+                    { new MenuViewModel("Job log check", Url.Action(nameof(ModelEnquireController.ModelLogFiles), "ModelEnquire"), 1) },
+                    { new MenuViewModel("Running status", Url.Action(nameof(ModelEnquireController.RunningStatus), "ModelEnquire"), 2) },
+                    { new MenuViewModel("Daily report", Url.Action(nameof(ModelEnquireController.DailyReport), "ModelEnquire"), 3)},
+                    { new MenuViewModel("Typhoon data check", Url.Action(nameof(ModelEnquireController.TyphoonInitialData), "ModelEnquire"), 4) },
+                    { new MenuViewModel("Batch history", Url.Action(nameof(ModelEnquireController.BatchHistory), "ModelEnquire"), 5) },
                 }),
                 //Model rerun
                 new MenuViewModel("Model rerun", 3, new List<MenuViewModel>
                 {
-                    { new MenuViewModel("Cancel running job", Url.Action(nameof(ModelRerunController.ResetModel)), 1) },
-                    { new MenuViewModel("Dtg adjust", Url.Action(nameof(ModelRerunController.DtgAdjust)), 2) },
-                    { new MenuViewModel("Lid adjust", Url.Action(nameof(ModelRerunController.LidAdjust)), 3) },
-                    { new MenuViewModel("Submit model", Url.Action(nameof(ModelRerunController.SubmitModel)), 4) },
+                    { new MenuViewModel("Cancel running job", Url.Action(nameof(ModelRerunController.ResetModel), "ModelRerun"), 1) },
+                    { new MenuViewModel("Dtg adjust", Url.Action(nameof(ModelRerunController.DtgAdjust), "ModelRerun"), 2) },
+                    { new MenuViewModel("Lid adjust", Url.Action(nameof(ModelRerunController.LidAdjust), "ModelRerun"), 3) },
+                    { new MenuViewModel("Submit model", Url.Action(nameof(ModelRerunController.SubmitModel), "ModelRerun"), 4) },
                 }),
             });
 
@@ -85,15 +85,15 @@ namespace UIQ.Controllers
                     //Rescue tools
                     new MenuViewModel("Rescue tools", 4, new List<MenuViewModel>
                     {
-                        { new MenuViewModel("Archive redo", Url.Action(nameof(RescueToolsController.ArchiveRedo)), 1) },
-                        { new MenuViewModel("Model output generate", Url.Action(nameof(RescueToolsController.FixFailedModel)), 2) },
+                        { new MenuViewModel("Archive redo", Url.Action(nameof(RescueToolsController.ArchiveRedo), "RescueTools"), 1) },
+                        { new MenuViewModel("Model output generate", Url.Action(nameof(RescueToolsController.FixFailedModel), "RescueTools"), 2) },
                     }),
                     //Maintain tools
                     new MenuViewModel("Maintain tools", 5, new List<MenuViewModel>
                     {
-                        { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData)), 1) },
-                        { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command)), 2) },
-                        { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting)), 3) },
+                        { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData), "MaintainTools"), 1) },
+                        { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command), "MaintainTools"), 2) },
+                        { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 3) },
                     }),
                     //Reference info
                     new MenuViewModel("Reference info", 6, new List<MenuViewModel>
