@@ -1,0 +1,30 @@
+﻿@using UIQ.Services.Interfaces
+@using Microsoft.Extensions.Options
+@inject IConfiguration configuration
+@inject IOptions<RunningJobInfoOption> runningJobInfoOption
+@inject IUiqService uiqService
+
+@{
+    Layout = null;
+    
+    var hostName = System.Net.Dns.GetHostName();
+    var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
+    var hpcCtl = configuration.GetValue<string>("HpcCTL");
+    var rshAccount = configuration.GetValue<string>("RshAccount");
+}
+
+<link rel="stylesheet" href="~/css/style.css" type="text/css">
+
+<TITLE>CRON table status</Title>
+<div class=topic>System enquire > CRON table status</div>
+<h1>show the CRON table set in each operation account</h1>
+<div class="huge">
+    <pre>
+        @if(runningJobInfo != null)
+        {
+            var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
+            <p>@(uiqService.RunCommand($"rsh ${loginIp} -l ${rshAccount} '/ncs/${hpcCtl}/web/shell/Start_Cron.ksh Check 2>&1'  ").GetAwaiter().GetResult())</p>
+        }
+        <p>Enquiring data completely!</p>
+    </pre>
+</div>

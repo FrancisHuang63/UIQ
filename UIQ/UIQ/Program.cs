@@ -15,6 +15,7 @@ builder.Services.AddScoped<IDataBaseService, MySqlDataBaseNcsUiService>();
 builder.Services.AddScoped<IDataBaseService, MySqlDataBaseNcsLogService>();
 builder.Services.AddScoped<IUserService, UserForDataBaseLoginService>();
 builder.Services.AddScoped<IUiqService, UiqService>();
+builder.Services.AddScoped<ISshCommandService, SshCommandService>();
 
 //Login
 if (builder.Configuration.GetValue<bool>("IsLoginByOauth"))
@@ -50,6 +51,7 @@ else
 builder.Services.AddAuthorization();
 
 builder.Services.Configure<ConnectoinStringOption>(builder.Configuration.GetSection("MySqlOptions").GetSection("ConnectionString"));
+builder.Services.Configure<RunningJobInfoOption>(builder.Configuration.GetSection("RunningJobInfo"));
 
 var app = builder.Build();
 

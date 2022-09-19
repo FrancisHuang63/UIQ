@@ -1,0 +1,118 @@
+﻿@using UIQ.Services.Interfaces
+@using Microsoft.Extensions.Options
+@inject IConfiguration configuration
+@inject IOptions<RunningJobInfoOption> runningJobInfoOption
+@inject IUiqService uiqService
+
+@{
+    Layout = null;
+    
+    var hostName = System.Net.Dns.GetHostName();
+    var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
+    var hpcCtl = configuration.GetValue<string>("HpcCTL");
+    var rshAccount = configuration.GetValue<string>("RshAccount");
+}
+
+<link rel="stylesheet" href="~/css/style.css" type="text/css">
+<link rel="stylesheet" href="~/css/fjstyle.css" type="text/css">
+
+<TITLE>HPC status</Title>
+<div class=topic>System enquire > HPC system status</div>
+<h1>show the water level of disks status</h1>
+<div class="enquire">
+	<pre>
+		<p>@(uiqService.RunCommand("df -k | grep -v /dev/").GetAwaiter().GetResult())</p>
+		<p>Enquiring data completely!</p>
+	</pre>
+</div>
+<h1>show the node status(summary)</h1>
+<div class="short">
+	<pre>
+		@if (runningJobInfo != null)
+		{
+			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
+			var pjshowrsc_s = $"rsh -l ${rshAccount} ${loginIp} /users/xa09/bin/chknode";
+			var pjshowrsc_sarr = pjshowrsc_s.Split("/\n/");
+			foreach (var item in pjshowrsc_sarr)
+			{
+				<p>@(item)</p>
+			}
+
+			<p>Enquiring data completely!</p>
+		}
+	</pre>
+</div>
+
+<h1>show the node status(detail)</h1>
+<div class="huge">
+	<pre>
+		@if (runningJobInfo != null)
+		{
+			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
+			//Execute pjshowrsc command and make it an array
+			var pjshowrsc_s = $"rsh -l ${rshAccount} ${loginIp} 'date; pjshowrsc'";
+			var pjshowrsc_sarr = pjshowrsc_s.Split("/\n/");
+
+			//Make 5th line of pjshowrsc_s delimited by space
+			var dataArray = pjshowrsc_sarr.Count() >= 5 ? pjshowrsc_sarr[4].Split("/\\s+/") : new string[] { };
+
+			//Get #line of nodelist.txt
+			var nodeNum = "cat nodelist.txt | wc -l";
+
+			//Comapare pjshowrsc_s result and #line of nodelist.txt 
+			if(dataArray.Count() >= 2 && dataArray[1] != nodeNum)
+			{
+				<span class="c1">Some nodes might have stopped!</span><br>;
+			}
+
+			// Print pjshowrsc_s result
+			foreach(var item in pjshowrsc_sarr)
+			{
+				<p>@(item)</p>
+			}
+
+			<p>Enquiring data completely!</p>
+
+			//Read node list and make it an array
+			var nodeList = "cat nodelist.txt";
+			var nodelistArray =  nodeList.Split("/\n/");
+
+			//Execute pjshowrsc command and make it an array
+			var pjshowrsc_d = $"rsh -l ${rshAccount} ${loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
+			var pjshowrsc_darr = pjshowrsc_d.Split("/\n/");
+			
+			<p>@($"{hpcCtl} {loginIp}")</p>
+
+			//Check if pjshowrsc_darr has all nodes.
+			//If so, display pjshowrsc_darr. If not, display the node name and make it red.
+			if(pjshowrsc_darr.Length >= 5)
+			{
+				for(var i = 0; i < 5; i++)
+				{
+					<p>@(pjshowrsc_darr[i])</p>
+				}
+
+				foreach(var node in nodelistArray)
+				{
+					var marr =  pjshowrsc_darr.Where(x => x.Contains($"/{node}/"));
+					if(marr.Count() == 1)
+					{
+						<p>@($"{marr.FirstOrDefault()}")</p>
+					}
+					else if(marr.Count() == 0)
+					{
+						<span class="c1">@(node)      --      --      -    --Gi</span><br>
+					}
+					else
+					{
+						<span class="c2">@(node)     Matched 2 or more</span><br>
+					}
+				}
+
+				<p>Enquiring data completely!</p>
+			}
+		}
+	</pre>
+</div>
+
+

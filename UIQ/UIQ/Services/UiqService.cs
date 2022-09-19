@@ -6,20 +6,26 @@ namespace UIQ.Services
 {
     public class UiqService : IUiqService
     {
-        private IDataBaseService _dataBaseNcsUiService;
-        private IDataBaseService _dataBaseNcsLogService;
+        private readonly IDataBaseService _dataBaseNcsUiService;
+        private readonly IDataBaseService _dataBaseNcsLogService;
+        private readonly ISshCommandService _sshCommandService;
+        private string _HpcCtl { get; set; }
+        private string _RshAccount { get; set; }
 
-        public UiqService(IEnumerable<IDataBaseService> dataBaseServices)
+        public UiqService(IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration)
         {
             _dataBaseNcsUiService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsUi);
             _dataBaseNcsLogService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsLog);
+            _sshCommandService = sshCommandService;
+            _HpcCtl = configuration.GetValue<string>("HpcCTL");
+            _RshAccount = configuration.GetValue<string>("RshAccount");
         }
 
         public IEnumerable<HomeTableViewModel> GetHomeTableDatas()
         {
             var command = string.Empty;
             var checkPointLid = ShellExecute(command);
-            
+
             var batchInfos = GetShowBatchInfos();
             var cronInfos = GetShowCronInfos();
             var modelConfigs = GetShowModelConfigs();
@@ -38,11 +44,47 @@ namespace UIQ.Services
             return homeTableViewDatas;
         }
 
-        public void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)
+        public async Task<string> RunCommand(string command)
+        {
+            return await _sshCommandService.RunCommand(command);
+        }
+
+        public void SaveCronSetting(string memberId, string cronMode)
+        {
+            var data = new CronTab
+            {
+                Member_Id = int.Parse(memberId),
+                Cron_Group = cronMode,
+            };
+        }
+
+        public async Task<string> GetExecuteNwpRunningNodesCommandHtml(string selNode)
+        {
+            if (!string.IsNullOrWhiteSpace(selNode)) return string.Empty;
+
+            var resultHtml = string.Empty;
+            var nodes = selNode.Split(',');
+            foreach (var node in nodes)
+            {
+                var command = $"rsh -l ${_RshAccount} {node} /ncs/${_HpcCtl}/web/shell/ps.ksh";
+
+                resultHtml += "<pre>";
+                resultHtml += $"<h3>{node}</h3>";
+                resultHtml += "---------------------------------------------------------------------------------------\n";
+                resultHtml += await RunCommand(command);
+                resultHtml += "---------------------------------------------------------------------------------------</pre>\n\n";
+            }
+
+            return resultHtml;
+        }
+
+        #region Private Methods
+
+        private void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)
         {
             foreach (var modelInfo in modelInfos)
             {
-                if($"{modelInfo.Model_Name}_{modelInfo.Member_Name}({modelInfo.Nickname})" == "GFS_MNH(T511)")
+                if ($"{modelInfo.Model_Name}_{modelInfo.Member_Name}({modelInfo.Nickname})" == "GFS_MNH(T511)")
                 {
                 }
                 var maxPerRunTime = modelInfo.Member_Dtg_Value * 60 * 60;
@@ -325,8 +367,6 @@ namespace UIQ.Services
                 #endregion No matter what "$info->status" is, it is necessary to define $next_time.
             }
         }
-
-        #region Private Methods
 
         private string ShellExecute(string command)
         {

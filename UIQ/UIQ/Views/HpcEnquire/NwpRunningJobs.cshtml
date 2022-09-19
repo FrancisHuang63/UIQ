@@ -1,0 +1,116 @@
+﻿@using Microsoft.Extensions.Options
+@using UIQ.Services.Interfaces
+@inject IOptions<RunningJobInfoOption> runningJobInfoOption
+@inject IConfiguration configuration
+@inject IUiqService uiqService
+
+@{
+    Layout = null;
+
+    var hostName = System.Net.Dns.GetHostName();
+    var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
+    var hpcCtl = configuration.GetValue<string>("HpcCTL");
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+ <link rel="stylesheet" href="~/css/style.css" type="text/css">
+<script src="~/js/jquery-1.3.2.min.js"></script>
+<script src="~/js/tool.js"></script>
+
+<TITLE>NWP runnning jobs</Title>
+<div class=topic>System enquire > NWP running jobs</div>
+<h1>Show jobs of ncsa* accounts on compute nodes</h1>
+<div class="enquire">
+    <pre>
+        @DateTime.Now.GetCstUsAbbreviatedDateTime();
+        @if(runningJobInfo != null)
+        {
+            for (var i = 0; i < runningJobInfo.Items.Count(); i++)
+            {
+                var runningJobInfoItem = runningJobInfo.Items.ElementAt(i);
+                <p>@i</p>
+
+                foreach (var runningJobInfoData in runningJobInfoItem.Datas)
+                {
+                    var command = $"rsh -l ${hpcCtl} ${runningJobInfoData.LoginIp} 'sh ${Directory.GetCurrentDirectory()}hpc_enquire/pjstat_wrapper.sh' | grep ${runningJobInfoData.Prefix} | sort -k 5 | cat -n | sed 's/\t/ /'";
+
+                    <p>@runningJobInfoData.Name</p>
+                    <p>@($"{"No.".PadRight(6)}{"JOB_ID".PadRight(11)}{"JOB_NAME".PadRight(30)}{"MD".PadRight(6)}{"ST".PadRight(6)}{"USER".PadRight(20)}{"START_DATE".PadRight(15)}{"ELAPSE_LIM".PadRight(10)}{"NODE_REQUIRE".PadRight(12)}")</p>
+                    <p>@uiqService.RunCommand(command).GetAwaiter().GetResult()</p>
+                }
+            }
+
+            <p>Enquiring data completely!</p>
+        }
+    </pre>
+</div>
+<br>
+
+<h1>Show processes of accounts on DATAMOVER:
+    <select id="node" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action("NwpRunningNodes"))', 'show');">
+        <option value="0">-----</option>
+        @switch (hostName) 
+        {
+            case "datamv03":
+            case "datamv04":
+	            <option value="datamv01">datamv01></option>
+	            <option value="datamv02">datamv02</option>
+	            <option value="datamv03">datamv03</option>
+	            <option value="datamv04">datamv04</option>
+	            <option value="datamv01,datamv02,datamv03,datamv04">ALL</option>
+	            break;
+
+            case "datamv05":
+            case "datamv06":
+	            <option value="datamv05">datamv05</option>
+	            <option value="datamv06">datamv06</option>
+	            <option value="datamv05,datamv06">ALL</option>
+	            break;
+
+            case "login11":
+            case "login12":
+                    <option value="login11">login11</option>
+                    <option value="login12">login12</option>
+                    <option value="login11,login12">ALL</option>
+                    break;
+
+            case "login15":
+            case "login16":
+                    <option value="login15">login15</option>
+                    <option value="login16">login16</option>
+                    <option value="login15,login16">ALL</option>
+                    break;
+
+            case "h6dm13":
+            case "h6dm14":
+                    <option value="h6dm13">h6dm13</option>
+                    <option value="h6dm14">h6dm14</option>
+                    <option value="h6dm13,h6dm14">ALL</option>
+                    break;
+
+            case "h6ln13":
+            case "h6ln14":
+                    <option value="h6ln13">h6ln13</option>
+                    <option value="h6ln14">h6ln14</option>
+                    <option value="h6ln13,h6ln14">ALL</option>
+                    break;        
+
+            case "h6dm21":
+            case "h6dm22":
+                    <option value="h6dm21">h6dm21</option>
+                    <option value="h6dm22">h6dm22</option>
+                    <option value="h6dm21,h6dm22">ALL</option>
+                    break;
+
+            case "h6ln21":
+            case "h6ln22":
+                    <option value="h6ln21">h6ln21</option>
+                    <option value="h6ln22">h6ln22</option>
+                    <option value="h6ln21,h6ln22">ALL</option>
+                    break; 
+        }
+    </select>
+</h1>
+<div id="show" class="enquire"></div>
+
+
