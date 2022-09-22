@@ -16,6 +16,7 @@ builder.Services.AddScoped<IDataBaseService, MySqlDataBaseNcsLogService>();
 builder.Services.AddScoped<IUserService, UserForDataBaseLoginService>();
 builder.Services.AddScoped<IUiqService, UiqService>();
 builder.Services.AddScoped<ISshCommandService, SshCommandService>();
+builder.Services.AddScoped<IReadLogFileService, ReadLogFileService>();
 
 //Login
 if (builder.Configuration.GetValue<bool>("IsLoginByOauth"))

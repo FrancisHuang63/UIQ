@@ -4,7 +4,7 @@ namespace UIQ.Services.Interfaces
 {
     public class SshCommandService : ISshCommandService
     {
-        public async Task<string> RunCommand(string command)
+        public async Task<string> RunCommandAsync(string command)
         {
             if(string.IsNullOrWhiteSpace(command)) return null;
 

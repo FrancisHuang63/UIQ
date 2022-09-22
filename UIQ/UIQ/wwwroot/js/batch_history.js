@@ -4,17 +4,17 @@ $(function () {
     $(document).on('change', '#model', function () {
         var model_name = $('#model').val();
         $.ajax({
-            url: '../batch_history/get_member_name',
+            url: '/ModelEnquire/GetMemberItems',
             data: {
-                'model_name': model_name
+                'modelName': model_name
             },
             type: 'post',
             dataType: 'json',
-            success: function (member_name) {
+            success: function (respones) {
                 var html = '<option>-----</optin>';
                 if (model_name !== '-----') {
-                    $.each(member_name, function (key, value) {
-                        html += "<option value='" + value.member_name + "'>" + value.member_name + "</optin>";
+                    $.each(respones.data, function (key, value) {
+                        html += "<option value='" + value + "'>" + value + "</optin>";
                     });
                 }
                 $('#member').html(html);
@@ -27,18 +27,18 @@ $(function () {
         var model_name = $('#model').val();
         var member_name = $('#member').val();
         $.ajax({
-            url: '../batch_history/get_nickname',
+            url: '/ModelEnquire/GetNicknameItems',
             data: {
-                'model_name': model_name,
-                'member_name': member_name
+                'modelName': model_name,
+                'memberName': member_name
             },
             type: 'post',
             dataType: 'json',
-            success: function (nickname) {
+            success: function (respones) {
                 var html = '<option>-----</optin>';
                 if (member_name !== '-----') {
-                    $.each(nickname, function (key, value) {
-                        html += "<option value='" + value.nickname + "'>" + value.nickname + "</optin>";
+                    $.each(respones.data, function (key, value) {
+                        html += "<option value='" + value + "'>" + value + "</optin>";
                     });
                 }
                 $('#nickname').html(html);
@@ -51,8 +51,8 @@ $(function () {
         $('#result').initial_jtable({
             config: create_batch_history_table,
             filter: {
-                'model_name': $('#model').val(),
-                'member_name': $('#member').val(),
+                'modelName': $('#model').val(),
+                'memberName': $('#member').val(),
                 'nickname': $('#nickname').val()
             },
             text: false
@@ -63,13 +63,13 @@ $(function () {
 
     function get_model_name() {
         $.ajax({
-            url: '../batch_history/get_model_name',
+            url: '/ModelEnquire/GetModelItems',
             type: 'post',
             dataType: 'json',
-            success: function (model_name) {
+            success: function (respones) {
                 var html = '';
-                $.each(model_name, function (key, value) {
-                    html += "<option value='" + value.model_name + "'>" + value.model_name + "</optin>";
+                $.each(respones.data, function (key, value) {
+                    html += "<option value='" + value + "'>" + value+ "</optin>";
                 });
                 $('#model').append(html);
             }
@@ -82,7 +82,7 @@ $(function () {
             pageSize: 20,
             pageSizes: [10,20,25,50,100],
             actions: {
-                listAction: '../batch_history/get_model_time'
+                listAction: '/ModelEnquire/GetModelTimeTableData'
             },
             fields: {
                 model: {
@@ -132,12 +132,12 @@ $(function () {
                             config: get_batch_detail,
                             filter: function () {
                                 return{
-                                    'model_name': model_data.record.model,
-                                    'member_name': model_data.record.member,
+                                    'modelName': model_data.record.model,
+                                    'memberName': model_data.record.member,
                                     'nickname': model_data.record.nickname,
-                                    'run_type': model_data.record.run_type,
-                                    'typhoon_mode': model_data.record.typhoon_mode,
-                                    'cron_mode': model_data.record.cron_mode,
+                                    'runType': model_data.record.run_type,
+                                    'typhoonMode': model_data.record.typhoon_mode,
+                                    'cronMode': model_data.record.cron_mode,
                                     'round': model_data.record.round
                                 };
                             }
@@ -155,12 +155,12 @@ $(function () {
                             config: get_shell_detail,
                             filter: function () {
                                 return{
-                                    'model_name': batch_data.record.model,
-                                    'member_name': batch_data.record.member,
+                                    'modelName': batch_data.record.model,
+                                    'memberName': batch_data.record.member,
                                     'nickname': batch_data.record.nickname,
-                                    'run_type': batch_data.record.run_type,
-                                    'typhoon_mode': batch_data.record.typhoon_mode,
-                                    'cron_mode': batch_data.record.cron_mode,
+                                    'runType': batch_data.record.run_type,
+                                    'typhoonMode': batch_data.record.typhoon_mode,
+                                    'cronMode': batch_data.record.cron_mode,
                                     'round': batch_data.record.round
                                 };
                             },
@@ -177,7 +177,7 @@ $(function () {
             paging: false,
             sorting: false,
             actions: {
-                listAction: '../batch_history/get_batch_detail'
+                listAction: '/ModelEnquire/GetBatchDetailTableData'
             },
             fields: {
                 batch_name: {
@@ -201,7 +201,7 @@ $(function () {
             paging: false,
             sorting: false,
             actions: {
-                listAction: '../batch_history/get_shell_detail'
+                listAction: '/ModelEnquire/GetShellDetailTableData'
             },
             fields: {
                 batch_name: {

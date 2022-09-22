@@ -1,4 +1,5 @@
-﻿using UIQ.Models;
+﻿using UIQ.Enums;
+using UIQ.Models;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
 
@@ -9,14 +10,16 @@ namespace UIQ.Services
         private readonly IDataBaseService _dataBaseNcsUiService;
         private readonly IDataBaseService _dataBaseNcsLogService;
         private readonly ISshCommandService _sshCommandService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private string _HpcCtl { get; set; }
         private string _RshAccount { get; set; }
 
-        public UiqService(IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration)
+        public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration)
         {
             _dataBaseNcsUiService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsUi);
             _dataBaseNcsLogService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsLog);
             _sshCommandService = sshCommandService;
+            _httpContextAccessor = httpContextAccessor;
             _HpcCtl = configuration.GetValue<string>("HpcCTL");
             _RshAccount = configuration.GetValue<string>("RshAccount");
         }
@@ -24,7 +27,7 @@ namespace UIQ.Services
         public IEnumerable<HomeTableViewModel> GetHomeTableDatas()
         {
             var command = string.Empty;
-            var checkPointLid = ShellExecute(command);
+            var checkPointLid = RunCommandAsync(command).GetAwaiter().GetResult();
 
             var batchInfos = GetShowBatchInfos();
             var cronInfos = GetShowCronInfos();
@@ -44,9 +47,9 @@ namespace UIQ.Services
             return homeTableViewDatas;
         }
 
-        public async Task<string> RunCommand(string command)
+        public async Task<string> RunCommandAsync(string command)
         {
-            return await _sshCommandService.RunCommand(command);
+            return await _sshCommandService.RunCommandAsync(command);
         }
 
         public void SaveCronSetting(string memberId, string cronMode)
@@ -58,7 +61,7 @@ namespace UIQ.Services
             };
         }
 
-        public async Task<string> GetExecuteNwpRunningNodesCommandHtml(string selNode)
+        public async Task<string> GetExecuteNwpRunningNodesCommandHtmlAsync(string selNode)
         {
             if (!string.IsNullOrWhiteSpace(selNode)) return string.Empty;
 
@@ -71,11 +74,169 @@ namespace UIQ.Services
                 resultHtml += "<pre>";
                 resultHtml += $"<h3>{node}</h3>";
                 resultHtml += "---------------------------------------------------------------------------------------\n";
-                resultHtml += await RunCommand(command);
+                resultHtml += await RunCommandAsync(command);
                 resultHtml += "---------------------------------------------------------------------------------------</pre>\n\n";
             }
 
             return resultHtml;
+        }
+
+        public IEnumerable<ModelLogFileViewModel> GetModelLogFileViewModels()
+        {
+            var sql = @"SELECT `model`.`model_name`,
+                        `member`.`model_id`,
+                        `member`.`member_name`,
+                        `member`.`nickname`,
+                        `member`.`account`,
+                        `member`.`member_dtg_value`
+                        FROM `member`
+                        LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
+                        ORDER BY model.model_position,member.member_position";
+
+            return _dataBaseNcsUiService.QueryAsync<ModelLogFileViewModel>(sql).GetAwaiter().GetResult();
+        }
+
+        public async Task<string> GetFullPathAsync(string modelName, string memberName, string nickname)
+        {
+            var sql = @"SELECT `member`.`account`, `member`.`member_path`
+                        FROM `member`
+                        LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
+                        WHERE `model`.`model_name` = @modelName
+                        AND `member`.`member_name` = @memberName
+                        AND `member`.`nickname` = @nickname";
+
+            var datas = await _dataBaseNcsUiService.QueryAsync<FullPathViewModel>(sql, new { modelName = modelName, memberName = memberName, nickname = nickname });
+
+            var result = datas.FirstOrDefault();
+            if (result == null) return null;
+
+            return $"/ncs/{result.Account}{result.Member_Path}/{modelName}/{memberName}";
+        }
+
+        public async Task<IEnumerable<Model>> GetModelsAsync()
+        {
+            var datas = await _dataBaseNcsUiService.GetAllAsync<Model>(nameof(Model));
+            return datas;
+        }
+
+        public IEnumerable<ModelTimeViewModel> GetModelTimeDatas(string modelName, string memberName, string nickname, int startIndex, int pageSize, out int totalCount)
+        {
+            var sql = @"SELECT SQL_CALC_FOUND_ROWS
+	                        etr.`model`,
+	                        etr.`member`,
+	                        mb.`nickname`,
+	                        CEILING(etr.`avg_execution_time` / 60) AS `avg_execution_time`,
+	                        etr.`run_type`,
+	                        etr.`cron_mode`,
+	                        etr.`typhoon_mode`,
+	                        etr.`round`,
+                            (SELECT SUM(bt.`batch_time`) FROM `db_ncsui`.`batch` bt
+	                         WHERE bt.`member_id` = mb.`member_id`
+                             AND (bt.`batch_type` = '' OR bt.`batch_type` = SUBSTRING_INDEX(etr.`run_type`, '_', 1))
+                             AND (bt.`batch_dtg` = '' OR bt.`batch_dtg` = etr.`round`)
+                             GROUP BY(bt.`member_id`)
+	                        ) AS `batch_time`
+                        FROM `db_ncs_log`.`execution_time_result` etr
+                        JOIN `db_ncsui`.`member` mb ON mb.`member_name` = etr.`member` AND mb.`account` = etr.`account`
+                        JOIN `db_ncsui`.`model` md ON md.`model_name` = etr.`model` AND md.`model_id` = mb.`model_id`
+                        WHERE etr.`account` = mb.`account`
+                        AND md.`model_id` = mb.`model_id`
+                        AND etr.`batch_name` = @BatchName
+                        AND etr.`shell_name` = @ShellName";
+            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString())) sql += " AND mb.`maintainer_status` = 0";
+            if (!string.IsNullOrWhiteSpace(modelName?.Replace("-", string.Empty))) sql += " AND etr.`model` = @ModelName";
+            if (!string.IsNullOrWhiteSpace(memberName?.Replace("-", string.Empty))) sql += " AND etr.`member` = @MemberName";
+            if (!string.IsNullOrWhiteSpace(nickname?.Replace("-", string.Empty))) sql += " AND mb.`nickname` = @Nickname";
+
+            sql += " ORDER BY model_position, member_position, run_type,cron_mode, typhoon_mode, round ASC";
+            sql += $" LIMIT {pageSize} OFFSET {startIndex}";
+
+            var param = new
+            {
+                BatchName = "unknown",
+                ShellName = "unknown",
+                ModelName = modelName,
+                MemberName = memberName,
+                Nickname = nickname,
+            };
+
+            var result = _dataBaseNcsLogService.QueryAsync<ModelTimeViewModel>(sql, param).GetAwaiter().GetResult();
+            totalCount = _dataBaseNcsLogService.QueryAsync<int>("SELECT FOUND_ROWS() as total").GetAwaiter().GetResult().FirstOrDefault();
+            return result;
+        }
+
+        public IEnumerable<BatchDetailViewModel> GetBatchDetailDatas(BatchDetailViewModelSearchParameter param)
+        {
+            var sql = @"SELECT `batch_name`, `batch_time`, `batch_type`, `batch_dtg`
+                        FROM `batch` bt
+                        JOIN `member` mb ON mb.`member_id` = bt.`member_id`
+                        JOIN `model` md ON md.`model_id` = mb.`model_id`
+                        WHERE (bt.`batch_type` = '' OR bt.`batch_type` = SUBSTRING_INDEX(@RunType, '_', 1))
+                        AND md.`model_name` = @ModelName
+                        AND mb.`member_name` = @MemberName
+                        AND mb.`nickname` = @NickName
+                        AND (bt.`batch_dtg` = '' OR bt.`batch_dtg` = @Round)
+                        ORDER BY batch_position ASC";
+
+            var batchList = _dataBaseNcsUiService.QueryAsync<BatchListViewModel>(sql, param).GetAwaiter().GetResult();
+
+            sql = @"SELECT CEILING(`avg_execution_time` / 60) AS `avg_execution_time`
+                    FROM `execution_time_result`
+                    WHERE `model` = @ModelName
+                    AND `member` = @MemberName
+                    AND `account` = (SELECT mb.`account`
+                                        FROM `db_ncsui`.`member` mb
+                                        JOIN `db_ncsui`.`model` md ON md.`model_id` = mb.`model_id`
+                                        WHERE md.`model_name` = @ModelName
+                                        AND mb.`member_name` = @MemberName
+                                        AND mb.`nickname` = @Nickname)
+                    AND `run_type` = @RunType
+                    AND `round` = @Round
+                    AND `typhoon_mode` = @TyphoonMode
+                    AND `cron_mode` = @CronMode
+                    AND `batch_name` = @BatchName
+                    AND `shell_name` = 'unknown'";
+            var tmpBatchTime = 0;
+            var result = batchList.Select(batchItem =>
+            {
+                param.BatchName = batchItem.Batch_Name;
+                tmpBatchTime += batchItem.Batch_Time;
+                var avgExecutionTime = _dataBaseNcsLogService.QueryAsync<int?>(sql, param).GetAwaiter().GetResult().FirstOrDefault();
+
+                return new BatchDetailViewModel
+                {
+                    Batch_Name = batchItem.Batch_Name,
+                    Setting_Time = tmpBatchTime,
+                    History_Time = avgExecutionTime.HasValue ? avgExecutionTime.Value.ToString() : "-",
+                };
+            }).ToList();
+
+            return result;
+        }
+
+        public IEnumerable<ShellDetailViewModel> GetShellDetailDatas(ShellDetailViewModelSearchParameter param)
+        {
+            var sql = @"SELECT `batch_name`, `shell_name`, CEILING(`avg_execution_time` / 60) AS `avg_time_min`, `avg_execution_time` AS `avg_time_sec`
+                        FROM `execution_time_result`
+                        WHERE `model` = @ModelName
+                        AND `member` = @MemberName
+                        AND `account` = (SELECT mb.`account`
+                                        FROM `db_ncsui`.`member` mb
+                                        JOIN `db_ncsui`.`model` md ON md.`model_id` = mb.`model_id`
+                                        WHERE md.`model_name` = @ModelName
+                                        AND mb.`member_name` = @MemberName
+                                        AND mb.`nickname` = @Nickname)
+                        AND `typhoon_mode` = @TyphoonMode
+                        AND `run_type` = @RunType
+                        AND `cron_mode` = @CronMode
+                        AND `round` = @Round
+                        AND `batch_name` != 'unknown'
+                        AND `shell_name` != 'unknown'
+                        ORDER BY `avg_execution_time` ASC";
+
+            var result = _dataBaseNcsLogService.QueryAsync<ShellDetailViewModel>(sql, param).GetAwaiter().GetResult();
+
+            return result;
         }
 
         #region Private Methods
@@ -366,12 +527,6 @@ namespace UIQ.Services
 
                 #endregion No matter what "$info->status" is, it is necessary to define $next_time.
             }
-        }
-
-        private string ShellExecute(string command)
-        {
-            //TODO
-            return string.Empty;
         }
 
         private void UpdateDelayCheckPoint(CheckPointViewModelSearch modelExeInfo, IEnumerable<CheckPointViewModel> unRunCheckPoints, DateTime modelStartTime)

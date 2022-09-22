@@ -1,0 +1,50 @@
+﻿
+@{
+    Layout = null;
+}
+
+<link rel="stylesheet" href="~/css/style.css" type="text/css">
+<link rel="stylesheet" href="~/packages/jquery-ui-1.12.1/jquery-ui.min.css" type="text/css" />
+<link rel="stylesheet" href="~/packages/bootstrap/3.3.1/css/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="~/packages/bootstrap/3.3.1/custom.css" type="text/css" />
+<link rel="stylesheet" href="~/packages/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
+<link rel="stylesheet" href="~/packages/jtable/2.4.0/custom.css" type="text/css">
+
+<script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="~/packages/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="~/packages/bootstrap/3.3.1/js/bootstrap.js"></script>
+<script type="text/javascript" src="~/packages/bootstrap/3.3.1/custom.min.js"></script>
+<script type="text/javascript" src="~/js/lib.min.js"></script>
+<script type="text/javascript" src="~/packages/jtable/2.4.0/jquery.jtable.js"></script>
+<script type="text/javascript" src="~/packages/jtable/2.4.0/custom.js"></script>
+<script type="text/javascript" src="~/js/batch_history.js"></script>
+
+<html>
+    <HEAD><TITLE>Batch history</Title></Head>
+    <body>
+        <div class="topic">Model enquire > Batch history</div>
+        <div class="form">
+            <div>
+                Model:
+                <select id="model" class="form">
+                    <option>-----</option>
+                </select>
+
+                Member:
+                <select id="member" class="form">
+                    <option>-----</option>
+                </select>
+
+                Nickname:
+                <select id="nickname" class="form">
+                    <option>-----</option>
+                </select>
+                <button id="enquire" class="form">enquire</button>
+            </div>
+            <div id="result" class="huge"></div>
+        </div>
+    </body>
+</html>
+
+
+

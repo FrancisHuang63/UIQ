@@ -37,32 +37,33 @@ function sendAJAXRequest(req_type, uri, div) {
     div = '#' + div;
 
     if (req_type == 'post') {
-        target_url = uri + '?timeStamp=' + new Date().getTime();
+        //target_url = uri + '?timeStamp=' + new Date().getTime();
+        target_url = uri;
         // to avoid browsers loading the past data from cache
     } else {
         target_url = uri;
     }
-
+    
     $.ajax({
         url: target_url,
         type: 'POST',
         dataType: 'html',
-        data: {p_model: model,
-            p_member: member,
-            p_dtg: dtg,
-            p_lid: lid,
-            p_tau1: tau1,
-            p_tau2: tau2,
-            p_method: method,
-            p_node: node,
-            p_account: account,
-            p_nickname: nickname,
-            p_adjust: adjust,
-            p_batch: batch,
-            p_jobid: jobid,
-            p_cronmode: cronmode,
-            p_keyw: keyw,
-            p_parameter: parameter
+        data: {ModelName: model,
+            MemberName: member,
+            Dtg: dtg,
+            Lid: lid,
+            Tau1: tau1,
+            Tau2: tau2,
+            Method: method,
+            Node: node,
+            Account: account,
+            Nickname: nickname,
+            Adjust: adjust,
+            Batch: batch,
+            JobId: jobid,
+            CronMode: cronmode,
+            Keyword: keyw,
+            Parameter: parameter
         },
         error: function () {
             alert("Syntax error on " + uri);
@@ -148,29 +149,28 @@ function clear_nickname_options() {
 function build_nickname_options() {
     var model = $('#model').val();
     var member = $('#member').val();
-    var target_url = '../sql_query_function.php?target=get_nickname_list';
+    var target_url = '/ModelEnquire/GetNicknameItems';
 
     $.ajax({
         url: target_url,
         type: 'POST',
         dataType: 'json',
         data: {
-            model: model,
-            member: member
+            modelName: model,
+            memberName: member
         },
-        error: function (data) {
+        error: function (response) {
             alert("Syntax error on " + target_url);
         },
-        success: function (data) {
+        success: function (respones) {
             var html = '<option>-----</option>';
-            $.each(data, function (key, value) {
-                html += '<option val="' + value + '">' + value + '</option>';
+            $.each(respones.data, function (key, item) {
+                html += `<option val="${item}">${item}</option>`;
                 $('#nickname').html(html);
             });
 
             return;
         }
-
     });
 }
 

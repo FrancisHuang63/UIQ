@@ -2,6 +2,6 @@
 {
     public interface ISshCommandService
     {
-        public Task<string> RunCommand(string command);
+        public Task<string> RunCommandAsync(string command);
     }
 }

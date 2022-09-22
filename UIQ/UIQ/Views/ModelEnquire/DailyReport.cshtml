@@ -1,0 +1,28 @@
+﻿@using UIQ.Controllers
+
+@{
+    Layout = null;
+    string data = ViewBag.Data;
+}
+
+<script src="~/js/jquery-1.3.2.min.js"></script>
+<script src="~/js/tool.js"></script>
+<link rel=stylesheet type="text/css" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/fjstyle.css" type="text/css">
+
+<html>
+    <head><title>Daily report</title></head>
+    <body>
+        <div class="topic">Model enquire > Daily report</div>
+            Daily log date:
+            <select id="node" class="form">
+                @foreach (var item in data)
+                {
+                    <option>@item</option>
+                }
+            </select>
+            <br><br>
+            <input type="submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.DailyResult), "GetHtml"))', 'result')";>
+        <div id="result" class="huge"></div>
+    </body>
+</html>

@@ -23,7 +23,7 @@
         @if(runningJobInfo != null)
         {
             var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
-            <p>@(uiqService.RunCommand($"rsh ${loginIp} -l ${rshAccount} '/ncs/${hpcCtl}/web/shell/Start_Cron.ksh Check 2>&1'  ").GetAwaiter().GetResult())</p>
+            <p>@(uiqService.RunCommandAsync($"rsh ${loginIp} -l ${rshAccount} '/ncs/${hpcCtl}/web/shell/Start_Cron.ksh Check 2>&1'  ").GetAwaiter().GetResult())</p>
         }
         <p>Enquiring data completely!</p>
     </pre>

@@ -1,0 +1,57 @@
+.ui-dialog {
+    z-index: 1100;
+}
+
+.jtable-dialog-form input {
+    width: 200px;
+}
+
+.jtable-dialog-form input.input-width-auto {
+    width: auto;
+}
+
+div.jtable-main-container table.jtable thead th.jtable-column-header div.jtable-column-header-container {
+    height: auto;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar span.jtable-toolbar-item span.jtable-toolbar-item-text {
+    display: inline;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar span.jtable-toolbar-item.jtable-toolbar-item-add-record {
+    top: -1px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar span.jtable-toolbar-item.jtable-toolbar-item-update-record {
+    display: initial;
+    background: url('themes/lightcolor/edit.png') no-repeat;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar {
+    top: 1px;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar span.jtable-toolbar-item {
+    padding: 2px;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar span.jtable-toolbar-item.jtable-toolbar-item-update-record .jtable-toolbar-item-icon {
+    margin: 0px;
+}
+
+div.jtable-main-container div.jtable-title div.jtable-toolbar span.jtable-toolbar-item.jtable-toolbar-custom {
+    top: 1px;
+    padding-top: 0px;
+}
+
+/* for checkbox color */
+
+.jtable-checkbox-yes {
+    color: green;
+}
+
+.jtable-checkbox-no {
+    color: orange;
+}

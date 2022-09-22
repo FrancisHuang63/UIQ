@@ -21,7 +21,7 @@
 <h1>show the water level of disks status</h1>
 <div class="enquire">
 	<pre>
-		<p>@(uiqService.RunCommand("df -k | grep -v /dev/").GetAwaiter().GetResult())</p>
+		<p>@(uiqService.RunCommandAsync("df -k | grep -v /dev/").GetAwaiter().GetResult())</p>
 		<p>Enquiring data completely!</p>
 	</pre>
 </div>
