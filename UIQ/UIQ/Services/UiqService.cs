@@ -88,7 +88,9 @@ namespace UIQ.Services
                         `member`.`member_name`,
                         `member`.`nickname`,
                         `member`.`account`,
-                        `member`.`member_dtg_value`
+                        `member`.`member_dtg_value`,
+                        `member`.`dtg_adjust`,
+                        `member`.`submit_model`
                         FROM `member`
                         LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
                         ORDER BY model.model_position,member.member_position";
@@ -235,6 +237,19 @@ namespace UIQ.Services
                         ORDER BY `avg_execution_time` ASC";
 
             var result = _dataBaseNcsLogService.QueryAsync<ShellDetailViewModel>(sql, param).GetAwaiter().GetResult();
+
+            return result;
+        }
+
+        public IEnumerable<string> GetMemberRelay(string modelName, string memberName, string nickname)
+        {
+            var sql = @"SELECT `batch` FROM `batch_view`
+                        WHERE `model` = @ModelName
+                        AND `member` = @MemberName
+                        AND `relay` = 1
+                        GROUP BY `batch`";
+            var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname };
+            var result =_dataBaseNcsUiService.QueryAsync<string>(sql, param).GetAwaiter().GetResult();
 
             return result;
         }

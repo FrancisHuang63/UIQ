@@ -150,5 +150,203 @@ namespace UIQ.Controllers
             html += "</pre>";
             return html;
         }
+
+        [HttpPost]
+        public async Task<string> ResetModelShow(string modelName, string memberName, string nickname)
+        {
+            //TODO 部分邏輯尚未完成
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var account = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname)?.Account;
+            var html = @"<div id=""show"" class=""enquire"">
+                            <pre>======================current Job status======================
+                        ";
+
+            var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -A -s | sed '1,4d'";
+            var data = await _uiqService.RunCommandAsync(command);
+            data =  data.Replace("#fx100#", string.Empty).Replace("#fx10#", string.Empty);
+            var dataArray = data.Split("Statistical Information");
+            html += dataArray.Count() > 2 ? dataArray[1] : string.Empty;
+
+            var isWeps = modelName == "WEPS" && memberName == "CEN01";
+            html += $"<h3>{modelName}_{memberName}(User: {account}, Nickname: {nickname})</h3>";
+
+            if (dataArray.Any() == false)
+            {
+                html += "There is no job!<br>";
+            }
+            else
+            {
+                foreach (var item in dataArray)
+                {
+                    html += $"{item}<br>";
+                    html += $"-----------------------------------------------------------------<br>";
+                }
+            }
+            html += "</div>";
+
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> DtgShow(string modelName, string memberName, string nickname)
+        {
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var dtgValue = configData?.Member_Dtg_Value;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var command = $"cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var dtg = await _uiqService.RunCommandAsync(command);
+            var html = $@"<div class=""short"">
+                            [Model]={modelName}, [Member]={memberName}, [Nickname]={nickname}<br><br>DTG={dtg}
+                           </div>
+                         <br>
+                         <form class=""form"">Adjust value
+                            <select id=""dtg"" class=""form"">
+                                <option value=""{dtgValue}"">+</option>
+                                <option value=""{dtgValue}"">-</option>
+                            </select>
+                            {dtgValue}
+                            <input type=""button"" class=""form"" value=""Submit"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.DtgResult))}', 'result'); "">
+                        </form>";
+
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> DtgResult(string modelName, string memberName, string nickname, string dtg)
+        {
+            var html = string.Empty;
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var dtgAdjust = configData?.Dtg_Adjust;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+
+            var message = "DTG adjust function is not available for this member.\r\n";
+            if (string.IsNullOrWhiteSpace(dtgAdjust))
+            {
+                html += "DTG adjust function is not available for this member.\r\n";
+            }
+            else
+            {
+                var command = $"rsh -l {account} {_loginIp} /ncs/{_hpcCtl}/web/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                html += $"{command} <br><br>";
+                html += await _uiqService.RunCommandAsync(command);
+
+	            //輸出結果
+	            message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.";
+	            message = message.Replace("/\n/", "<br>");
+                html += message;
+            }
+
+            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> LidShow(string modelName, string memberName, string nickname)
+        {
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var command = $"cat {fullPath}/etc/Lid";
+            var lid = await _uiqService.RunCommandAsync(command);
+            var html = $@"[Model]={modelName}, [Member]={memberName}, [Nickname]={nickname}<br><br>LID={lid}";
+
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> LidResult(string modelName, string memberName, string nickname, string lid)
+        {
+            var html = string.Empty;
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+
+            var command = $"rsh -l {account} {_loginIp} /ncs/{_hpcCtl}/web/shell/set_Lid.ksh {account} {fullPath} {lid}";
+            html += command;
+            html += await _uiqService.RunCommandAsync(command);
+
+            var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
+            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> SubmitShow(string modelName, string memberName, string nickname)
+        {
+            var html = string.Empty;
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var dtg = await _uiqService.RunCommandAsync(command);
+            command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/Lid";
+            var lid= await _uiqService.RunCommandAsync(command);
+
+            var batchs = _uiqService.GetMemberRelay(modelName, memberName, nickname);
+            var batchSelectHtml = @"<select id=""batch"" class=""form""><option value="""">---</option>";
+            foreach (var item in batchs)
+            {
+                // TODO: add batchSelectHtml <option>
+            }
+            batchSelectHtml += "</select>";
+
+            html = $@"<div class=""short"">
+                        [Model] ={modelName}, [Member]={memberName}, [Nickname]={nickname}<br><br>
+                        DTG ={dtg} ;
+                        Lid ={lid} ;
+                        batch:{batchSelectHtml} ;
+                    </div>
+                    <input type=""hidden"" id=""dtg"" value=""{dtg}"">
+                    <input type=""button"" {(lid == "1" ? "disabled" : string.Empty)} class=""form"" value=""Submit"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(SubmitResult))}', 'result');"">";
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> SubmitResult(string modelName, string memberName, string nickname, string dtg, string batch)
+        {
+            var html = string.Empty;
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var submitModel = configData?.Submit_Model;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+
+            var message = "submit model function is not avaliable for this member.\r\n";
+            if (string.IsNullOrWhiteSpace(submitModel))
+            {
+                html += message;
+            }
+            else
+            {
+                var command = $"rsh -l {account} -n {_loginIp} /ncs/{_hpcCtl}/web/shell/re_run.ksh {account}{fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
+                message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Rerun the {modelName} {memberName} {nickname} with {dtg} in {batch} run \r\n";
+                html += message;
+                html += await _uiqService.RunCommandAsync(command);
+            }
+
+            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            return html;
+        }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
-using System.Web;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
 

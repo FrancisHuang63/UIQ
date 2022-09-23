@@ -21,5 +21,11 @@ namespace UIQ.ViewModels
 
         [JsonPropertyName("member_dtg_value")]
         public int Member_Dtg_Value { get; set; }
+
+        [JsonPropertyName("dtg_adjust")]
+        public string Dtg_Adjust { get; set; }
+
+        [JsonPropertyName("submit_model")]
+        public string Submit_Model { get; set; }
     }
 }

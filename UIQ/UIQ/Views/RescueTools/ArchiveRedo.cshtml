@@ -1,0 +1,59 @@
+﻿
+@{
+    ViewData["Title"] = "ArchiveRedo";
+}
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<script src="~/js/jquery-1.3.2.min.js"></script>
+<script src="~/js/tool.js"></script>
+<link rel=stylesheet type="text/css" href="~/css/style.css">
+
+<html>
+    <head><title>Archive redo</title></head>
+    <body>
+        <div class='topic'>Rescue tools > Archive redo</div>
+        <form name="myForm" class="form">
+            Model:
+            <select id="model" class="form" OnChange="Buildkey(this.selectedIndex);clear_nickname_options();">
+                <option>-----</option>
+            </select>
+
+            Member:
+            <select id="member" class="form" OnChange="build_nickname_options();">
+                <option>-----</option>
+            </select>
+
+            Nickname:
+            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', 'archive_show.php', 'show');$('#result').html('');">
+                <option>-----</option>
+            </select>
+        </form>
+
+        <div id="show">
+            Current DTG
+            <input id="dtg" type="text" class="form" cols="70" value=""> (the DTG format is yymmddhh) <br><br>
+            Data type
+            <select  id="method" class="form">
+                <option>-----</option>
+            </select>
+        </div>
+        <br>
+
+        Run type
+        <select id="node" class="form">
+            <option value="Major">Major</option>
+            <option value="Post">Post</option>
+        </select>
+        <br>
+
+        <input type="button" class="form" value="Enquire" OnClick="sendAJAXRequest('post', 'archive_show2.php', 'ShowLog');">
+        <br>
+
+        <div id="ShowLog" class="short">result...</div>
+        <br>
+        <input type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', 'archive_result.php', 'result');">
+        <br><br>
+        <div id="result" class="enquire">result...</div>
+    </body>
+</html>
+

@@ -24,5 +24,7 @@ namespace UIQ.Services.Interfaces
         public IEnumerable<BatchDetailViewModel> GetBatchDetailDatas(BatchDetailViewModelSearchParameter param);
 
         public IEnumerable<ShellDetailViewModel> GetShellDetailDatas(ShellDetailViewModelSearchParameter param);
+        
+        public IEnumerable<string> GetMemberRelay(string modelName, string memberName, string nickname);
     }
 }
