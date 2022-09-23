@@ -3,7 +3,7 @@
 
 @{
     Layout = null;
-    IEnumerable<ArchiveViewModel> configList = ViewBag.ConfigList;
+    IEnumerable<ModelLogFileViewModel> configList = ViewBag.ConfigList;
 }
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,10 +12,10 @@
 <link rel=stylesheet type="text/css" href="~/css/style.css">
 
 <html>
-    <head><title>Archive redo</title></head>
+    <head><title>Model output generate</title></head>
     <body>
-        <div class="topic">Rescue tools > Archive redo</div>
-        <form name="myForm" class="form">
+        <div class="topic">Rescue tools > Model output generate</div>
+        <form Name="myForm" class="form">
             Model:
             <select id="model" class="form">
                 <option>-----</option>
@@ -29,37 +29,33 @@
             <select id="member" class="form" OnChange="build_nickname_options();">
                 <option>-----</option>
             </select>
-
+            
             Nickname:
-            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveShow), "GetHtml"))', 'show');$('#result').html('');">
+            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.FixShow), "GetHtml"))', 'show')">
                 <option>-----</option>
+            </select>
+
+            Method:
+            <select id="method" class="form">
+                <option>-----</option>
+                <option value='Rename'>Rename</option>
             </select>
         </form>
 
         <div id="show">
-            Current DTG
-            <input id="dtg" type="text" class="form" cols="70" value=""> (the DTG format is yymmddhh) <br><br>
-            Data type
-            <select  id="method" class="form">
-                <option>-----</option>
-            </select>
-        </div>
-        <br>
+            Current DTG <input id="dtg" type="text" class="form" cols="70" value=""> (the DTG format is yymmddhh)
+        </div><br>
 
-        Run type
-        <select id="node" class="form">
-            <option value="Major">Major</option>
-            <option value="Post">Post</option>
-        </select>
-        <br>
+        <div>
+            Parameter <input id="parameter" type="text" class="form" cols="100" value=""> (The parameters are seperated by space. ex. par1 par2)
+        </div><br>
 
-        <input type="button" class="form" value="Enquire" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveShowForEnquire), "GetHtml"))', 'ShowLog');">
-        <br>
+        <input type="button" class="form" value="Enquire" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.FixShowForEnquire), "GetHtml"))', 'ShowLog');"><br><br>
 
         <div id="ShowLog" class="short">result...</div>
         <br>
-        <input type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveResult), "GetHtml"))', 'result');">
-        <br><br>
+        <input type="button" class="form" value="Submit" OnClick="if(confirm('Do you want to submit?'))  {sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.FixResult), "GetHtml"))', 'result');}">
+
         <div id="result" class="enquire">result...</div>
 
         <script type="text/JavaScript">

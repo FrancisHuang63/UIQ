@@ -26,5 +26,11 @@ namespace UIQ.Services.Interfaces
         public IEnumerable<ShellDetailViewModel> GetShellDetailDatas(ShellDetailViewModelSearchParameter param);
         
         public IEnumerable<string> GetMemberRelay(string modelName, string memberName, string nickname);
+
+        public IEnumerable<ArchiveViewModel> GetArchiveViewModels();
+
+        public IEnumerable<string> GetArchiveDataTypes(string modelName, string memberName, string nickname);
+
+        public Task<IEnumerable<string>> GetModelMemberPath(string modelName, string memberName, string nickname);
     }
 }

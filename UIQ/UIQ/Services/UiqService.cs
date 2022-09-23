@@ -90,7 +90,8 @@ namespace UIQ.Services
                         `member`.`account`,
                         `member`.`member_dtg_value`,
                         `member`.`dtg_adjust`,
-                        `member`.`submit_model`
+                        `member`.`submit_model`,
+                        `member`.`fix_failed_model`
                         FROM `member`
                         LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
                         ORDER BY model.model_position,member.member_position";
@@ -250,6 +251,57 @@ namespace UIQ.Services
                         GROUP BY `batch`";
             var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname };
             var result =_dataBaseNcsUiService.QueryAsync<string>(sql, param).GetAwaiter().GetResult();
+
+            return result;
+        }
+
+        public IEnumerable<ArchiveViewModel> GetArchiveViewModels()
+        {
+            var sql = @"SELECT 
+                            `model`.`model_id`, `model`.`model_name`, `member`.`member_name`, `member`.`nickname`, `member`.`account`
+                        FROM (SELECT `archive`.`member_id`
+                              FROM `archive`
+                              GROUP BY `archive`.`member_id`
+                        ) AS arch_info
+                        LEFT JOIN `member` ON `member`.`member_id` = `arch_info`.`member_id`
+                        LEFT JOIN `model` ON `model`.`model_id` = `member`.`model_id`";
+
+            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
+                sql += " WHERE `member`.`maintainer_status` = '0'";
+
+            sql += " ORDER BY `model`.`model_position`, `member`.`member_position`";
+            var result = _dataBaseNcsUiService.QueryAsync<ArchiveViewModel>(sql).GetAwaiter().GetResult();
+
+            return result;
+        }
+
+        public IEnumerable<string> GetArchiveDataTypes(string modelName, string memberName, string nickname)
+        {
+            var sql = @"SELECT `data`.`data_name`
+                        FROM (SELECT `data_id`
+	                          FROM `archive` 
+	                          WHERE `archive`.`member_id` = (SELECT `member`.`member_id`
+								                             FROM `member`
+								                             LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
+								                             WHERE `model_name` = @ModelName
+                                                             AND `member_name` = @MemberName
+                                                             AND `nickname` = @Nickname)
+	                         ) AS d_id
+                        LEFT JOIN `data` ON `data`.`data_id` = d_id.`data_id`";
+            var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname };
+            var result = _dataBaseNcsUiService.QueryAsync<string>(sql, param).GetAwaiter().GetResult();
+
+            return result;
+        }
+
+        public async Task<IEnumerable<string>> GetModelMemberPath(string modelName, string memberName, string nickname)
+        {
+            var sql = @"SELECT `fix_failed_target_directory` FROM `model_member_view` 
+                        WHERE `model_name` = @ModelName 
+                        AND `member_name` = @MemberName 
+                        AND `nickname` = @Nickname";
+            var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname };
+            var result = await _dataBaseNcsUiService.QueryAsync<string>(sql, param);
 
             return result;
         }

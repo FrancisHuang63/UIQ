@@ -27,5 +27,8 @@ namespace UIQ.ViewModels
 
         [JsonPropertyName("submit_model")]
         public string Submit_Model { get; set; }
+
+        [JsonPropertyName("fix_failed_model")]
+        public string Fix_Failed_Model { get; set; }
     }
 }

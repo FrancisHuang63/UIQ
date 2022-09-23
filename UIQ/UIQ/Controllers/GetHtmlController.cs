@@ -348,5 +348,125 @@ namespace UIQ.Controllers
             await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
             return html;
         }
+
+        [HttpPost]
+        public async Task<string> ArchiveShow(string modelName, string memberName, string nickname)
+        {
+            var dataTypes = _uiqService.GetArchiveDataTypes(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var dtg = await _uiqService.RunCommandAsync(command);
+            var html = $@"Current DTG<input id=""dtg"" type=""text"" class=""form"" cols=""70"" value=""{dtg}""> (the DTG format is yymmddhh)
+                          <br><br>Data type
+                          <select id=""method"" class=""form"">";
+
+            foreach (var item in dataTypes)
+            {
+                html += $"<option>{item}</option>";
+            }
+            html += "</select>";
+
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> ArchiveShowForEnquire()
+        {
+            return "Enquire completed";
+        }
+
+        [HttpPost]
+        public async Task<string> ArchiveResult()
+        {
+            return "Sumbit completed";
+        }
+
+        [HttpPost]
+        public async Task<string> FixShow(string modelName, string memberName, string nickname)
+        {
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var dtg = await _uiqService.RunCommandAsync(command);
+            var html = $@"Current DTG<input id=""dtg"" type=""text"" class=""form"" cols=""70"" value=""{dtg}""> (the DTG format is yymmddhh)";
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> FixShowForEnquire(string modelName, string memberName, string nickname, string dtg)
+        {
+            var html = "<pre>";
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var memberId = configData?.Model_Id;
+            var fullPath = (await _uiqService.GetModelMemberPath(modelName, memberName, nickname)).FirstOrDefault() ?? string.Empty;
+            fullPath = fullPath.Replace("{dtg}", dtg);
+            if (string.IsNullOrWhiteSpace(fullPath))
+            {
+                html += $@"No target directory!! Please edit MySQL data.<br>
+                          ---------------------------------------------<br>
+                        Table name : member<br>
+                        Column name: fix_failed_target_directory<br>
+                        member_id  : {memberId}<br>";
+            }
+            else
+            {
+                foreach (var path in fullPath.Split(' '))
+                {
+                    var command = $"rsh -l {_rshAccount} {_loginIp} ls -ald {path}/*{dtg}* " + " | sed 's%\\/.\\+\\/%%'";
+                    html += command;
+                    var data = await _uiqService.RunCommandAsync(command);
+                    html += "<table><tr>";
+                    var idx = 0;
+                    foreach (var item in data.Split("\n\t"))
+                    {
+                        html += $"<td{item}</td>{((idx % 9 == 8) ? "</td></tr><tr>" : string.Empty)}";
+                        idx++;
+                    }
+                    html += "</table><br><br>";
+                }
+            }
+
+            html += "</pre>";
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> FixResult(string modelName, string memberName, string nickname, string dtg, string parameter, string method)
+        {
+            var html = string.Empty;
+            var message = string.Empty;
+            var command = string.Empty;
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname);
+            var account = configData?.Account;
+            var fixFailedModel = configData?.Fix_Failed_Model;
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+
+            if(fixFailedModel == null)
+            {
+                message = "fix failed model function is not avaliable for this member.\r\n";
+	            html += "fix failed model function is not avaliable for this member.\r\n";
+            }
+            else
+            {
+                command = $"rsh -l {_hpcCtl} {_loginIp} /ncs/{_hpcCtl}/web/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
+                if(string.IsNullOrWhiteSpace(parameter) == false)
+                    command += $@" '""\""{parameter}\""""'";
+
+                html += $"<br>{command}";
+                message =$"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Fixed failed model on {modelName} {memberName} in {method} with {dtg}\r\n";
+
+                var result = await _uiqService.RunCommandAsync(command);
+                result = result.Replace("\n", "\n<br>");
+                html += $"<br>{result}";
+            }
+
+            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            return html;
+        }
     }
 }
