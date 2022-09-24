@@ -165,7 +165,7 @@ namespace UIQ.Controllers
 
             var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -A -s | sed '1,4d'";
             var data = await _uiqService.RunCommandAsync(command);
-            data =  data.Replace("#fx100#", string.Empty).Replace("#fx10#", string.Empty);
+            data = data.Replace("#fx100#", string.Empty).Replace("#fx10#", string.Empty);
             var dataArray = data.Split("Statistical Information");
             html += dataArray.Count() > 2 ? dataArray[1] : string.Empty;
 
@@ -240,9 +240,9 @@ namespace UIQ.Controllers
                 html += $"{command} <br><br>";
                 html += await _uiqService.RunCommandAsync(command);
 
-	            //輸出結果
-	            message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.";
-	            message = message.Replace("/\n/", "<br>");
+                //輸出結果
+                message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.";
+                message = message.Replace("/\n/", "<br>");
                 html += message;
             }
 
@@ -299,7 +299,7 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
             command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/Lid";
-            var lid= await _uiqService.RunCommandAsync(command);
+            var lid = await _uiqService.RunCommandAsync(command);
 
             var batchs = _uiqService.GetMemberRelay(modelName, memberName, nickname);
             var batchSelectHtml = @"<select id=""batch"" class=""form""><option value="""">---</option>";
@@ -446,19 +446,19 @@ namespace UIQ.Controllers
             var fixFailedModel = configData?.Fix_Failed_Model;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
-            if(fixFailedModel == null)
+            if (fixFailedModel == null)
             {
                 message = "fix failed model function is not avaliable for this member.\r\n";
-	            html += "fix failed model function is not avaliable for this member.\r\n";
+                html += "fix failed model function is not avaliable for this member.\r\n";
             }
             else
             {
                 command = $"rsh -l {_hpcCtl} {_loginIp} /ncs/{_hpcCtl}/web/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
-                if(string.IsNullOrWhiteSpace(parameter) == false)
+                if (string.IsNullOrWhiteSpace(parameter) == false)
                     command += $@" '""\""{parameter}\""""'";
 
                 html += $"<br>{command}";
-                message =$"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Fixed failed model on {modelName} {memberName} in {method} with {dtg}\r\n";
+                message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Fixed failed model on {modelName} {memberName} in {method} with {dtg}\r\n";
 
                 var result = await _uiqService.RunCommandAsync(command);
                 result = result.Replace("\n", "\n<br>");
@@ -466,6 +466,120 @@ namespace UIQ.Controllers
             }
 
             await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> TyphoonShow(string dtg, int adjust)
+        {
+            var typhoonEntry = new string[] { "Name", "Lat.", "Long.", "6-hr ago Lat.", "6-hr ago Long.", "Center Pressure", "15M/S Radius", "Maximum Speed", "25M/S Radius" };
+            var formatDescription = new string[] { "(颱風/TD 名稱：PHANFONE/TD201905)",
+                                                   "(緯度：13.9) (填寫範圍: 0.0~90.0)",
+                                                   "(經度：117.7) (填寫範圍: 0.0~180.0)",
+                                                   "(6hr 前緯度：13.4) (填寫範圍: 0.0~90.0)",
+                                                   "(6hr 前經度：118.0) (填寫範圍: 0.0~180.0)",
+                                                   "(中心氣壓：965)",
+                                                   "(七級風暴風半徑：180)",
+                                                   "(最大風速：35)",
+                                                   "(十級風暴風半徑：50)",
+                                                 };
+            var html = $@"<form>
+                            <table>
+                            <tr>
+                                <td>DTG<font color=""red""><font>*</font>:</td>
+                                <td><input id=""dtg"" type=""text"" value=""dtg"" name=""dtg""></td>
+                                <td class=""input_description"">(DTG:19122612)<br></td>
+                            </tr>
+                            <tr style=""display:none;"">
+                                <td>Typhoon number:</td>
+                                <td><input id=""num"" type=""text"" value=""{adjust}"" name=""num"" disabled></td>
+                            </tr>
+                            <tr>
+                                <td><hr></td>
+                                <td><hr></td>
+                            </tr>";
+            for (int i = 1, n = 1, inputNum = typhoonEntry.Length; i < (adjust * 14); i++)
+            {
+                if ((i % 14 == 1) || (i % 14 == 2) || (i % 14 == 4))
+                {
+                    html += @$"<tr>
+                                <td>{typhoonEntry[(n - 1) % inputNum]}<font color=""red"">*</font>:</td>
+                                <td><input type=""text"" value="""" name=""entryn""></td>
+                                <td class=""input_description"">{formatDescription[(n - 1) % inputNum]}</td>
+                               </tr>";
+                    n++;
+                }
+                else if ((i % 14 == 13) || (i % 2 == 0))
+                {
+                    html += @$"<tr>
+                                <td>{typhoonEntry[(n - 1) % inputNum]}:</td>
+                                <td><input type=""text"" value="""" name=""entryn""></td>
+                                <td class=""input_description"">{formatDescription[(n - 1) % inputNum]}</td>
+                              </tr>";
+                    n++;
+                }
+
+                if (i % 14 == 0) html += "<tr><td><hr></td><td><hr></td></tr>";
+            }
+
+            html += $@"<tr>
+                         <td></td>
+                         <td>
+                             <input type=""button"" class=""form"" value=""View"" OnClick=""sendTyphoonDataRequest('post', '{Url.Action(nameof(TyphoonPreview))}', 'file_content', '9')"">
+                         </td>
+                       </tr>
+                  </table>
+               </form>";
+
+            return html;
+        }
+
+        [HttpPost]
+        public async Task<string> TyphoonPreview(string dtg, int typhoonNum, int everyDataCount, string typhoonData)
+        {
+            var html = string.Empty;
+            var isInputError = string.IsNullOrWhiteSpace(dtg);
+            var typhoonDataObject = System.Text.Json.JsonSerializer.Deserialize<dynamic>(typhoonData);
+            var dataUnit = new string[] { "", "N", "E", "N", "E", "MB", "KM", "M/S", "KM" };
+            var dataFormat = new string[] { "", "%4.1f %s ", "%5.1f %s ", "%4.1f %s ", "%5.1f %s ", "%4.0f %s ", "%3.0f %s ", "%2.0f %s ", "%3.0f %s" };
+            for (int i = 0; i < typhoonNum; i++)
+            {
+                for (int j = 1; j < everyDataCount; j++)
+                {
+                    var entry = $"entry{((i - 1) * everyDataCount + j)}";
+                    var typhoonDataValue = typhoonDataObject[entry];
+
+                    if (j <= 3 && typhoonDataValue == string.Empty)
+                    {
+                        isInputError = true;
+                        html += "<font color='red'>*欄位必填</font><br>";
+                        break;
+                    }
+
+                    if (j != 1 && typhoonDataValue == string.Empty)
+                    {
+                        typhoonDataValue = -1;
+                    }
+
+                    //TDOD 完成
+                    //if (j == 1)
+                    //{
+                    //    var typhoonName = typhoonDataValue;
+                    //    var content_by_typh_name[typhoonName]['dat'] = sprintf("%' -8.8s ", typhoonDataValue);
+                    //    content_by_typh_name[typhoonName]['txt'] = sprintf("%' -15.15s ", typhoonDataValue);
+                    //}
+                    //else
+                    //{
+                    //    $content_by_typh_name[$typh_name]['dat'].= sprintf( $data_format[j - 1], typhoonDataValue, $data_unit[j - 1]);
+                    //    $content_by_typh_name[$typh_name]['txt'].= sprintf( $data_format[j - 1], typhoonDataValue, $data_unit[j - 1]);
+                    //}
+                }
+
+                if (isInputError) break;
+            }
+
+            if (isInputError) return string.Empty;
+
             return html;
         }
     }

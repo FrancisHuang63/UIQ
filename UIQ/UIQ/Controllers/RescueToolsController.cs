@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UIQ.Services.Interfaces;
 
 namespace UIQ.Controllers
 {
+    [Authorize]
     public class RescueToolsController : Controller
     {
         private readonly IUiqService _uiqService;

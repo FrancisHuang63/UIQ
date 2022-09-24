@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
 
 namespace UIQ.Controllers
 {
+    [Authorize]
     public class ModelEnquireController : Controller
     {
         private readonly IUiqService _uiqService;
