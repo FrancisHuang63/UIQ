@@ -12,12 +12,14 @@ namespace UIQ.Controllers
     public class HomeController : Controller
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly Microsoft.AspNetCore.Hosting.IHostingEnvironment _hostingEnvironment;
         private readonly IUiqService _uiqService;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(IHttpContextAccessor httpContextAccessor, IUiqService uiqService, ILogger<HomeController> logger)
+        public HomeController(IHttpContextAccessor httpContextAccessor, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment, IUiqService uiqService, ILogger<HomeController> logger)
         {
             _httpContextAccessor = httpContextAccessor;
+            _hostingEnvironment = hostingEnvironment;
             _uiqService = uiqService;
             _logger = logger;
         }
@@ -98,9 +100,9 @@ namespace UIQ.Controllers
                     //Reference info
                     new MenuViewModel("Reference info", 6, new List<MenuViewModel>
                     {
-                        { new MenuViewModel("Set typhoon data", "~/reference/user_guide.pdf", 1) },
-                        { new MenuViewModel("Special Use command", "~/reference/Monitor_reference.pdf", 2) },
-                        { new MenuViewModel("Cron_Mode set", "~/reference/Contact_list.pdf", 3) },
+                        { new MenuViewModel("UI user guide", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/user_guide.pdf", 1) },
+                        { new MenuViewModel("Monitor reference", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/Monitor_reference.pdf", 2) },
+                        { new MenuViewModel("Contact list", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/Contact_list.pdf", 3) },
                     }),
                 });
             }
