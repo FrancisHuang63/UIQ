@@ -1,9 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UIQ.Models
 {
-    public class UserModel
+    public class User
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("user_id")]
         public int User_Id { get; set; }
 

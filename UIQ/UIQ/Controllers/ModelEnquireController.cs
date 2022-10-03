@@ -64,7 +64,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public JsonResult GetModelItems()
         {
-            var datas = _uiqService.GetModelsAsync().GetAwaiter().GetResult();
+            var datas = _uiqService.GetModelItemsAsync().GetAwaiter().GetResult();
             var models = datas.OrderBy(x => x.Model_Position).Select(x => x.Model_Name).Distinct();
             return new JsonResult(new ApiResponse<IEnumerable<string>>(models) { Success = true });
         }

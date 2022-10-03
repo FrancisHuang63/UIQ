@@ -8,7 +8,7 @@
 
         public int Sort { get; set; }
 
-        public IEnumerable<MenuViewModel> ChildItems { get; set; }
+        public List<MenuViewModel> ChildItems { get; set; }
 
         public MenuViewModel(string title, string linkUrl, int sort)
         {
@@ -21,7 +21,7 @@
         {
             Title = title;
             Sort = sort;
-            ChildItems = childItem;
+            ChildItems = childItem.ToList();
         }
 
         public MenuViewModel()

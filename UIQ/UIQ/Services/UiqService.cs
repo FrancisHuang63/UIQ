@@ -52,13 +52,30 @@ namespace UIQ.Services
             return await _sshCommandService.RunCommandAsync(command);
         }
 
-        public void SaveCronSetting(string memberId, string cronMode)
+        public void UpdateCrontabMasterGroup(string cronMode)
         {
-            var data = new CronTab
-            {
-                Member_Id = int.Parse(memberId),
-                Cron_Group = cronMode,
-            };
+            var sql = "UPDATE `crontab` SET `master_group` = @CronMode";
+            _dataBaseNcsUiService.ExecuteWithTransactionAsync(sql, new { CronMode = cronMode });
+        }
+
+        public void UpdateGroupValidationWhoHasCronMode(string cronMode)
+        {
+            var sql = @"UPDATE `crontab`
+	                    SET `group_validation` = CASE WHEN `cron_group` = @Cronmode THEN 1 ELSE 0 END
+	                    WHERE `member_id` IN (SELECT `member_id`
+                                              FROM `crontab`
+                                              WHERE `cron_group` = @Cronmode GROUP BY `member_id`)";
+            _dataBaseNcsUiService.ExecuteWithTransactionAsync(sql, new { CronMode = cronMode });
+        }
+
+        public void UpdateGroupValidationWhoNotHasCronMode(string cronMode)
+        {
+            var sql = @"UPDATE `crontab`
+	                    SET `group_validation` = CASE WHEN `cron_group` = 'Normal' THEN 1 ELSE 0 END
+	                    WHERE `member_id` IN (SELECT `member_id`
+                                              FROM `crontab`
+                                              WHERE `cron_group` <> @Cronmode GROUP BY `member_id`)";
+            _dataBaseNcsUiService.ExecuteWithTransactionAsync(sql, new { CronMode = cronMode });
         }
 
         public async Task<string> GetExecuteNwpRunningNodesCommandHtmlAsync(string selNode)
@@ -116,7 +133,7 @@ namespace UIQ.Services
             return $"/ncs/{result.Account}{result.Member_Path}/{modelName}/{memberName}";
         }
 
-        public async Task<IEnumerable<Model>> GetModelsAsync()
+        public async Task<IEnumerable<Model>> GetModelItemsAsync()
         {
             var datas = await _dataBaseNcsUiService.GetAllAsync<Model>(nameof(Model));
             return datas;
@@ -250,14 +267,14 @@ namespace UIQ.Services
                         AND `relay` = 1
                         GROUP BY `batch`";
             var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname };
-            var result =_dataBaseNcsUiService.QueryAsync<string>(sql, param).GetAwaiter().GetResult();
+            var result = _dataBaseNcsUiService.QueryAsync<string>(sql, param).GetAwaiter().GetResult();
 
             return result;
         }
 
         public IEnumerable<ArchiveViewModel> GetArchiveViewModels()
         {
-            var sql = @"SELECT 
+            var sql = @"SELECT
                             `model`.`model_id`, `model`.`model_name`, `member`.`member_name`, `member`.`nickname`, `member`.`account`
                         FROM (SELECT `archive`.`member_id`
                               FROM `archive`
@@ -279,7 +296,7 @@ namespace UIQ.Services
         {
             var sql = @"SELECT `data`.`data_name`
                         FROM (SELECT `data_id`
-	                          FROM `archive` 
+	                          FROM `archive`
 	                          WHERE `archive`.`member_id` = (SELECT `member`.`member_id`
 								                             FROM `member`
 								                             LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
@@ -294,16 +311,92 @@ namespace UIQ.Services
             return result;
         }
 
-        public async Task<IEnumerable<string>> GetModelMemberPath(string modelName, string memberName, string nickname)
+        public async Task<IEnumerable<string>> GetModelMemberPathAsync(string modelName, string memberName, string nickname)
         {
-            var sql = @"SELECT `fix_failed_target_directory` FROM `model_member_view` 
-                        WHERE `model_name` = @ModelName 
-                        AND `member_name` = @MemberName 
+            var sql = @"SELECT `fix_failed_target_directory` FROM `model_member_view`
+                        WHERE `model_name` = @ModelName
+                        AND `member_name` = @MemberName
                         AND `nickname` = @Nickname";
             var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname };
             var result = await _dataBaseNcsUiService.QueryAsync<string>(sql, param);
 
             return result;
+        }
+
+        public async Task<IEnumerable<Command>> GetCommandItemsAsync()
+        {
+            return await _dataBaseNcsUiService.GetAllAsync<Command>("command");
+        }
+
+        public async Task<bool> UpsertCommandAsync(Command data)
+        {
+            if (data.Command_Id.HasValue)
+                return await _dataBaseNcsUiService.UpdateAsync("command", data, new { Command_Id = data.Command_Id }) > 0;
+
+            return await _dataBaseNcsUiService.InsertAsync("command", data) > 0;
+        }
+
+        public async Task<bool> DeleteCommandAsync(int commandId)
+        {
+            return await _dataBaseNcsUiService.DeleteAsync("command", new { Command_Id = commandId }) > 0;
+        }
+
+        public async Task<Command> GetCommandItemAsync(int commandId)
+        {
+            var sql = @"SELECT * FROM `command` WHERE `command_id` = @CommandId";
+            return (await _dataBaseNcsUiService.QueryAsync<Command>(sql, new { CommandId = commandId })).FirstOrDefault();
+        }
+
+        public IEnumerable<CronSettingViewModel> GetCronSettingViewModels()
+        {
+            var sql = @"SELECT `cron_group`, CASE WHEN `cron_group` = (SELECT `master_group` FROM `crontab` GROUP BY `master_group` LIMIT 1) THEN 1
+						                          ELSE 0
+					                         END AS `is_master_group`
+                        FROM `crontab` GROUP BY `cron_group`";
+
+            return _dataBaseNcsUiService.QueryAsync<CronSettingViewModel>(sql).GetAwaiter().GetResult();
+        }
+
+        public async Task<IEnumerable<CronTab>> GetCronTabItemsAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<CronTab>("crontab", new { member_id = memberId });
+            return result;
+        }
+
+        public async Task<IEnumerable<Batch>> GetBatchItemsAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Batch>("batch", new { member_id = memberId });
+            return result;
+        }
+
+        public async Task<IEnumerable<Archive>> GetArchiveItemsAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Archive>("archive", new { member_id = memberId });
+            return result;
+        }
+
+        public async Task<IEnumerable<Output>> GetOutputItemsAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Output>("output", new { member_id = memberId });
+            return result;
+        }
+
+        public async Task<IEnumerable<Data>> GetDataItemsAsync()
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Data>("data");
+            return result;
+        }
+
+        public async Task<IEnumerable<Work>> GetWorkItemsAsync()
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Work>("work");
+            return result;
+        }
+
+        public async Task<Member> GetMemberItemAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Member>("member", new { member_id = memberId });
+            return result.FirstOrDefault();
         }
 
         #region Private Methods

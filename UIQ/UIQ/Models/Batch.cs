@@ -1,9 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace UIQ.Models
 {
     public class Batch
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("batch_id")]
         public int Batch_Id { get; set; }
 

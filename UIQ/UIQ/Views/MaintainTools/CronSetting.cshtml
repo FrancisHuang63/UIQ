@@ -1,6 +1,7 @@
-﻿
+﻿@using UIQ.ViewModels
+@model IEnumerable<CronSettingViewModel>
 @{
-    ViewData["Title"] = "CronSetting";
+    Layout = null;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -14,45 +15,48 @@
         <title>Cron mode Setting</title>
     </head>
     <body>
-        <div id="loading"><img src="./images/clock.gif"></div>
+        <div id="loading"><img src="~/images/clock.gif"></div>
         <div class=topic>Cron mode Setting</div>
         <br>
         <h1>The page is used to CHANGE cron mode</h1>
 
         <table border=1 height=50px><tr>
-                <td align=center width=150px bgcolor=pink><font size=5><input type=radio name=validation value=$i onClick='cron_change()' checked>Backup</font>
-                <td align=center width=150px><font size=5><input type=radio name=validation value=$i onClick='cron_change()'>Normal</font>
-                <td align=center width=150px><font size=5><input type=radio name=validation value=$i onClick='cron_change()'>Typhoon</font>
+            @foreach (var item in Model)
+            {
+                <td align=center width=150px @(item.Is_Master_Group ? @"bgcolor=pink" : string.Empty)>
+                    <font size=5>
+                        <input type=radio name=validation value=@item.Cron_Group onClick="cron_change()" @(item.Is_Master_Group ? @"checked" : string.Empty)>@item.Cron_Group
+                    </font>
+                </td>
+            }
         </table>
         <br>
-        <FORM id="cron_setting" name="cron_setting" action="@Url.Action("CronSetting")" method="post" onSubmit="return check()">
-        <input type=submit value="Switch" style="width:100px">
-        <input type=hidden id=cronmode name=cronMode>
-        </FORM>
+        <form id="cron_setting" name="cron_setting" action="@Url.Action("CronSetting")" method="post" onSubmit="return check()">
+            <input type=submit value="Switch" style="width:100px">
+            <input type=hidden id=cronmode name=cronMode>
+        </form>
 
-        <SCRIPT>
-
-        function check(){
-	        if(confirm('This will change the cron mode of ALL models. Are you sure?')){
-		        return true;
-	        }else{
-		        alert("Cancelled");
-		        return false;
-	        }
-        }
-		
-		
-        function cron_change(){
-                var radioList = document.getElementsByName("validation");
-                var valid_group = "";
-                for(var i=0; i<radioList.length; i++){
+        <script>
+            function check(){
+	            if(confirm('This will change the cron mode of ALL models. Are you sure?')){
+		            return true;
+	            }else{
+		            alert("Cancelled");
+		            return false;
+	            }
+            }
+		    
+            function cron_change(){
+                    var radioList = document.getElementsByName("validation");
+                    var valid_group = "";
+                    for(let i = 0; i < radioList.length; i++){
                         if (radioList[i].checked){
                                 valid_group = radioList[i].value;
                                 document.cron_setting.cronmode.value=valid_group;
                                 break;
                         }
-                }
-        }
+                    }
+            }
         </script>
     </body>
 </html>

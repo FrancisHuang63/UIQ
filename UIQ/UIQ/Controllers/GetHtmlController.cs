@@ -400,7 +400,7 @@ namespace UIQ.Controllers
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
             var memberId = configData?.Model_Id;
-            var fullPath = (await _uiqService.GetModelMemberPath(modelName, memberName, nickname)).FirstOrDefault() ?? string.Empty;
+            var fullPath = (await _uiqService.GetModelMemberPathAsync(modelName, memberName, nickname)).FirstOrDefault() ?? string.Empty;
             fullPath = fullPath.Replace("{dtg}", dtg);
             if (string.IsNullOrWhiteSpace(fullPath))
             {

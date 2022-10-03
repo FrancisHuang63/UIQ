@@ -1,6 +1,6 @@
 $(document).ready(function () {
-    $('input[name="model_rd"]').on('change', function () {
-        var selected_model = $('input[name="model_rd"]:checked').val();
+    $('input[name="modelNameRadio"]').on('change', function () {
+        var selected_model = $('input[name="modelNameRadio"]:checked').val();
         if (selected_model === 'def') {
             $('#model_select').trigger('change');
         } else {
@@ -8,6 +8,7 @@ $(document).ready(function () {
             $('input[name="model_position"]').val(model_position);
         }
     });
+
 
     $('#model_select').on('change', function () {
         var model_position = $('#model_select option:selected').attr('data-position');
@@ -123,7 +124,7 @@ function initial_dialog(dialog_id, batch_row_index) {
 
 function add_new_check_point(dialog_id, item, batch_name, batch_index) {
     var model_id = item.parents().find('select#model_select').val();
-    var member_name = item.parents().find('input[name="member_input"]').val();
+    var member_name = item.parents().find('input[name="member_name"]').val();
     var member_account = item.parents().find('input[name="member_account"]').val();
     var run_type = item.parents().find('#batchInputType_' + batch_index).val();
     var round = item.parents().find('#batchInputDtg_' + batch_index).val();
@@ -149,7 +150,7 @@ function add_new_check_point(dialog_id, item, batch_name, batch_index) {
         dataType: 'json',
         success: function (shell_info) {
             var shell = unset_repeat_shell(shell_info);
-            var member_id = $('#memberID').val();
+            var member_id = $('#memberId').val();
             var batch_row_index = dialog_id.split("_")[3];
             var id_prefix = "batch_" + batch_row_index + '_';
             var new_check_point_number = $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val();
@@ -224,7 +225,7 @@ function set_old_check_dialog(batch_type, batch_dtg, item, batch_name, batch_row
 function add_old_check_point(batch_type, batch_dtg, item, batch_row_index, dialog_id, check_row_index, check_point_info) {
     var id_prefix = "batch_" + batch_row_index + '_';
     var model_id = item.parents().find('select#model_select').val();
-    var member_name = item.parents().find('input[name="member_input"]').val();
+    var member_name = item.parents().find('input[name="member_name"]').val();
     var member_account = item.parents().find('input[name="member_account"]').val();
     var batch_name = item.val();
     var run_type = batch_type.val();

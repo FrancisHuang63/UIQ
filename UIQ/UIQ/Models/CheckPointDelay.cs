@@ -1,10 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using UIQ.Enums;
 
 namespace UIQ.Models
 {
     public class CheckPointDelay
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("id")]
         public int Id { get; set; }
 

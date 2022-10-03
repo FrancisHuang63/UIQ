@@ -65,10 +65,10 @@ function showParameterModal(command_id, group){
     }
 
     $.ajax({
-        url: 'command/getCommandInfo',
+        url: '/MaintainTools/getCommandInfo',
         type: 'POST',
         data:{
-            cmd_id: command_id
+            commandId: command_id
         },
         dataType: 'json',
         success: function(cmd_data){
@@ -84,27 +84,17 @@ function excuteCmdWithParameters(){
 
     var match_add_result = check_urlstring_by_regex('(Add)');
     var match_edit_result = check_urlstring_by_regex('(Edit)');
+    var exe_url = '/MaintainTools/CommandExecute/?timeStamp=' + new Date().getTime();
+    var time_url = '/MaintainTools/CalculateCommandExecuteTime/?timeStamp=' + new Date().getTime();
     if(match_add_result != null || match_edit_result != null){
         var ajax_data = {
-            command_id: command_id,
+            commandId: command_id,
             parameters: parameters,
             passwd: pwd,
             command: $('#content').val(),
-            exec_time: $('#exec_time').val()
+            execTime: $('#exec_time').val()
         };
-
-        if(match_add_result != null){
-            var exe_url = '../command/exe/?timeStamp=' + new Date().getTime();
-            var time_url = '../command/calculate_exe_time/?timeStamp=' + new Date().getTime();
-        }else if(match_edit_result != null){
-            var exe_url = '../../command/exe/?timeStamp=' + new Date().getTime();
-            var time_url = '../../command/calculate_exe_time/?timeStamp=' + new Date().getTime();
-        }else{
-            alert('Wrong operation!');
-        }
     }else{
-        var exe_url = 'command/exe/?timeStamp=' + new Date().getTime();
-        var time_url = 'command/calculate_exe_time/?timeStamp=' + new Date().getTime();
         var ajax_data = {
             command_id: command_id,
             parameters: parameters,

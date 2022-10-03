@@ -12,14 +12,12 @@ namespace UIQ.Controllers
     public class HomeController : Controller
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly Microsoft.AspNetCore.Hosting.IHostingEnvironment _hostingEnvironment;
         private readonly IUiqService _uiqService;
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(IHttpContextAccessor httpContextAccessor, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment, IUiqService uiqService, ILogger<HomeController> logger)
         {
             _httpContextAccessor = httpContextAccessor;
-            _hostingEnvironment = hostingEnvironment;
             _uiqService = uiqService;
             _logger = logger;
         }
@@ -28,7 +26,7 @@ namespace UIQ.Controllers
         {
             var models = _uiqService.GetHomeTableDatas();
             var menus = GenerateMenuItems();
-            
+
             ViewBag.Menu = menus;
             return View(models);
         }
@@ -78,32 +76,35 @@ namespace UIQ.Controllers
                     { new MenuViewModel("Lid adjust", Url.Action(nameof(ModelRerunController.LidAdjust), "ModelRerun"), 3) },
                     { new MenuViewModel("Submit model", Url.Action(nameof(ModelRerunController.SubmitModel), "ModelRerun"), 4) },
                 }),
+                //Rescue tools
+                new MenuViewModel("Rescue tools", 4, new List<MenuViewModel>
+                {
+                    { new MenuViewModel("Archive redo", Url.Action(nameof(RescueToolsController.ArchiveRedo), "RescueTools"), 1) },
+                    { new MenuViewModel("Model output generate", Url.Action(nameof(RescueToolsController.FixFailedModel), "RescueTools"), 2) },
+                }),
+                //Maintain tools
+                new MenuViewModel("Maintain tools", 5, new List<MenuViewModel>
+                {
+                    { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData), "MaintainTools"), 1) },
+                    { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command), "MaintainTools"), 2) },
+                    { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 3) },
+                }),
+                //Reference info
+                new MenuViewModel("Reference info", 6, new List<MenuViewModel>
+                {
+                    { new MenuViewModel("UI user guide", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/user_guide.pdf", 1) },
+                    { new MenuViewModel("Monitor reference", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/Monitor_reference.pdf", 2) },
+                    { new MenuViewModel("Contact list", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/Contact_list.pdf", 3) },
+                }),
             });
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
             {
-                menus.AddRange(new MenuViewModel[]
+                menus[4].ChildItems.Add(new MenuViewModel("Model_Member set", Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools"), 4));
+                menus[5].ChildItems.AddRange(new List<MenuViewModel>
                 {
-                    //Rescue tools
-                    new MenuViewModel("Rescue tools", 4, new List<MenuViewModel>
-                    {
-                        { new MenuViewModel("Archive redo", Url.Action(nameof(RescueToolsController.ArchiveRedo), "RescueTools"), 1) },
-                        { new MenuViewModel("Model output generate", Url.Action(nameof(RescueToolsController.FixFailedModel), "RescueTools"), 2) },
-                    }),
-                    //Maintain tools
-                    new MenuViewModel("Maintain tools", 5, new List<MenuViewModel>
-                    {
-                        { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData), "MaintainTools"), 1) },
-                        { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command), "MaintainTools"), 2) },
-                        { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 3) },
-                    }),
-                    //Reference info
-                    new MenuViewModel("Reference info", 6, new List<MenuViewModel>
-                    {
-                        { new MenuViewModel("UI user guide", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/user_guide.pdf", 1) },
-                        { new MenuViewModel("Monitor reference", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/Monitor_reference.pdf", 2) },
-                        { new MenuViewModel("Contact list", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/Contact_list.pdf", 3) },
-                    }),
+                    { new MenuViewModel("FX100 Model and node", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/FX100_Model_and_node.pdf", 4) },
+                    { new MenuViewModel("FX10 Model and node", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/FX10_Model_and_node.pdf", 5) },
                 });
             }
 

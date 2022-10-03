@@ -35,21 +35,20 @@ namespace UIQ.Services
 
         public async Task<int> ExecuteWithTransactionAsync(string sql, object parameter = null, CommandType commandType = CommandType.Text)
         {
-            using (var conn = new MySqlConnection(ConnectionString))
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
             {
-                conn.Open();
-                var transaction = conn.BeginTransaction();
-                try
-                {
-                    var result = conn.ExecuteAsync(sql, parameter).GetAwaiter().GetResult();
-                    await transaction.CommitAsync();
-                    return result;
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                var result = await connection.ExecuteAsync(sql, parameter, transaction: transaction, commandType: commandType);
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
         }
 
@@ -57,12 +56,19 @@ namespace UIQ.Services
         {
             var fieldNames = selectColumns?.Any() ?? false
                 ? string.Join(", ", selectColumns.Select(x => $"`{x}`"))
-                : string.Join(", ", typeof(T).GetProperties().Where(x => !x.CustomAttributes.Any(a => a.AttributeType == typeof(NotMappedAttribute) || a.AttributeType == typeof(DatabaseGeneratedAttribute)))
+                : string.Join(", ", typeof(T).GetProperties().Where(x => !x.CustomAttributes.Any(a => a.AttributeType == typeof(NotMappedAttribute)))
                     .Select(x => $"`{x.Name.ToLower()}`"));
             var sql = $@"SELECT {fieldNames}
                          FROM `{tableName}` {GetWhereSql(parameter)}";
+            if (parameter == null) return await QueryAsync<T>(sql);
 
-            return await QueryAsync<T>(sql, parameter);
+            var actualParamter = new DynamicParameters();
+            parameter.GetType().GetProperties().ToList().ForEach(prop =>
+            {
+                actualParamter.Add($"@_{prop.Name}", prop.GetValue(parameter));
+            });
+
+            return await QueryAsync<T>(sql, actualParamter);
         }
 
         public async Task<int> InsertAsync<T>(string tableName, T model)
@@ -80,21 +86,20 @@ namespace UIQ.Services
 
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object parameter = null, CommandType commandType = CommandType.Text)
         {
-            using (var conn = new MySqlConnection(ConnectionString))
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
             {
-                conn.Open();
-                var transaction = conn.BeginTransaction();
-                try
-                {
-                    var result = conn.QueryAsync<T>(sql, parameter, transaction).GetAwaiter().GetResult();
-                    await transaction.CommitAsync();
-                    return result;
-                }
-                catch (Exception)
-                {
-                    transaction.Rollback();
-                    throw;
-                }
+                var result = await connection.QueryAsync<T>(sql, parameter, transaction: transaction, commandType: commandType);
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+                throw;
             }
         }
 
@@ -108,7 +113,17 @@ namespace UIQ.Services
             var sql = $@"UPDATE `{tableName}`
                          SET {setSql} {whereSql}";
 
-            return await ExecuteWithTransactionAsync(sql, parameter);
+            var actualParamter = new DynamicParameters();
+            props.ToList().ForEach(prop =>
+            {
+                actualParamter.Add($"@{prop.Name}", prop.GetValue(model));
+            });
+            parameter.GetType().GetProperties().ToList().ForEach(prop =>
+            {
+                actualParamter.Add($"@_{prop.Name}", prop.GetValue(parameter));
+            });
+
+            return await ExecuteWithTransactionAsync(sql, actualParamter);
         }
 
         #region Private Methods
