@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Interfaces\**" />
+    <Compile Remove="wwwroot\demo\**" />
     <Content Remove="Interfaces\**" />
+    <Content Remove="wwwroot\demo\**" />
     <EmbeddedResource Remove="Interfaces\**" />
+    <EmbeddedResource Remove="wwwroot\demo\**" />
     <None Remove="Interfaces\**" />
+    <None Remove="wwwroot\demo\**" />
   </ItemGroup>
 
   <ItemGroup>
