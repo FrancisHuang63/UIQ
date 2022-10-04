@@ -25,7 +25,7 @@
 <script type="text/javascript" src="~/packages/jquery-flexselect/liquidmetal.js"></script>
 <script type="text/javascript" src="~/js/setting.js"></script>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="zh-hant">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<link href="~/packages/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
@@ -37,7 +37,7 @@
 		<title>Model & Member Setting</title>
 	</head>
 	<body>
-		<div id="loading"><img src="~/images/clock.gif"></div>
+		<div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
 		<div class=topic>Model & Member Setting</div>
 		<br>
 		<h1>This page is used to @(isNew ? "ADD a NEW" : "EDIT or DELETE an OLD") MODEL & MEMBER</h1>
@@ -45,7 +45,7 @@
 			<form id="setting" action="@Url.Action(nameof(MaintainToolsController.ModelMemberSet))" method="post" autocomplete="off"  enctype="multipart/form-data">
 				<input id="memberID" type="hidden" name="memberId" value="@Model?.Member_Id">
 				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
-					<table width="100%" border="1">
+					<table width="100%" border="1" aria-describedby="check_point_dialog">
 						<thead>
 							<tr>
 								<th id="batch_name" width=65%></th>
@@ -61,21 +61,24 @@
 					</table>
 				</div>
 
-				<table width="85%" border="1">
+				<table width="85%" border="1" aria-describedby="check_point_dialog2">
 					<thead>
 						<tr>
-							<th>Name</th>
-							<th width=80%>Setting</th>
+							<th scope="col">Name</th>
+							<th scope="col" width=80%>Setting</th>
 						</tr>
 					</thead>
 					<tbody>
 						@* Model Set *@
+						<tr style="display:none;">
+							<th scope="col"></th>
+						</tr>
 						<tr>
 							<td>Model Set</td>
 							<td>
-								<table>
+								<table aria-describedby="Model_Set">
 									<tr>
-										<td><input type="radio" name="modelNameRadio" value="def" @(isNew ? "checked" : string.Empty)>Old Model Name<font color="red">*</font>：</td>
+										<td><input type="radio" name="modelNameRadio" value="def" @(isNew ? "checked" : string.Empty)>Old Model Name<span style="color:red;">*</span>：</td>
 										<td>
 											<select id="model_select" name="Model_Name">
 												@foreach (var item in modelItems)
@@ -87,11 +90,11 @@
 										</td>
 									</tr>
 									<tr>
-										<td><input type="radio" name="modelNameRadio" value="input" />New Model Name<font color="red">*</font>：</td>
+										<td><input type="radio" name="modelNameRadio" value="input" />New Model Name<span style="color:red;">*</span>：</td>
 										<td><input type="text" name="new_model_name">(Ex: NFS)</td>
 									</tr>
 									<tr>
-										<td>Model Position<font color="red">*</font>：</td>
+										<td>Model Position<span style="color:red;">*</span>：</td>
 										<td><input type="text" name="model_position" value="@currentModelItem?.Model_Position">(Ex: 24)</td>
 									</tr>
 									<input type="hidden" name="model_id" value="@currentModelItem?.Model_Id">
@@ -104,35 +107,38 @@
 						<tr>
 							<td>Member Set</td>
 							<td>
-								<table>
+								<table aria-describedby="Member_Set">
+									<tr style="display:none;">
+										<th scope="col"></th>
+									</tr>
 									<tr>
-										<td>Member Name<font color="red">*</font>：</td>
+										<td>Member Name<span style="color:red;">*</span>：</td>
 										<td>
 											<input type="text" name="member_Name" value="@Model?.Member_Name">(Ex: M03)
 											<input type="hidden" name="member_id" value="@Model?.Member_Id">
 										</td>
 									</tr>
 									<tr>
-										<td>Member Nickname<font color="red">*</font>：</td>
+										<td>Member Nickname<span style="color:red;">*</span>：</td>
 										<td><input type="text" name="member_nickname" value="@Model?.Nickname"></td>
 									</tr>
 									<tr>
-										<td>Member Position<font color="red">*</font>：</td>
+										<td>Member Position<span style="color:red;">*</span>：</td>
 										<td><input type="text" name="member_position" value="@Model?.Member_Position">(Ex: 24)</td>
 									</tr>
 									<tr>
-										<td>Member Account<font color="red">*</font>：</td>
+										<td>Member Account<span style="color:red;">*</span>：</td>
 										<td><input type="text" name="member_account" value="@Model?.Account">(Ex: npcaxxx)</td>
 									</tr>
 									<tr>
 										<td>Member Path：</td>
 										<td>
 											<input type="text" name="member_path" value="@Model?.Member_Path">
-											(Ex: /ncs/npcaxxx/<font color="red">MemberPath</font>/NFS/M03)
+											(Ex: /ncs/npcaxxx/<span style="color:red;">MemberPath</span>/NFS/M03)
 										</td>
 									</tr>
 									<tr>
-										<td>Dtg Value<font color="red">*</font>：</td>
+										<td>Dtg Value<span style="color:red;">MemberPath</span>：</td>
 										<td><input type="text" name="member_dtg_value" value="@Model?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
 									</tr>
 									<tr>
@@ -175,13 +181,14 @@
 						<tr>
 							<td>Cron Table<img src="~/images/add_icons.png" onclick="addSatnamingCronGroup()" alt="新增"/></td>
 							<td>
-								<table id="crontabTable">
+								<table id="crontabTable" aria-describedby="crontabTable">
+									<tr style="display:none;"><th scope="col"></th></tr>
 									<tbody><tr></tr></tbody>
 								</table>
-								<table id="crongrpTable_Normal" border="1">
+								<table id="crongrpTable_Normal" border="1" aria-describedby="crongrpTable_Normal" >
 									<tbody>
 										<tr>
-											<th bgcolor="lightcyan">Normal<img src="~/images/add_icons.png" onclick="addSatnamingCrontab('Normal')" alt="新增"></th>
+											<th scope="col" bgcolor="lightcyan">Normal<img src="~/images/add_icons.png" onclick="addSatnamingCrontab('Normal')" alt="新增"></th>
 										</tr>
 										<tr id="trCrontab">
 											@for (var idx = 0;  idx < cronTabItems.Count(); idx ++)

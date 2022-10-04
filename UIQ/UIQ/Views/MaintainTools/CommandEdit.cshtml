@@ -5,7 +5,7 @@
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-hant">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link href="~/packages/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -22,12 +22,15 @@
     </head>
 
     <body>
-        <div id="loading"><img src="~/images/clock.gif"></div>
+        <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
         <div class=topic>Maintain tools > Special Use command > Edit</div>
 
         <div>
             <form method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.CommandEdit)))" enctype="multipart/form-data">
-                <table width="100%" id="edit_command_table">
+                <table width="100%" id="edit_command_table" aria-describedby="edit_command_table">
+                     <tr style="display:none;">                
+                        <th scope="col"></th>
+                    </tr>
                     <tbody>
                         <tr>
                             <td width=8%>Name</td>

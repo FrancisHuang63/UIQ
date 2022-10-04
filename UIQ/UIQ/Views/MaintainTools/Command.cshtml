@@ -18,7 +18,8 @@
 <script type="text/javascript" src="~/js/tool.js"></script>
 <script type="text/javascript" src="~/js/command.js"></script>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="zh-hant">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href="~/packages/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
@@ -37,7 +38,7 @@
 </head>
 
 <body>
-    <div id="loading"><img src="~/images/clock.gif"></div>
+    <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
     <div class=topic>
         Maintain tools > Special Use command
         <input style="float:right;" type="button" value="Add" @(currentUser.IsInRole(GroupNameEnum.OP.ToString()) ? "disabled" : $@"onclick=location.href='{Url.Action(nameof(MaintainToolsController.CommandEdit))}'; ") />
@@ -45,15 +46,15 @@
     <br>
     <div>
     <div id="authority" style="display:none;"></div>
-    <table class="warp_table" id="changecolor">
+    <table class="warp_table" id="changecolor" aria-labelledby="changecolor">
         <thead>
             <tr>
-                <th>Command Name</th>
-                <th width=65%>Describe</th>
-                <th width=12%>Exec Time(min)</th>
-                <th width=6%>Edit</th>
-                <th width=6%>Execute</th>
-                <th width=6%>Delete</th>
+                <th scope="col">Command Name</th>
+                <th scope="col" width=65%>Describe</th>
+                <th scope="col" width=12%>Exec Time(min)</th>
+                <th scope="col" width=6%>Edit</th>
+                <th scope="col" width=6%>Execute</th>
+                <th scope="col" width=6%>Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -109,4 +110,4 @@
     </div>
 </body>
 
-
+</html>

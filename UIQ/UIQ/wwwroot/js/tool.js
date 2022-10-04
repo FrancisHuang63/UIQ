@@ -36,14 +36,21 @@ function sendAJAXRequest(req_type, uri, div) {
 
     div = '#' + div;
 
-    if (req_type == 'post') {
-        //target_url = uri + '?timeStamp=' + new Date().getTime();
-        target_url = uri;
-        // to avoid browsers loading the past data from cache
-    } else {
-        target_url = uri;
-    }
-    
+
+    // start Remove this conditional structure or edit its code blocks so that they're not all the same
+
+    //if (req_type == 'post') {
+    //    //target_url = uri + '?timeStamp=' + new Date().getTime();
+    //    target_url = uri;
+    //    // to avoid browsers loading the past data from cache
+    //} else {
+    //    target_url = uri;
+    //}
+
+    target_url = uri; 
+
+    // end Remove this conditional structure or edit its code blocks so that they're not all the same
+
     $.ajax({
         url: target_url,
         type: 'POST',

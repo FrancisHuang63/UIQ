@@ -11,7 +11,8 @@
     ViewData["Title"] = "DetailedStatus";
 }
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-hant">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>NWP monitor system</title>
@@ -47,10 +48,13 @@
 
     <body>
         <div id="detailed_status_top">
-            <table>
+        <table aria-describedby="detailed status top">
+            <tr style="display:none;">
+                <th scope="col"></th>
+            </tr>
                 <tr>
                     <td height="107" valign="bottom" background="@Href("~/images/index_inside_01.jpg")">
-                        <div id="topright">welcome! <b>@(user.Identity?.Name)</b> <a href="@(Url.Action("LogOut", "Login"))">logout</a></div>
+                        <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href="@(Url.Action("LogOut", "Login"))">logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
                             <ul>
                             @foreach(var menu in menus.OrderBy(x => x.Sort))
@@ -75,16 +79,16 @@
             </table>
         </div>
         <div id="main">
-            <table id="tablesorter-demo" class="tablesorter" cellspacing="1">
+        <table id="tablesorter-demo" class="tablesorter" cellspacing="1" aria-describedby="tablesorter-demo">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>DTG & RUN</th>
-                        <th>Start Time -> Predict End</th>
-                        <th>Stage start (Predict End)</th>
-                        <th>Run Status</th>
-                        <th>Comment</th>
-                        <th>Next Run</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">DTG & RUN</th>
+                        <th scope="col">Start Time -> Predict End</th>
+                        <th scope="col">Stage start (Predict End)</th>
+                        <th scope="col">Run Status</th>
+                        <th scope="col">Comment</th>
+                        <th scope="col">Next Run</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,7 +107,7 @@
                                 @if (user.IsInRole(UIQ.Enums.GroupNameEnum.ADM.ToString()))
                                 {
                                     <a href="@Url.Action("Edit", "Setting", new{ memberId = item.Member_Id })" target="_blank">
-                                        <img src="~/images/edit.png" width="12"/>
+                                        <img alt="Edit" src="~/images/edit.png" width="12"/>
                                     </a>
                                 }
                                 <a style="text-decoration:none; font-weight:bold" href="@(Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>

@@ -1,11 +1,10 @@
-td.contactDept
-{ 
-background-color: #99CCCC;
-border: 1px #000000 solid;
-font-family: Verdana;
-font-weight: bold;
-font-size: 15px;
-color: #404040; 
+td.contactDept {
+    background-color: #99CCCC;
+    border: 1px #000000 solid;
+    /*font-family: Verdana;*/ /*Unexpected missing generic font family*/
+    font-weight: bold;
+    font-size: 15px;
+    color: #404040;
 }
 
 
@@ -69,15 +68,14 @@ padding-left: 8px;
 padding-right: 0px;
 }
 
-td.hed
-{ 
-background-color: #BEC8D1;
-text-indent: 5px;
-font-family: Verdana;
-font-weight: bold;
-font-size: 15px;
-color: #404040; 
-text-align:center;
+td.hed {
+    background-color: #BEC8D1;
+    text-indent: 5px;
+    /*font-family: Verdana;*/ /*Unexpected missing generic font family*/
+    font-weight: bold;
+    font-size: 15px;
+    color: #404040;
+    text-align: center;
 }
 
 td.bod

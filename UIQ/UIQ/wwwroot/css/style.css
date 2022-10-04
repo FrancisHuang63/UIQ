@@ -40,16 +40,15 @@ input
     margin: 0 auto;
     width:970px;
 }
-#loading
-{
-    position:absolute;
-    top:0%;
-    left:90%;
-    width:10%;
-    height:4%;
-    font-family:"Verdana","Courier New";
-    font-size:14pt;
-    display:none;
+#loading {
+    position: absolute;
+    top: 0%;
+    left: 90%;
+    width: 10%;
+    height: 4%;
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
+    font-size: 14pt;
+    display: none;
 }
 .topic
 {
@@ -60,58 +59,52 @@ input
     height:30px !important;
     padding-top:6px !important;
 }
-.form
-{
-
+.form {
     margin-right: 3px;
-    margin-top:3px;
-    margin-bottom:3px;
-    font-size:1.1em;
-    font-family:"Verdana","Courier New";
+    margin-top: 3px;
+    margin-bottom: 3px;
+    font-size: 1.1em;
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
 }
 
-div.enquire
-{
+div.enquire {
     /*magin-left:10em;*/
-    font-size:1.2em;
-    height:320px;
-    font-family:"Verdana","Courier New";
-    color:#111;
-    overflow:auto;
-    border:1px solid #666;
+    font-size: 1.2em;
+    height: 320px;
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
+    color: #111;
+    overflow: auto;
+    border: 1px solid #666;
 }
-div.huge
-{
-    font-size:1.2em;
-    height:700px;
-    font-family:"Verdana","Courier New";
-    color:#111;
-    overflow:auto;
-    border:1px solid #666;
+div.huge {
+    font-size: 1.2em;
+    height: 700px;
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
+    color: #111;
+    overflow: auto;
+    border: 1px solid #666;
 }
-div.short
-{
-    font-size:1.2em;
-    height:170px;
-    font-family:"Verdana","Courier New";
-    color:#111;
-    overflow:auto;
-    border:1px solid #666;
+div.short {
+    font-size: 1.2em;
+    height: 170px;
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
+    font-family: "Courier New";
+    color: #111;
+    overflow: auto;
+    border: 1px solid #666;
 }
-div.line
-{
-    font-size:1.2em;
-    height:30px;
-    font-family:"Verdana","Courier New";
-    color:#111;
-    overflow:auto;
-    border:1px solid #666;
+div.line {
+    font-size: 1.2em;
+    height: 30px;
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
+    color: #111;
+    overflow: auto;
+    border: 1px solid #666;
 }
-h1
-{
-    font-family:"Verdana","Courier New";
-    font-size:1.3em;
-    color:#666;
+h1 {
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
+    font-size: 1.3em;
+    color: #666;
 }
 td.summary
 {
@@ -242,8 +235,8 @@ th#add_check_btn{
     width: 50%;
 }
 
-#file_content div{
-    font-family: "Courier New","Verdana";
+#file_content div {
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
 }
 
 #typhoon_data_form table{
@@ -254,9 +247,9 @@ th#add_check_btn{
     margin-top:15px;
 }
 
-.typhoon_setting_block{
+.typhoon_setting_block {
     display: inline-block;
-    font-family: "Verdana","Courier New";
+    /*font-family: "Verdana","Courier New";*/ /*Unexpected missing generic font family*/
     height: 80%;
     border: solid 1px;
     padding: 10px;
@@ -269,6 +262,6 @@ th#add_check_btn{
     display: inline;
 }
 
-.typhoon_file_name{
-    margin-button: 5px;
+.typhoon_file_name {
+    margin-bottom: 5px;
 }
