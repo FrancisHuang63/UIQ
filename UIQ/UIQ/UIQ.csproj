@@ -9,12 +9,20 @@
   <ItemGroup>
     <Compile Remove="Interfaces\**" />
     <Compile Remove="wwwroot\demo\**" />
+    <Compile Remove="wwwroot\lib\**" />
+    <Compile Remove="wwwroot\packages\**" />
     <Content Remove="Interfaces\**" />
     <Content Remove="wwwroot\demo\**" />
+    <Content Remove="wwwroot\lib\**" />
+    <Content Remove="wwwroot\packages\**" />
     <EmbeddedResource Remove="Interfaces\**" />
     <EmbeddedResource Remove="wwwroot\demo\**" />
+    <EmbeddedResource Remove="wwwroot\lib\**" />
+    <EmbeddedResource Remove="wwwroot\packages\**" />
     <None Remove="Interfaces\**" />
     <None Remove="wwwroot\demo\**" />
+    <None Remove="wwwroot\lib\**" />
+    <None Remove="wwwroot\packages\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +43,29 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SSH.NET" Version="2020.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\jtable\themes\basic\jtable_basic.less" />
+    <None Include="wwwroot\css\jtable\themes\jqueryui\jtable_jqueryui.less" />
+    <None Include="wwwroot\css\jtable\themes\jtable_theme_base.less" />
+    <None Include="wwwroot\css\jtable\themes\lightcolor\blue\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\lightcolor\gray\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\lightcolor\green\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\lightcolor\jtable_lightcolor_base.less" />
+    <None Include="wwwroot\css\jtable\themes\lightcolor\orange\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\lightcolor\red\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\blue\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\brown\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\crimson\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\darkgray\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\darkorange\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\green\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\jtable_metro_base.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\lightgray\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\pink\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\purple\jtable.less" />
+    <None Include="wwwroot\css\jtable\themes\metro\red\jtable.less" />
   </ItemGroup>
 
 </Project>
