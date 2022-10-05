@@ -164,5 +164,29 @@ namespace UIQ.Controllers
                       <mark>Please wait...</mark>\n<br>\n<br>";
             return html;
         }
+
+        public IActionResult PermissionSetting() 
+        {
+            return View();
+        }
+
+        public IActionResult PermissionSetting_MenuSet()
+        {
+            return View();
+        }
+        public IActionResult PermissionSetting_UserSet()
+        {
+            return View();
+        }
+
+        public IActionResult UploadFile()
+        {
+            return View();
+        }
+
+        public IActionResult ParameterSetting()
+        {
+            return View();
+        }
     }
 }
