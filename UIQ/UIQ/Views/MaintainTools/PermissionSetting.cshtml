@@ -1,0 +1,262 @@
+﻿
+@{
+	 Layout = null;
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="stylesheet" href="~/css/style.css" type="text/css">
+<link rel="stylesheet" href="~/packages/jquery-ui-1.12.1/jquery-ui.min.css" type="text/css" />
+<link rel="stylesheet" href="~/packages/bootstrap/3.3.1/css/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="~/packages/bootstrap/3.3.1/custom.css" type="text/css" />
+<link rel="stylesheet" href="~/packages/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
+<link rel="stylesheet" href="~/packages/jtable/2.4.0/custom.css" type="text/css">
+
+<script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="~/packages/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="~/packages/bootstrap/3.3.1/js/bootstrap.js"></script>
+<script type="text/javascript" src="~/packages/bootstrap/3.3.1/custom.min.js"></script>
+<script type="text/javascript" src="~/js/lib.min.js"></script>
+<script type="text/javascript" src="~/packages/jtable/2.4.0/jquery.jtable.js"></script>
+<script type="text/javascript" src="~/packages/jtable/2.4.0/custom.js"></script>
+<script type="text/javascript" src="~/js/batch_history.js"></script>
+
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="zh-hant">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link href="~/packages/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+		<link href="~/css/style.css" rel="stylesheet" type="text/css" />
+		<link href="~/css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+		<link href="~/css/apprise.css" rel="stylesheet" type="text/css" />
+		<link href="~/packages/jquery-flexselect/flexselect.css" rel="stylesheet" type="text/css" />
+
+		<title>Permission Setting</title>
+	</head>
+	<body>
+		<div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
+		<div class=topic>Permission Setting</div>
+		<div id="result" class="huge">
+		  <div class="jtable-main-container">
+			<div class="jtable-busy-panel-background" style="height: 110px;"></div>
+			<div class="jtable-busy-message" style="">
+			  載入中...
+			</div>
+			<table class="jtable">
+			  <thead>
+				<tr>
+				  <th class="jtable-column-header" style="width: 10%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">SN</span>
+					</div>
+				  </th>
+				  <th class="jtable-column-header" style="width: 70%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">Role</span>
+					</div>
+				  </th>
+				  <th class="jtable-column-header" style="width: 10%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">Menu Set</span>
+					</div>
+				  </th>
+				  <th class="jtable-column-header" style="width: 10%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">User Set</span>
+					</div>
+				  </th>				  
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr>
+					<td>1</td>
+					<td>Admin</td>
+					<td><a href="#">Set</a></td>
+					<td><a href="#">Set</a></td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>Viwer</td>
+					<td><a href="#">Set</a></td>
+					<td><a href="#">Set</a></td>
+				</tr>
+				<tr class="jtable-no-data-row">
+				  <td colspan="11">查無資料</td>
+				</tr>
+			  </tbody>
+			</table>
+			<div class="jtable-bottom-panel">
+			  <div class="jtable-left-area">
+				<span class="jtable-page-list"></span>
+				<span class="jtable-goto-page">
+				  <span>跳至: </span>
+				  <select>
+					<option value="1">1</option>
+				  </select>
+				</span>
+				<span class="jtable-page-size-change">
+				  <span>每頁顯示筆數: </span>
+				  <select>
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="25">25</option>
+					<option value="50">50</option>
+					<option value="100">100</option>
+				  </select>
+				</span>
+			  </div>
+			  <div class="jtable-right-area">
+				<span class="jtable-page-info"></span>
+			  </div>
+			</div>
+			<div class="jtable-column-resize-bar" style="display: none;"></div>
+			<div class="jtable-column-selection-container"></div>
+		  </div>
+		</div>;
+
+		<div>
+			<form id="setting" action="" method="post" autocomplete="off"  enctype="multipart/form-data">
+				<input id="memberID" type="hidden" name="memberId" value="@Model?.Member_Id">
+				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
+					<table width="100%" border="1" aria-describedby="check_point_dialog">
+						<thead>
+							<tr>
+								<th id="batch_name" width=65%></th>
+								<th id="add_check_btn" width=35%>
+									<a type="button" id="addCheckPoint" class="btn_default">
+										<img src="~/images/add_icons.png" alt="新增"/>
+										Add Check Point
+									</a>
+								</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<table width="85%" border="1" aria-describedby="check_point_dialog2">
+					<thead>
+						<tr>
+							<th scope="col">Name</th>
+							<th scope="col" width=80%>Setting</th>
+						</tr>
+					</thead>
+					<tbody>
+						@* Model Set *@
+						<tr style="display:none;">
+							<th scope="col"></th>
+						</tr>
+						<tr>
+							<td>Model Set</td>
+							<td>
+								<table aria-describedby="Model_Set">
+									<tr>
+										<td><input type="radio" name="modelNameRadio" value="def">Old Model Name<span style="color:red;">*</span>：</td>
+										<td>
+											<select id="model_select" name="Model_Name">
+													<option value="" data-position=""></option>
+											</select>
+											<input type="button" value="DelModel" onclick="deleteModelCheck()">
+										</td>
+									</tr>
+									<tr>
+										<td><input type="radio" name="modelNameRadio" value="input" />New Model Name<span style="color:red;">*</span>：</td>
+										<td><input type="text" name="new_model_name">(Ex: NFS)</td>
+									</tr>
+									<tr>
+										<td>Model Position<span style="color:red;">*</span>：</td>
+										<td><input type="text" name="model_position" value="">(Ex: 24)</td>
+									</tr>
+									<input type="hidden" name="model_id" value="">
+									<input type="hidden" name="new_model_position" value="">
+								</table>
+							</td>
+						</tr>
+
+						@* Member Set *@
+						<tr>
+							<td>Member Set</td>
+							<td>
+								<table aria-describedby="Member_Set">
+									<tr style="display:none;">
+										<th scope="col"></th>
+									</tr>
+									<tr>
+										<td>Member Name<span style="color:red;">*</span>：</td>
+										<td>
+											<input type="text" name="member_Name" value="@Model?.Member_Name">(Ex: M03)
+											<input type="hidden" name="member_id" value="@Model?.Member_Id">
+										</td>
+									</tr>
+									<tr>
+										<td>Member Nickname<span style="color:red;">*</span>：</td>
+										<td><input type="text" name="member_nickname" value="@Model?.Nickname"></td>
+									</tr>
+									<tr>
+										<td>Member Position<span style="color:red;">*</span>：</td>
+										<td><input type="text" name="member_position" value="@Model?.Member_Position">(Ex: 24)</td>
+									</tr>
+									<tr>
+										<td>Member Account<span style="color:red;">*</span>：</td>
+										<td><input type="text" name="member_account" value="@Model?.Account">(Ex: npcaxxx)</td>
+									</tr>
+									<tr>
+										<td>Member Path：</td>
+										<td>
+											<input type="text" name="member_path" value="@Model?.Member_Path">
+											(Ex: /ncs/npcaxxx/<span style="color:red;">MemberPath</span>/NFS/M03)
+										</td>
+									</tr>
+									<tr>
+										<td>Dtg Value<span style="color:red;">MemberPath</span>：</td>
+										<td><input type="text" name="member_dtg_value" value="@Model?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
+									</tr>
+									<tr>
+										<td>Group Member Name：</td>
+										<td><input type="text" name="model_group" value="@Model?.Model_Group">(Ex: M01 TWRF or M03 caa)</td>
+									</tr>
+									<tr>
+										<td>Member Reset：</td>
+										<td><input type="text" name="reset_model" value="@Model?.Reset_Model">(Ex: cgibin/KillJob.ksh)</td>
+									</tr>
+									<tr>
+										<td>Member Dtg Adjust：</td>
+										<td><input type="text" name="dtg_adjust" value="@Model?.Dtg_Adjust">(Ex: bin/setdtg.sh)</td>
+									</tr>
+									<tr>
+										<td>Member Fix：</td>
+										<td><input type="text" name="fix_failed_model" value="@Model?.Fix_Failed_Model">(Ex: cgibin/Rescue.ksh)</td>
+									</tr>
+									<tr>
+										<td>Member Submit：</td>
+										<td><input type="text" name="submit_model" value="@Model?.Submit_Model">(Ex: cgibin/ReRun.ksh)</td>
+									</tr>
+									<tr>
+										<td>Normal Prediction Time：</td>
+										<td><input type="text" name="normal_pre_time" value="@Model?.Normal_Pre_Time">(Ex: 300)</td>
+									</tr>
+									<tr>
+										<td>Typhoon Prediction Time：</td>
+										<td><input type="text" name="Typhoon_Pre_Time" value="@Model?.Typhoon_Pre_Time">(Ex: 300)</td>
+									</tr>
+									<tr>
+										<td>About Typhoon：</td>
+										<td><input type="checkbox" id="typhoon_model" name="typhoon_model" value="1"></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						@* maintainer Setting *@
+						<tr>
+							<td>maintainer Setting</td>
+							<td>
+								<input id="maintainer_status" type="radio" name="maintainer_status" value="0" @(Model?.Maintainer_Status == 0 ? "checked" : string.Empty) >on
+								<input id="maintainer_status" type="radio" name="maintainer_status" value="2" @(Model?.Maintainer_Status == 2 ? "checked" : string.Empty) >maintainer
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<input type="submit" value="">
+				<input type="button" value="Delete" onclick="deleteCheck()">
+			</form>
+		</div>
+	</body>
+</html>
