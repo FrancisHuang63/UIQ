@@ -40,25 +40,25 @@
 			<div class="jtable-busy-message" style="">
 			  載入中...
 			</div>
-			<table class="jtable">
+			<table class="jtable" aria-describedby="permission_table">
 			  <thead>
 				<tr>
-				  <th class="jtable-column-header" style="width: 10%;">
+				  <th class="jtable-column-header" style="width: 10%;" scope="col">
 					<div class="jtable-column-header-container">
 					  <span class="jtable-column-header-text">SN</span>
 					</div>
 				  </th>
-				  <th class="jtable-column-header" style="width: 70%;">
+				  <th class="jtable-column-header" style="width: 70%;" scope="col">
 					<div class="jtable-column-header-container">
 					  <span class="jtable-column-header-text">Role</span>
 					</div>
 				  </th>
-				  <th class="jtable-column-header" style="width: 10%;">
+				  <th class="jtable-column-header" style="width: 10%;" scope="col">
 					<div class="jtable-column-header-container">
 					  <span class="jtable-column-header-text">Menu Set</span>
 					</div>
 				  </th>
-				  <th class="jtable-column-header" style="width: 10%;">
+				  <th class="jtable-column-header" style="width: 10%;" scope="col">
 					<div class="jtable-column-header-container">
 					  <span class="jtable-column-header-text">User Set</span>
 					</div>
@@ -110,153 +110,6 @@
 			<div class="jtable-column-resize-bar" style="display: none;"></div>
 			<div class="jtable-column-selection-container"></div>
 		  </div>
-		</div>;
-
-		<div>
-			<form id="setting" action="" method="post" autocomplete="off"  enctype="multipart/form-data">
-				<input id="memberID" type="hidden" name="memberId" value="@Model?.Member_Id">
-				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
-					<table width="100%" border="1" aria-describedby="check_point_dialog">
-						<thead>
-							<tr>
-								<th id="batch_name" width=65%></th>
-								<th id="add_check_btn" width=35%>
-									<a type="button" id="addCheckPoint" class="btn_default">
-										<img src="~/images/add_icons.png" alt="新增"/>
-										Add Check Point
-									</a>
-								</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
-
-				<table width="85%" border="1" aria-describedby="check_point_dialog2">
-					<thead>
-						<tr>
-							<th scope="col">Name</th>
-							<th scope="col" width=80%>Setting</th>
-						</tr>
-					</thead>
-					<tbody>
-						@* Model Set *@
-						<tr style="display:none;">
-							<th scope="col"></th>
-						</tr>
-						<tr>
-							<td>Model Set</td>
-							<td>
-								<table aria-describedby="Model_Set">
-									<tr>
-										<td><input type="radio" name="modelNameRadio" value="def">Old Model Name<span style="color:red;">*</span>：</td>
-										<td>
-											<select id="model_select" name="Model_Name">
-													<option value="" data-position=""></option>
-											</select>
-											<input type="button" value="DelModel" onclick="deleteModelCheck()">
-										</td>
-									</tr>
-									<tr>
-										<td><input type="radio" name="modelNameRadio" value="input" />New Model Name<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="new_model_name">(Ex: NFS)</td>
-									</tr>
-									<tr>
-										<td>Model Position<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="model_position" value="">(Ex: 24)</td>
-									</tr>
-									<input type="hidden" name="model_id" value="">
-									<input type="hidden" name="new_model_position" value="">
-								</table>
-							</td>
-						</tr>
-
-						@* Member Set *@
-						<tr>
-							<td>Member Set</td>
-							<td>
-								<table aria-describedby="Member_Set">
-									<tr style="display:none;">
-										<th scope="col"></th>
-									</tr>
-									<tr>
-										<td>Member Name<span style="color:red;">*</span>：</td>
-										<td>
-											<input type="text" name="member_Name" value="@Model?.Member_Name">(Ex: M03)
-											<input type="hidden" name="member_id" value="@Model?.Member_Id">
-										</td>
-									</tr>
-									<tr>
-										<td>Member Nickname<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="member_nickname" value="@Model?.Nickname"></td>
-									</tr>
-									<tr>
-										<td>Member Position<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="member_position" value="@Model?.Member_Position">(Ex: 24)</td>
-									</tr>
-									<tr>
-										<td>Member Account<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="member_account" value="@Model?.Account">(Ex: npcaxxx)</td>
-									</tr>
-									<tr>
-										<td>Member Path：</td>
-										<td>
-											<input type="text" name="member_path" value="@Model?.Member_Path">
-											(Ex: /ncs/npcaxxx/<span style="color:red;">MemberPath</span>/NFS/M03)
-										</td>
-									</tr>
-									<tr>
-										<td>Dtg Value<span style="color:red;">MemberPath</span>：</td>
-										<td><input type="text" name="member_dtg_value" value="@Model?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
-									</tr>
-									<tr>
-										<td>Group Member Name：</td>
-										<td><input type="text" name="model_group" value="@Model?.Model_Group">(Ex: M01 TWRF or M03 caa)</td>
-									</tr>
-									<tr>
-										<td>Member Reset：</td>
-										<td><input type="text" name="reset_model" value="@Model?.Reset_Model">(Ex: cgibin/KillJob.ksh)</td>
-									</tr>
-									<tr>
-										<td>Member Dtg Adjust：</td>
-										<td><input type="text" name="dtg_adjust" value="@Model?.Dtg_Adjust">(Ex: bin/setdtg.sh)</td>
-									</tr>
-									<tr>
-										<td>Member Fix：</td>
-										<td><input type="text" name="fix_failed_model" value="@Model?.Fix_Failed_Model">(Ex: cgibin/Rescue.ksh)</td>
-									</tr>
-									<tr>
-										<td>Member Submit：</td>
-										<td><input type="text" name="submit_model" value="@Model?.Submit_Model">(Ex: cgibin/ReRun.ksh)</td>
-									</tr>
-									<tr>
-										<td>Normal Prediction Time：</td>
-										<td><input type="text" name="normal_pre_time" value="@Model?.Normal_Pre_Time">(Ex: 300)</td>
-									</tr>
-									<tr>
-										<td>Typhoon Prediction Time：</td>
-										<td><input type="text" name="Typhoon_Pre_Time" value="@Model?.Typhoon_Pre_Time">(Ex: 300)</td>
-									</tr>
-									<tr>
-										<td>About Typhoon：</td>
-										<td><input type="checkbox" id="typhoon_model" name="typhoon_model" value="1"></td>
-									</tr>
-								</table>
-							</td>
-						</tr>
-						@* maintainer Setting *@
-						<tr>
-							<td>maintainer Setting</td>
-							<td>
-								<input id="maintainer_status" type="radio" name="maintainer_status" value="0" @(Model?.Maintainer_Status == 0 ? "checked" : string.Empty) >on
-								<input id="maintainer_status" type="radio" name="maintainer_status" value="2" @(Model?.Maintainer_Status == 2 ? "checked" : string.Empty) >maintainer
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<input type="submit" value="">
-				<input type="button" value="Delete" onclick="deleteCheck()">
-			</form>
 		</div>
 	</body>
 </html>
