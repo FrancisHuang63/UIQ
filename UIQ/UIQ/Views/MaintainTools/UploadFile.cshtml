@@ -1,0 +1,132 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  lang="zh-hant">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link href="~/css/style.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/apprise.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" href="~/css/style.css" type="text/css">
+		<link rel="stylesheet" href="~/packages/jquery-ui-1.12.1/jquery-ui.min.css" type="text/css" />
+		<link rel="stylesheet" href="~/packages/bootstrap/3.3.1/css/bootstrap.css" type="text/css" />
+		<link rel="stylesheet" href="~/packages/bootstrap/3.3.1/custom.css" type="text/css" />
+		<link rel="stylesheet" href="~/packages/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
+		<link rel="stylesheet" href="~/packages/jtable/2.4.0/custom.css" type="text/css">
+
+		<script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+		<script type="text/javascript" src="~/packages/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="~/packages/bootstrap/3.3.1/js/bootstrap.js"></script>
+		<script type="text/javascript" src="~/packages/bootstrap/3.3.1/custom.min.js"></script>
+		<script type="text/javascript" src="~/js/lib.min.js"></script>
+		<script type="text/javascript" src="~/packages/jtable/2.4.0/jquery.jtable.js"></script>
+		<script type="text/javascript" src="~/packages/jtable/2.4.0/custom.js"></script>
+		<script type="text/javascript" src="~/js/batch_history.js"></script>
+
+        <title>Upload File</title>
+    </head>
+    <body>
+        <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
+        <div class=topic>Upload File</div>
+        <div class="m-10" style="display:inline-flex;">
+            <input type="file" />
+            <input type=submit value="Upload" style="width:50px">
+        </div>
+
+		<div id="result" class="huge">
+		  <div class="jtable-main-container">
+			<div class="jtable-busy-panel-background" style="height: 110px;"></div>
+			<div class="jtable-busy-message" style="">
+			  載入中...
+			</div>
+			<table class="jtable">
+			  <thead>
+				<tr>
+				  <th class="jtable-column-header" style="width: 10%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">SN</span>
+					</div>
+				  </th>
+				  <th class="jtable-column-header" style="width: 50%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">Name</span>
+					</div>
+				  </th>
+				  <th class="jtable-column-header" style="width: 20%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text">Upload Time</span>
+					</div>
+				  </th>
+				  <th class="jtable-column-header" style="width: 10%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text"></span>
+					</div>
+				  </th>				
+				  <th class="jtable-column-header" style="width: 10%;">
+					<div class="jtable-column-header-container">
+					  <span class="jtable-column-header-text"></span>
+					</div>
+				  </th>					  
+				</tr>
+			  </thead>
+			  <tbody>
+				<tr>
+					<td>1</td>
+					<td>XXXX.pdf</td>
+					<td>2022-10-05 10:00:00</td>
+					<td><a href="#">Donload</a></td>
+					<td><a href="#">Delete</a></td>
+				</tr>
+				<tr>
+					<td>2</td>
+					<td>XXXX.pdf</td>
+					<td>2022-10-05 10:00:00</td>
+					<td><a href="#">Donload</a></td>
+					<td><a href="#">Delete</a></td>
+				</tr>
+				<tr>
+					<td>3</td>
+					<td>XXXX.pdf</td>
+					<td>2022-10-05 10:00:00</td>
+					<td><a href="#">Donload</a></td>
+					<td><a href="#">Delete</a></td>
+				</tr>
+				<tr class="jtable-no-data-row">
+				  <td colspan="11">查無資料</td>
+				</tr>
+			  </tbody>
+			</table>
+			<div class="jtable-bottom-panel">
+			  <div class="jtable-left-area">
+				<span class="jtable-page-list"></span>
+				<span class="jtable-goto-page">
+				  <span>跳至: </span>
+				  <select>
+					<option value="1">1</option>
+				  </select>
+				</span>
+				<span class="jtable-page-size-change">
+				  <span>每頁顯示筆數: </span>
+				  <select>
+					<option value="10">10</option>
+					<option value="20">20</option>
+					<option value="25">25</option>
+					<option value="50">50</option>
+					<option value="100">100</option>
+				  </select>
+				</span>
+			  </div>
+			  <div class="jtable-right-area">
+				<span class="jtable-page-info"></span>
+			  </div>
+			</div>
+			<div class="jtable-column-resize-bar" style="display: none;"></div>
+			<div class="jtable-column-selection-container"></div>
+		  </div>
+		</div>
+    </body>
+</html>
+
+
