@@ -88,6 +88,9 @@ namespace UIQ.Controllers
                     { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData), "MaintainTools"), 1) },
                     { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command), "MaintainTools"), 2) },
                     { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 3) },
+                    { new MenuViewModel("Document manager", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 5) },
+                    { new MenuViewModel("Role Setting", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 6) },
+                    { new MenuViewModel("Refresh time setting", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 7) },
                 }),
                 //Reference info
                 new MenuViewModel("Reference info", 6, new List<MenuViewModel>
@@ -100,7 +103,7 @@ namespace UIQ.Controllers
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
             {
-                menus[4].ChildItems.Add(new MenuViewModel("Model_Member set", Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools"), 4));
+                menus[4].ChildItems.Insert(3, new MenuViewModel("Model_Member set", Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools"), 4));
                 menus[5].ChildItems.AddRange(new List<MenuViewModel>
                 {
                     { new MenuViewModel("FX100 Model and node", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/FX100_Model_and_node.pdf", 4) },

@@ -84,6 +84,20 @@ namespace UIQ.Services
             return await ExecuteWithTransactionAsync(sql, model);
         }
 
+        public async Task<long> InsertAndReturnAutoGenerateIdAsync<T>(string tableName, T model)
+        {
+            if (model == null) return 0;
+            var props = model.GetType().GetProperties().Where(x => !x.CustomAttributes.Any(a => a.AttributeType == typeof(NotMappedAttribute) || a.AttributeType == typeof(DatabaseGeneratedAttribute)));
+            var fieldNames = props.Select(x => $"`{x.Name.ToLower()}`");
+            var fieldValues = props.Select(x => $"@{x.Name}");
+
+            var sql = $@"INSERT INTO `{tableName}`({string.Join(", ", fieldNames)})
+                         VALUES({string.Join(", ", fieldValues)});
+                         SELECT LAST_INSERT_ID();";
+
+            return (await QueryAsync<long>(sql, model)).FirstOrDefault();
+        }
+
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql, object parameter = null, CommandType commandType = CommandType.Text)
         {
             using var connection = new MySqlConnection(ConnectionString);
@@ -124,6 +138,36 @@ namespace UIQ.Services
             });
 
             return await ExecuteWithTransactionAsync(sql, actualParamter);
+        }
+
+        public async Task<int> UpsertAsync<T>(string tableName, T model)
+        {
+            if (model == null) return 0;
+            var props = model.GetType().GetProperties().Where(x => !x.CustomAttributes.Any(a => a.AttributeType == typeof(NotMappedAttribute) || a.AttributeType == typeof(DatabaseGeneratedAttribute)));
+            var fieldNames = props.Select(x => $"`{x.Name.ToLower()}`");
+            var fieldValues = props.Select(x => $"@{x.Name}");
+            var updateSetValues = props.Select(x => $"`{x.Name.ToLower()}` = @{x.Name.ToLower()}");
+
+            var sql = $@"INSERT INTO `{tableName}`({string.Join(", ", fieldNames)})
+                         VALUES({string.Join(", ", fieldValues)})
+                         ON DUPLICATE KEY 
+                         UPDATE {string.Join(", ", updateSetValues)}";
+
+            return await ExecuteWithTransactionAsync(sql, model);
+        }
+
+        public async Task<bool> IsExistAsync(string tableName, object parameter = null)
+        {
+            var whereSql = GetWhereSql(parameter);
+            var actualParamter = new DynamicParameters();
+            parameter.GetType().GetProperties().ToList().ForEach(prop =>
+            {
+                actualParamter.Add($"@_{prop.Name}", prop.GetValue(parameter));
+            });
+
+            var sql = $@"SELECT COUNT(1) FROM `{tableName}` {whereSql}";
+            var result = await QueryAsync<int>(sql, actualParamter);
+            return result.FirstOrDefault() > 0;
         }
 
         #region Private Methods

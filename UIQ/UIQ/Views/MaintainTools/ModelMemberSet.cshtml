@@ -44,6 +44,7 @@
 		<div>
 			<form id="setting" action="@Url.Action(nameof(MaintainToolsController.ModelMemberSet))" method="post" autocomplete="off"  enctype="multipart/form-data">
 				<input id="memberID" type="hidden" name="memberId" value="@Model?.Member_Id">
+				@Html.Hidden("IsNew", isNew)
 				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
 					<table width="100%" border="1">
 						<thead>
@@ -75,9 +76,9 @@
 							<td>
 								<table>
 									<tr>
-										<td><input type="radio" name="modelNameRadio" value="def" @(isNew ? "checked" : string.Empty)>Old Model Name<font color="red">*</font>：</td>
+										<td><input type="radio" name="IsNewModelName" value="False" @(isNew ? "checked" : string.Empty)>Old Model Name<font color="red">*</font>：</td>
 										<td>
-											<select id="model_select" name="Model_Name">
+											<select id="model_select" name="Model.Model_Id">
 												@foreach (var item in modelItems)
 												{
 													<option value="@item.Model_Id" data-position="@item.Model_Position">@item.Model_Name</option>
@@ -87,15 +88,14 @@
 										</td>
 									</tr>
 									<tr>
-										<td><input type="radio" name="modelNameRadio" value="input" />New Model Name<font color="red">*</font>：</td>
-										<td><input type="text" name="new_model_name">(Ex: NFS)</td>
+										<td><input type="radio" name="IsNewModelName" value="True" />New Model Name<font color="red">*</font>：</td>
+										<td><input type="text" name="New_Model_Name">(Ex: NFS)</td>
 									</tr>
 									<tr>
 										<td>Model Position<font color="red">*</font>：</td>
-										<td><input type="text" name="model_position" value="@currentModelItem?.Model_Position">(Ex: 24)</td>
+										<td><input type="text" id="model_position" name="Model.Model_Position" value="@currentModelItem?.Model_Position">(Ex: 24)</td>
 									</tr>
-									<input type="hidden" name="model_id" value="@currentModelItem?.Model_Id">
-									<input type="hidden" name="new_model_position" value="@newModelPostion">
+									<input type="hidden" name="New_Model_Position" value="@newModelPostion">
 								</table>
 							</td>
 						</tr>
@@ -108,52 +108,53 @@
 									<tr>
 										<td>Member Name<font color="red">*</font>：</td>
 										<td>
-											<input type="text" name="member_Name" value="@Model?.Member_Name">(Ex: M03)
-											<input type="hidden" name="member_id" value="@Model?.Member_Id">
+											<input type="text" name="Member.Member_Name" value="@Model?.Member_Name">(Ex: M03)
+											<input type="hidden" name="Member.Member_Id" value="@Model?.Member_Id">
+											<input type="hidden" id="memberModelId" name="Member.Model_Id" value="@Model?.Model_Id">
 										</td>
 									</tr>
 									<tr>
 										<td>Member Nickname<font color="red">*</font>：</td>
-										<td><input type="text" name="member_nickname" value="@Model?.Nickname"></td>
+										<td><input type="text" name="Member.Nickname" value="@Model?.Nickname"></td>
 									</tr>
 									<tr>
 										<td>Member Position<font color="red">*</font>：</td>
-										<td><input type="text" name="member_position" value="@Model?.Member_Position">(Ex: 24)</td>
+										<td><input type="text" name="Member.Member_Position" value="@Model?.Member_Position">(Ex: 24)</td>
 									</tr>
 									<tr>
 										<td>Member Account<font color="red">*</font>：</td>
-										<td><input type="text" name="member_account" value="@Model?.Account">(Ex: npcaxxx)</td>
+										<td><input type="text" name="Member.Account" value="@Model?.Account">(Ex: npcaxxx)</td>
 									</tr>
 									<tr>
 										<td>Member Path：</td>
 										<td>
-											<input type="text" name="member_path" value="@Model?.Member_Path">
+											<input type="text" name="Member.Member_Path" value="@Model?.Member_Path">
 											(Ex: /ncs/npcaxxx/<font color="red">MemberPath</font>/NFS/M03)
 										</td>
 									</tr>
 									<tr>
 										<td>Dtg Value<font color="red">*</font>：</td>
-										<td><input type="text" name="member_dtg_value" value="@Model?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
+										<td><input type="text" name="Member.Member_Dtg_Value" value="@Model?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
 									</tr>
 									<tr>
 										<td>Group Member Name：</td>
-										<td><input type="text" name="model_group" value="@Model?.Model_Group">(Ex: M01 TWRF or M03 caa)</td>
+										<td><input type="text" name="Member.Model_Group" value="@Model?.Model_Group">(Ex: M01 TWRF or M03 caa)</td>
 									</tr>
 									<tr>
 										<td>Member Reset：</td>
-										<td><input type="text" name="reset_model" value="@Model?.Reset_Model">(Ex: cgibin/KillJob.ksh)</td>
+										<td><input type="text" name="Member.Reset_Model" value="@Model?.Reset_Model">(Ex: cgibin/KillJob.ksh)</td>
 									</tr>
 									<tr>
 										<td>Member Dtg Adjust：</td>
-										<td><input type="text" name="dtg_adjust" value="@Model?.Dtg_Adjust">(Ex: bin/setdtg.sh)</td>
+										<td><input type="text" name="Member.Dtg_Adjust" value="@Model?.Dtg_Adjust">(Ex: bin/setdtg.sh)</td>
 									</tr>
 									<tr>
 										<td>Member Fix：</td>
-										<td><input type="text" name="fix_failed_model" value="@Model?.Fix_Failed_Model">(Ex: cgibin/Rescue.ksh)</td>
+										<td><input type="text" name="Member.Fix_Failed_Model" value="@Model?.Fix_Failed_Model">(Ex: cgibin/Rescue.ksh)</td>
 									</tr>
 									<tr>
 										<td>Member Submit：</td>
-										<td><input type="text" name="submit_model" value="@Model?.Submit_Model">(Ex: cgibin/ReRun.ksh)</td>
+										<td><input type="text" name="Member.Submit_Model" value="@Model?.Submit_Model">(Ex: cgibin/ReRun.ksh)</td>
 									</tr>
 									<tr>
 										<td>Normal Prediction Time：</td>
@@ -165,7 +166,7 @@
 									</tr>
 									<tr>
 										<td>About Typhoon：</td>
-										<td><input type="checkbox" id="typhoon_model" name="typhoon_model" @(Model?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) value="1"></td>
+										<td><input type="checkbox" id="typhoon_model" name="Member.Typhoon_Model" @(Model?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) value="1"></td>
 									</tr>
 								</table>
 							</td>
@@ -183,18 +184,19 @@
 										<tr>
 											<th bgcolor="lightcyan">Normal<img src="~/images/add_icons.png" onclick="addSatnamingCrontab('Normal')" alt="新增"></th>
 										</tr>
-										<tr id="trCrontab">
-											@for (var idx = 0;  idx < cronTabItems.Count(); idx ++)
-											{
-												var item = cronTabItems.ElementAt(idx);
+										@for (var idx = 0;  idx < cronTabItems.Count(); idx ++)
+										{
+											var item = cronTabItems.ElementAt(idx);
 
+											<tr>
 												<td id="crontab_@(idx)" data-index="@(idx)">
 													<input id="crontabInput_@(idx)" name="CronTabs[@(idx)].Start_Time" type="text" value="@item.Start_Time">@(idx == 0 ? "(Ex: 17:00:00)" : string.Empty)
 													<img src="~/images/delete_icons.png" onclick="deleteSatnamingCrontab('crontab_@(idx)')" alt="移除">
 												</td>
 												<input id="crontab_gid_@(idx)" name="CronTabs[@(idx)].Cron_Group" type="hidden" value="@(idx== 0 ? "Normal" : item.Cron_Group)">
-											}
-										</tr>
+												<input type="hidden" name="CronTabs[@(idx)].Master_Group" value="@item.Master_Group" />
+											</tr>
+										}
 									</tbody>
 								</table>
 								<input id="crontabRowNum" type="hidden" name="crontabRowNum" value="@cronTabItems.Count()">
@@ -206,53 +208,56 @@
 						@* Batch *@
 						<tr>
 							<td>Batch<img src="~/images/add_icons.png" onclick="addSatnamingBatch()" alt="新增"/></td>
-							<td><table id="batchTable" border="1" frame="below">
-								<tr>
-									@foreach (var item in batchItems)
+							<td>
+								<table id="batchTable" border="1" frame="below">
+									@for (var idx = 0; idx < batchItems.Count(); idx++)
 									{
-										<td id="batch_@(item.Batch_Id)">
-											<table width="100%">
-												<tr>
-													<td>Batch Position<font color="red">*</font></td>
-													<td>
-														<input id="batchInputPosition_0" name="batchInputPosition_@(item.Batch_Id)" type="text" value="@item?.Batch_Position">(Ex: 1, 2 ,3)
-														<img src="~/images/delete_icons.png" onclick="deleteSatnamingBatch("batch_@(item.Batch_Id)")" alt="移除" align="right"/>
-													</td>
-												</tr>
-												<tr>
-													<td>Batch Name<font color="red">*</font></td>
-													<td>
-														<input class="batchName" id="batchInputName_@(item.Batch_Id)" name="batchInputName_@(item.Batch_Id)" type="text" size="17" value="">
-														<input id="batchInputRelay_@(item.Batch_Id)" name="batchInputRelay_@(item.Batch_Id)" type="checkbox" value="1">(Ex: Rnwpnfs1&是否為中繼點)
-													</td>
-												</tr>
-												<tr>
-													<td>Batch Type</td>
-													<td>
-														<input id="batchInputType_@(item.Batch_Id)" name="batchInputType_@(item.Batch_Id)" type="text" value="@item?.Batch_Type">(Ex: Major, Post)
-													</td>
-												</tr>
-												<tr>
-													<td>Batch Dtg</td>
-													<td>
-														<input id="batchInputDtg_@(item.Batch_Id)" name="batchInputDtg_@(item.Batch_Id)" type="text" value="@item?.Batch_Dtg">(Ex: 00, 06)
-													</td>
-												</tr>
-												<tr>
-													<td>Batch Time<font color="red">*</font></td>
-													<td>
-														<input id="batchInputTime_0" name="batchInputTime_@(item.Batch_Id)" type="text" size="15" value="@item?.Batch_Time">分鐘&nbsp;(Ex: 44)
-													</td>
-												</tr>
-												<tr>
-													<td>Check Point<img id="showCheckPoint" src="~/images/add_icons.png" alt="新增"/></td>
-													<td></td>
-												</tr>
-											</table>
-										</td>
+										var item = batchItems.ElementAt(idx);
+										<tr>
+											<td id="batch_@(idx)">
+												<table width="100%">
+													<tr>
+														<td>Batch Position<font color="red">*</font></td>
+														<td>
+															<input id="batchInputPosition_@(idx)" name="Batchs[@(idx)].Batch_Position" type="text" value="@item?.Batch_Position">(Ex: 1, 2 ,3)
+															<img src="~/images/delete_icons.png" onclick="deleteSatnamingBatch("batch_@(idx)")" alt="移除" align="right"/>
+														</td>
+													</tr>
+													<tr>
+														<td>Batch Name<font color="red">*</font></td>
+														<td>
+															<input class="batchName" id="batchInputName_@(idx)" name="Batchs[@(idx)].Batch_Name" type="text" size="17" value="@item?.Batch_Name">
+															<input id="batchInputRelay_@(idx)" name="Batchs[@(idx)].Batch_Relay" type="checkbox" value="1" @(item?.Batch_Relay == 1 ? "checked" : string.Empty)>(Ex: Rnwpnfs1&是否為中繼點)
+														</td>
+													</tr>
+													<tr>
+														<td>Batch Type</td>
+														<td>
+															<input id="batchInputType_@(idx)" name="Batchs[@(idx)].Batch_Type" type="text" value="@item?.Batch_Type">(Ex: Major, Post)
+														</td>
+													</tr>
+													<tr>
+														<td>Batch Dtg</td>
+														<td>
+															<input id="batchInputDtg_@(idx)" name="Batchs[@(idx)].Batch_Dtg" type="text" value="@item?.Batch_Dtg">(Ex: 00, 06)
+														</td>
+													</tr>
+													<tr>
+														<td>Batch Time<font color="red">*</font></td>
+														<td>
+															<input id="batchInputTime_@(idx)" name="Batchs[@(idx)].Batch_Time" type="text" size="15" value="@item?.Batch_Time">分鐘&nbsp;(Ex: 44)
+														</td>
+													</tr>
+													<tr>
+														<td>Check Point<img id="showCheckPoint" src="~/images/add_icons.png" alt="新增"/></td>
+														<td></td>
+													</tr>
+												</table>
+											</td>
+										</tr>
 									}
-								</tr>
-								</table><input id="batchRowNum" type="hidden" name="batchRowNum" value="@batchItems.Count()">
+								</table>
+								<input id="batchRowNum" type="hidden" name="batchRowNum" value="@batchItems.Count()">
 							</td>
 						</tr>
 		
@@ -260,25 +265,28 @@
 						<tr>
 							<td>Archive<img src="~/images/add_icons.png" onclick="addSatnamingArchive()" alt="新增"/></td>
 							<td>
-								@foreach (var item in archiveItems)
+								@for (var idx = 0; idx < archiveItems.Count(); idx ++)
 								{
+									var item = archiveItems.ElementAt(idx);
+
 									<table id="archiveTable">
 										<tbody>
 											<tr>
-												<td id="archive_@(item.Archive_Id)">Target Directory：
-													<input class="archive_directory" id="archive_directory_@(item.Archive_Id)" type="text" name="archive_directory_@(item.Archive_Id)">
+												<td id="archive_@(idx)">Target Directory：
+													<input class="archive_directory" id="archive_directory_@(idx)" type="text" name="Archives[@(idx)].Target_Directory" value="@item?.Target_Directory">
 												</td>
 											</tr>
 											<tr></tr>
 											<tr>
-												<td id="archive_@(item.Archive_Id)">
-													<select name="archive_data_@(item.Archive_Id)">
+												<td id="archive_@(idx)">
+													<select name="Archives[@(idx)].Data_Id">
 														@foreach (var data in dataItems)
 														{
 															<option value="@(data.Data_Id)">@data.Data_Name</option>
 														}
 													</select>
-													<input id="archiveInput_@(item.Archive_Id)" name="archiveInput_@(item.Archive_Id)" type="text" value="">(Ex: bin/Rarchive<font color="red">xxx</font>.ksh)<img src="~/images/delete_icons.png" onclick="deleteSatnamingArchive('archive_@(item.Archive_Id)')" alt="移除">
+													<input id="archiveInput_@(idx)" name="Archives[@(idx)].Archive_Redo" type="text" value="@item?.Archive_Redo">(Ex: bin/Rarchive<font color="red">xxx</font>.ksh)
+													<img src="~/images/delete_icons.png" onclick="deleteSatnamingArchive('archive_@(idx)')" alt="移除">
 												</td>
 											</tr>
 											<tr></tr>
@@ -293,19 +301,22 @@
 						<tr>
 							<td>Output<img src="~/images/add_icons.png" onclick="addSatnamingOutput()" alt="新增"/></td>
 							<td>
-								@foreach (var item in outputItems)
+								@for (var idx = 0; idx < outputItems.Count(); idx ++)
 								{
+									var item = outputItems.ElementAt(idx);
+
 									<table id="outputTable">
 										<tbody>
 											<tr>
-												<td id="output_0">
-													<select name="output_work_@(item.Output_Id)">
+												<td id="output_@(idx)">
+													<select name="Outputs[@(idx)].Work_Id">
 														@foreach (var work in workItems)
 														{
 															<option value="@(work.Work_Id)">@work.Work_Name</option>	
 														}
 													</select>
-													<input id="outputInput_@(item.Output_Id)" name="outputInput_@(item.Output_Id)" type="text" value="">(Ex: bin/R<font color="red">xxx</font>.ksh)<img src="../images/delete_icons.png" onclick="deleteSatnamingOutput('output_@(item.Output_Id)')" alt="移除">
+													<input id="outputInput_@(idx)" name="Outputs[@(idx)].Model_Output" type="text" value="@item.Model_Output">(Ex: bin/R<font color="red">xxx</font>.ksh)
+													<img src="~/images/delete_icons.png" onclick="deleteSatnamingOutput('output_@(idx)')" alt="移除">
 												</td>
 											</tr>
 										</tbody>
@@ -360,93 +371,147 @@
 			function addSatnamingCrontab(gid){
 				let table = 'crontab';
 				let gtbl = 'crongrpTable_'+gid;
-				let num = document.getElementById("crontabRowNum").value;
+				let idx = document.getElementById("crontabRowNum").value;
 				let otr = document.getElementById(gtbl).insertRow(-1);
 				let otd = document.createElement("td");
-				otd.id = table+'_'+num ;
-				otd.innerHTML='<input id="'+ table +'Input_'+ num +'" name="'+table+'Input_'+ num +'" type="text"><img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingCrontab(\''+ gtbl +'\', \''+table+'_'+ num +'\')" alt="移除"/>';
-				otd.innerHTML+='<input id="crontab_gid_'+ num +'" name="crontab_gid_'+ num + '" type="hidden" value=' + gid + '>';
+				otd.id = table+'_'+idx ;
+				otd.innerHTML=`<input id="crontabInput_${idx}" name="CronTabs[${idx}].Start_Time" type="text">
+							   <img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingCrontab('crontab_${idx}')" alt="移除"/>`;
+				otd.innerHTML+=`<input id="crontab_gid_${idx}" name="CronTabs[${idx}].Cron_Group" type="hidden" value="${gid}">
+								<input type="hidden" name="CronTabs[${idx}].Master_Group" value="${gid}" />`;
 				otr.appendChild(otd);
-				document.getElementById("crontabRowNum").value = parseInt(num) + 1;
+				document.getElementById("crontabRowNum").value = parseInt(idx) + 1;
 			}
 
 			function deleteSatnamingCrontab(tbl, str){
 				let td = document.getElementById(str).parentNode.rowIndex;
-				document.getElementById(tbl).deleteRow(td)
+				document.getElementById(tbl).deleteRow(td);
+				$('#crontabRowNum').val(parseInt($('#crontabRowNum').val()) - 1);
 			}
 
 			function addSatnamingBatch(){
 				let table = 'batch';
-				let num = document.getElementById("batchRowNum").value;
+				let idx = document.getElementById("batchRowNum").value;
 				let otr = document.getElementById("batchTable").insertRow(-1);
 				let otd = document.createElement("td");
-				otd.id = table+'_'+num ;
-				otd.innerHTML='<table><tr><td>Batch Position<font color="red">*</font></td><td><input id="batchInputPosition_'+num+'" name="batchInputPosition_'+num+'" type="text" value=""><img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingBatch(\'batch_'+num+'\')" alt="移除" align="right"/></td></tr><tr><td>Batch Name<font color="red">*</font></td><td><input class="batchName"  id="batchInputName_'+num+'" name="batchInputName_'+num+'" type="text" size="17" value=""><input id="batchInputRelay_'+num+'" name="batchInputRelay_'+num+'" type="checkbox" value="1"></td></tr><tr><td>Batch Type</td><td><input id="batchInputType_'+num+'" name="batchInputType_'+num+'" type="text" value=""></td></tr><tr><td>Batch Dtg</td><td><input id="batchInputDtg_'+num+'" name="batchInputDtg_'+num+'" type="text" value=""></td></tr><tr><td>Batch Time<font color="red">*</font></td><td><input id="batchInputTime_'+num+'" name="batchInputTime_'+num+'" type="text" size="15" value="">分鐘</td></tr><tr><td>Check Point<img id="showCheckPoint" src="@(Href("~/images/add_icons.png"))" alt="新增"/></td><td></td></tr></table>';
+				otd.id = table+'_'+idx ;
+				otd.innerHTML=`<table>
+									<tr>
+										<td>Batch Position<font color="red">*</font></td>
+										<td>
+											<input id="batchInputPosition_${idx}" name="Batchs[${idx}].Batch_Position" type="text" value="">
+											<img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingBatch('batch_${idx}')" alt="移除" align="right"/>
+										</td>
+									</tr>
+									<tr>
+										<td>Batch Name<font color="red">*</font></td>
+										<td>
+											<input class="batchName"  id="batchInputName_${idx}" name="Batchs[${idx}].Batch_Name" type="text" size="17" value="">
+											<input id="batchInputRelay_${idx}" name="Batchs[${idx}].Batch_Relay" type="checkbox" value="1">
+										</td>
+									</tr>
+									<tr>
+										<td>Batch Type</td>
+										<td><input id="batchInputType_${idx}" name="Batchs[${idx}].Batch_Type" type="text" value=""></td>
+									</tr>
+									<tr>
+										<td>Batch Dtg</td>
+										<td><input id="batchInputDtg_${idx}" name="Batchs[${idx}].Batch_Dtg" type="text" value=""></td>
+									</tr>
+									<tr>
+										<td>Batch Time<font color="red">*</font></td>
+										<td><input id="batchInputTime_${idx}" name="Batchs[${idx}].Batch_Time" type="text" size="15" value="">分鐘</td>
+									</tr>
+									<tr>
+										<td>Check Point<img id="showCheckPoint" src="@(Href("~/images/add_icons.png"))" alt="新增"/></td>
+										<td></td>
+									</tr>
+								</table>`;
 				otr.appendChild(otd);
-				document.getElementById("batchRowNum").value = parseInt(num) + 1;
+				document.getElementById("batchRowNum").value = parseInt(idx) + 1;
 			}
 
 			function deleteSatnamingBatch(str,row_num){
 				let td = document.getElementById(str).parentNode.rowIndex;
 				document.getElementById('batchTable').deleteRow(td);
 					$('div[aria-describedby="check_point_dialog_'+row_num+'"]').remove();
+				$('#batchRowNum').val(parseInt($('#batchRowNum').val()) - 1);
 			}
 
 			function addSatnamingArchive(){
 				let table = 'archive';
-				let num = document.getElementById("archiveRowNum").value;
+				let idx = document.getElementById("archiveRowNum").value;
 				let otr_directory = document.getElementById("archiveTable").insertRow(-1);
-					var otr_option = document.getElementById("archiveTable").insertRow(-1);
-					var otd_directory = document.createElement("td");
+				let otr_option = document.getElementById("archiveTable").insertRow(-1);
+				let otd_directory = document.createElement("td");
  				let otd_option = document.createElement("td");
 
-					otd_directory.id = table+'_'+num ;
-					otd_directory.innerHTML = 'Target Directory：<input class="archive_directory" id="' + table + '_directory_' + num + '" type="text" name="' + table + '_directory_' + num + '">';
-					otr_directory.appendChild(otd_directory);
+				otd_directory.id = table+'_'+idx ;
+				otd_directory.innerHTML = `Target Directory：<input class="archive_directory" id="archive_directory_${idx}" type="text" name="Archives[${idx}].Target_Directory">`;
+				otr_directory.appendChild(otd_directory);
 
-					otd_option.id = table+'_'+num ;
-				otd_option.innerHTML='<select name="'+ table +'_data_'+ num +'"><?= $data_option ?></select><input id="'+ table +'Input_'+ num +'" name="'+table+'Input_'+ num +'" type="text"><img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingArchive(\''+table+'_'+ num +'\')" alt="移除"/>';
+				otd_option.id = table+'_'+idx ;
+				otd_option.innerHTML=`<select name="Archives[${idx}].Data_Id">
+										@foreach (var data in dataItems)
+										{
+											@Html.Raw($@"<option value=""{data.Data_Id}"">{data.Data_Name}</option>")
+										}
+									  </select>
+									  <input id="archiveInput_${idx}" name="Archives[${idx}].Archive_Redo" type="text">
+									  <img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingArchive('archive_${idx}')" alt="移除"/>`;
 				otr_option.appendChild(otd_option);
 
-				document.getElementById("archiveRowNum").value = parseInt(num) + 1;
+				document.getElementById("archiveRowNum").value = parseInt(idx) + 1;
 			}
 
 			function deleteSatnamingArchive(str){
-				var td = document.getElementById(str).parentNode.rowIndex;
+				let td = document.getElementById(str).parentNode.rowIndex;
 				document.getElementById('archiveTable').deleteRow(td);
+				$('#'+str).remove();
 
-					$('#'+str).remove();
+				$('#archiveRowNum').val(parseInt($('#archiveRowNum').val()) - 1)
 			}
 
 			function addSatnamingOutput(){
 				var table = 'output';
-				var num = document.getElementById("outputRowNum").value;
+				var idx = document.getElementById("outputRowNum").value;
 				var otr = document.getElementById("outputTable").insertRow(-1);
 				var otd = document.createElement("td");
-				otd.id = table+'_'+num ;
-				otd.innerHTML='<select name="'+ table +'_work_'+ num +'"><?= $work_option ?></select><input id="'+ table +'Input_'+ num +'" name="'+table+'Input_'+ num +'" type="text"><img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingOutput(\''+table+'_'+ num +'\')" alt="移除"/>';
+				otd.id = table+'_'+idx ;
+				otd.innerHTML = `<select name="Outputs[${idx}].Work_Id">
+									@foreach (var work in workItems)
+									{
+										@Html.Raw($@"<option value=""{work.Work_Id}"">{work.Work_Name}</option>")
+									}
+								</select>
+								<input id="outputInput_${idx}" name="Outputs[${idx}].Model_Output" type="text" value="">
+								<img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingOutput('output_${idx}')" alt="移除"/>`;
 				otr.appendChild(otd);
-				document.getElementById("outputRowNum").value = parseInt(num) + 1;
+				document.getElementById("outputRowNum").value = parseInt(idx) + 1;
 			}
 
 			function deleteSatnamingOutput(str){
 				var td = document.getElementById(str).parentNode.rowIndex;
 				document.getElementById('outputTable').deleteRow(td);
+
+				$('#outputRowNum').val(parseInt($('#outputRowNum').val()) - 1)
 			}
 
 			function deleteModelCheck(){
 				if (confirm('Do You Want to Delete This Model ?\n\n(ALL the Members of this Model will be DELETE!)')){
 					if (confirm('Are You Sure Delete This Model ?')){
-						document.setting.action = '@Url.Action(nameof(MaintainToolsController.DeleteModel))';
-						document.setting.submit();
+						let setting = $('#setting');
+						setting.prop('action', '@Url.Action(nameof(MaintainToolsController.DeleteModel))');
+						setting.submit();
 					}
 				}
 			}
 
 			function deleteCheck(){
 				if (confirm('Do You Want to Delete This Member ?')){
-					document.setting.action = '../delete';
-					document.setting.submit();
+					let setting = $('#setting');
+					setting.prop('action', '@Url.Action(nameof(MaintainToolsController.DeleteMember))');
+					setting.submit();
 				}
 			}
 		</script>

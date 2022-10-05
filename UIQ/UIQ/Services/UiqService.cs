@@ -399,6 +399,83 @@ namespace UIQ.Services
             return result.FirstOrDefault();
         }
 
+        public async Task<bool> DeleteModelAsync(int modelId)
+        {
+            var result = await _dataBaseNcsUiService.DeleteAsync("model", new { Model_Id = modelId });
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteMemberAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.DeleteAsync("member", new { Member_Id = memberId });
+            return result > 0;
+        }
+
+        public async Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data)
+        {
+            var result = 0;
+            var memberId = data.Member.Member_Id;
+
+            //Model
+            if (data.IsNewModelName)
+            {
+                data.Model = new Model { Model_Name = data.New_Model_Name, Model_Position = data.New_Model_Position, };
+                data.Member.Model_Id = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("model", data.Model);
+            }
+            
+            //Member
+            var isMemberExist = await _dataBaseNcsUiService.IsExistAsync("member", new { Member_Id = data.Member.Member_Id });
+            if (isMemberExist) result += await _dataBaseNcsUiService.UpdateAsync("member", data.Member, new { Member_Id = data.Member.Member_Id });
+            else memberId = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("member", data.Member);
+
+            //CronTab
+            foreach (var cronTab in data.CronTabs)
+            {
+                cronTab.Member_Id = memberId;
+                var paramter = new
+                {
+                    Member_Id = cronTab.Member_Id,
+                    Start_Time = cronTab.Start_Time,
+                    Cron_Group = cronTab.Cron_Group,
+                };
+                var isExist = await _dataBaseNcsUiService.IsExistAsync("crontab", paramter);
+                if (isExist) result += await _dataBaseNcsUiService.UpdateAsync("crontab", cronTab, paramter);
+                else result += await _dataBaseNcsUiService.InsertAsync("crontab", cronTab);
+            }
+
+            //Batch
+            foreach (var batch in data.Batchs)
+            {
+                batch.Member_Id = memberId;
+                var paramter = new { Batch_Id = batch.Batch_Id };
+                var isExist = await _dataBaseNcsUiService.IsExistAsync("batch", paramter);
+                if (isExist) result += await _dataBaseNcsUiService.UpdateAsync("batch", batch, paramter);
+                else result += await _dataBaseNcsUiService.InsertAsync("batch", batch);
+            }
+
+            //Archive
+            foreach (var archive in data.Archives)
+            {
+                archive.Member_Id = memberId;
+                var paramter = new { Archive_Id = archive.Archive_Id };
+                var isExist = await _dataBaseNcsUiService.IsExistAsync("archive", paramter);
+                if (isExist) result += await _dataBaseNcsUiService.UpdateAsync("archive", archive, paramter);
+                else result += await _dataBaseNcsUiService.InsertAsync("archive", archive);
+            }
+
+            //Output
+            foreach (var output in data.Outputs)
+            {
+                output.Member_Id = memberId;
+                var paramter = new { Output_Id = output.Output_Id };
+                var isExist = await _dataBaseNcsUiService.IsExistAsync("output", paramter);
+                if (isExist) result += await _dataBaseNcsUiService.UpdateAsync("output", output, paramter);
+                else result += await _dataBaseNcsUiService.InsertAsync("output", output);
+            }
+
+            return result > 0;
+        }
+
         #region Private Methods
 
         private void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)

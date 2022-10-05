@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
+using UIQ.ViewModels;
 
 namespace UIQ.Controllers
 {
@@ -104,7 +105,7 @@ namespace UIQ.Controllers
             ViewBag.ModelItems = _uiqService.GetModelItemsAsync().GetAwaiter().GetResult();
             ViewBag.DataItems = _uiqService.GetDataItemsAsync().GetAwaiter().GetResult();
             ViewBag.WorkItems = _uiqService.GetWorkItemsAsync().GetAwaiter().GetResult();
-            ViewBag.CronTabItems = memberId.HasValue ? _uiqService.GetCronTabItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<CronTab> { new CronTab { Cron_Group = "Normal" } };
+            ViewBag.CronTabItems = memberId.HasValue ? _uiqService.GetCronTabItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<CronTab> { new CronTab { Cron_Group = "Normal", Master_Group = "Normal" } };
             ViewBag.BatchItems = memberId.HasValue ? _uiqService.GetBatchItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Batch> { new Batch() };
             ViewBag.ArchiveItems = memberId.HasValue ? _uiqService.GetArchiveItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Archive> { new Archive() };
             ViewBag.OutputItems = memberId.HasValue ? _uiqService.GetOutputItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Output> { new Output() };
@@ -113,15 +114,46 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public IActionResult ModelMemberSet()
+        public IActionResult ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
+        {
+            if(data == null) return View("Error");
+
+            _uiqService.SaveModelMemberSetData(data);
+
+            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteModel(int? memberId, int? model_Id)
+        {
+            if(model_Id.HasValue  == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+
+            _uiqService.DeleteModelAsync(model_Id.Value);
+            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteMember(int? memberId)
+        {
+            if (memberId.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+
+            _uiqService.DeleteMemberAsync(memberId.Value);
+            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        public IActionResult DocumentManager()
         {
             return View();
         }
 
-        [HttpPost]
-        public IActionResult DeleteModel()
+        public IActionResult RoleSetting()
         {
-            return null;
+            return View();
+        }
+
+        public IActionResult RefreshTimeSetting()
+        {
+            return View();
         }
 
         [HttpPost]
