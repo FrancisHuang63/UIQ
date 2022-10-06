@@ -181,7 +181,8 @@ namespace UIQ.Controllers
 
         public IActionResult UploadFile()
         {
-            return View();
+            var model = _uiqService.GetUploadFileItemsAsync().GetAwaiter().GetResult();
+            return View(model);
         }
 
         public IActionResult ParameterSetting()

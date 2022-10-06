@@ -399,6 +399,11 @@ namespace UIQ.Services
             return result.FirstOrDefault();
         }
 
+        public async Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync()
+        {
+            return await _dataBaseNcsUiService.GetAllAsync<UploadFile>("upload_file");
+        }
+
         #region Private Methods
 
         private void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)

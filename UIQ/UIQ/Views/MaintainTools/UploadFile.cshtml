@@ -1,4 +1,9 @@
-﻿@{
+﻿@using System.Security.Claims
+@using UIQ.Controllers
+@using UIQ.Enums
+@model IEnumerable<UploadFile>
+@inject IHttpContextAccessor httpContextAccessor
+@{
     Layout = null;
 }
 
@@ -27,9 +32,6 @@
 		<div id="result" class="huge">
 		  <div class="jtable-main-container">
 			<div class="jtable-busy-panel-background" style="height: 110px;"></div>
-			<div class="jtable-busy-message" style="">
-			  載入中...
-			</div>
 			<table class="jtable">
 			  <thead>
 				<tr>
@@ -61,30 +63,23 @@
 				</tr>
 			  </thead>
 			  <tbody>
+				@foreach (var item in Model)
+				{
 				<tr>
-					<td>1</td>
-					<td>XXXX.pdf</td>
-					<td>2022-10-05 10:00:00</td>
-					<td><a href="#">Donload</a></td>
+					<td>@item.file_id</td>
+					<td>@item.file_name</td>
+					<td>@item.create_datetime</td>
+					<td><a href="@item.file_path">Donload</a></td>
 					<td><a href="#">Delete</a></td>
 				</tr>
-				<tr>
-					<td>2</td>
-					<td>XXXX.pdf</td>
-					<td>2022-10-05 10:00:00</td>
-					<td><a href="#">Donload</a></td>
-					<td><a href="#">Delete</a></td>
-				</tr>
-				<tr>
-					<td>3</td>
-					<td>XXXX.pdf</td>
-					<td>2022-10-05 10:00:00</td>
-					<td><a href="#">Donload</a></td>
-					<td><a href="#">Delete</a></td>
-				</tr>
-				<tr class="jtable-no-data-row">
-				  <td colspan="11">查無資料</td>
-				</tr>
+				}
+
+					@if (1==1) {  /*Priya*/
+						<tr class="jtable-no-data-row">
+						  <td colspan="11">查無資料</td>
+						</tr>
+					}
+
 			  </tbody>
 			</table>
 			<div class="jtable-bottom-panel">
