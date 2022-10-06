@@ -88,6 +88,9 @@ namespace UIQ.Controllers
                     { new MenuViewModel("Set typhoon data", Url.Action(nameof(MaintainToolsController.TyphoonInitialData), "MaintainTools"), 1) },
                     { new MenuViewModel("Special Use command", Url.Action(nameof(MaintainToolsController.Command), "MaintainTools"), 2) },
                     { new MenuViewModel("Cron_Mode set", Url.Action(nameof(MaintainToolsController.CronSetting), "MaintainTools"), 3) },
+                    { new MenuViewModel("Update File", Url.Action(nameof(MaintainToolsController.UploadFile), "MaintainTools"), 5) },
+                    { new MenuViewModel("Permission Setting", Url.Action(nameof(MaintainToolsController.PermissionSetting), "MaintainTools"), 6) },
+                    { new MenuViewModel("Parameter Setting", Url.Action(nameof(MaintainToolsController.ParameterSetting), "MaintainTools"), 7) },
                 }),
                 //Reference info
                 new MenuViewModel("Reference info", 6, new List<MenuViewModel>
