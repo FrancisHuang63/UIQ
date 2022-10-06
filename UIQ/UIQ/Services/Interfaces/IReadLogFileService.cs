@@ -6,6 +6,6 @@
 
         public Task<string> ReadLogFileAsync(string filePath);
 
-        public Task WriteDataIntoLogFileAsync(string filePath, string newData);
+        public Task WriteDataIntoLogFileAsync(string directoryPath, string fullFilePath, string newData);
     }
 }

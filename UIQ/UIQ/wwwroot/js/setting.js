@@ -1,18 +1,19 @@
 $(document).ready(function () {
-    $('input[name="modelNameRadio"]').on('change', function () {
-        var selected_model = $('input[name="modelNameRadio"]:checked').val();
-        if (selected_model === 'def') {
+    $('input[name="IsNewModelName"]').on('change', function () {
+        var selected_model = $('input[name="IsNewModelName"]:checked').val();
+        if (selected_model === 'False') {
             $('#model_select').trigger('change');
         } else {
-            var model_position = $('input[name="new_model_position"]').val();
-            $('input[name="model_position"]').val(model_position);
+            var model_position = $('input[name="New_Model_Position"]').val();
+            $('#model_position').val(model_position);
         }
     });
 
 
     $('#model_select').on('change', function () {
         var model_position = $('#model_select option:selected').attr('data-position');
-        $('input[name="model_position"]').val(model_position);
+        $('#model_position').val(model_position);
+        $('#memberModelId').val($(this).val());
     });
 
     $(document).on('click', '#addCheckPoint', function () {

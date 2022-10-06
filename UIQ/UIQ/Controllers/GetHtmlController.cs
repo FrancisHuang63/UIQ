@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using UIQ.Services.Interfaces;
+using UIQ.ViewModels;
 
 namespace UIQ.Controllers
 {
@@ -11,6 +12,7 @@ namespace UIQ.Controllers
         private readonly string _hpcCtl;
         private readonly string _rshAccount;
         private readonly string _loginIp;
+        private readonly string _logDirectoryPath;
 
         public GetHtmlController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, IReadLogFileService readLogFileService)
         {
@@ -22,6 +24,7 @@ namespace UIQ.Controllers
             var hostName = System.Net.Dns.GetHostName();
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
+            _logDirectoryPath = $"{_readLogFileService.RootPath}/log";
         }
 
         [HttpPost]
@@ -246,7 +249,7 @@ namespace UIQ.Controllers
                 html += message;
             }
 
-            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
             return html;
         }
 
@@ -282,7 +285,7 @@ namespace UIQ.Controllers
             html += await _uiqService.RunCommandAsync(command);
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
-            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
             return html;
         }
 
@@ -345,7 +348,7 @@ namespace UIQ.Controllers
                 html += await _uiqService.RunCommandAsync(command);
             }
 
-            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
             return html;
         }
 
@@ -465,7 +468,7 @@ namespace UIQ.Controllers
                 html += $"<br>{result}";
             }
 
-            await _readLogFileService.WriteDataIntoLogFileAsync($"{_readLogFileService.RootPath}/log/UI_actions.log", message);
+            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
             return html;
         }
 
@@ -473,6 +476,19 @@ namespace UIQ.Controllers
         public async Task<string> TyphoonShow(string dtg, int adjust)
         {
             var typhoonEntry = new string[] { "Name", "Lat.", "Long.", "6-hr ago Lat.", "6-hr ago Long.", "Center Pressure", "15M/S Radius", "Maximum Speed", "25M/S Radius" };
+            var requiredEntry = new string[] { "Name", "Lat.", "Long.", };
+            var typhoonEntryNames = new string[]
+            {
+                nameof(TyphoonSetDataViewModel.Name),
+                nameof(TyphoonSetDataViewModel.Lat),
+                nameof(TyphoonSetDataViewModel.Lng),
+                nameof(TyphoonSetDataViewModel.LatBefore6Hours),
+                nameof(TyphoonSetDataViewModel.LngBefore6Hours),
+                nameof(TyphoonSetDataViewModel.CenterPressure),
+                nameof(TyphoonSetDataViewModel.Radius15MPerS),
+                nameof(TyphoonSetDataViewModel.MaximumSpeed),
+                nameof(TyphoonSetDataViewModel.Radius25MPerS),
+            };
             var formatDescription = new string[] { "(颱風/TD 名稱：PHANFONE/TD201905)",
                                                    "(緯度：13.9) (填寫範圍: 0.0~90.0)",
                                                    "(經度：117.7) (填寫範圍: 0.0~180.0)",
@@ -483,7 +499,7 @@ namespace UIQ.Controllers
                                                    "(最大風速：35)",
                                                    "(十級風暴風半徑：50)",
                                                  };
-            var html = $@"<form>
+            var html = $@"<form id=""typhoonSetDataFrom"">
                             <table>
                             <tr>
                                 <td>DTG<font color=""red""><font>*</font>:</td>
@@ -498,28 +514,18 @@ namespace UIQ.Controllers
                                 <td><hr></td>
                                 <td><hr></td>
                             </tr>";
-            for (int i = 1, n = 1, inputNum = typhoonEntry.Length; i < (adjust * 14); i++)
+            for (int i = 0; i < adjust; i++)
             {
-                if ((i % 14 == 1) || (i % 14 == 2) || (i % 14 == 4))
+                for (int colIdx = 0; colIdx < typhoonEntry.Length; colIdx++)
                 {
                     html += @$"<tr>
-                                <td>{typhoonEntry[(n - 1) % inputNum]}<font color=""red"">*</font>:</td>
-                                <td><input type=""text"" value="""" name=""entryn""></td>
-                                <td class=""input_description"">{formatDescription[(n - 1) % inputNum]}</td>
-                               </tr>";
-                    n++;
-                }
-                else if ((i % 14 == 13) || (i % 2 == 0))
-                {
-                    html += @$"<tr>
-                                <td>{typhoonEntry[(n - 1) % inputNum]}:</td>
-                                <td><input type=""text"" value="""" name=""entryn""></td>
-                                <td class=""input_description"">{formatDescription[(n - 1) % inputNum]}</td>
-                              </tr>";
-                    n++;
+								<td>{typhoonEntry[colIdx]} {(requiredEntry.Contains(typhoonEntry[colIdx]) ? @"<font color=""red"">*</font>:</td>" : string.Empty)}
+								<td><input type=""text"" value="""" name=""TyphoonSetDatas[{i}].{typhoonEntryNames[colIdx]}""></td>
+								<td class=""input_description"">{formatDescription[colIdx]}</td>
+							</tr>";
                 }
 
-                if (i % 14 == 0) html += "<tr><td><hr></td><td><hr></td></tr>";
+                html += "<tr><td><hr></td><td><hr></td></tr>";
             }
 
             html += $@"<tr>
@@ -535,51 +541,42 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<string> TyphoonPreview(string dtg, int typhoonNum, int everyDataCount, string typhoonData)
+        public async Task<string> TyphoonPreview(string dtg, int num, TyphoonSetDataViewModel[] typhoonSetDatas)
         {
-            var html = string.Empty;
-            var isInputError = string.IsNullOrWhiteSpace(dtg);
-            var typhoonDataObject = System.Text.Json.JsonSerializer.Deserialize<dynamic>(typhoonData);
-            var dataUnit = new string[] { "", "N", "E", "N", "E", "MB", "KM", "M/S", "KM" };
-            var dataFormat = new string[] { "", "%4.1f %s ", "%5.1f %s ", "%4.1f %s ", "%5.1f %s ", "%4.0f %s ", "%3.0f %s ", "%2.0f %s ", "%3.0f %s" };
-            for (int i = 0; i < typhoonNum; i++)
+            if (typhoonSetDatas == null || typhoonSetDatas.Any(x =>
+                                             string.IsNullOrWhiteSpace(x.Name)
+                                             || x.Lat.HasValue == false
+                                             || x.Lng.HasValue == false))
             {
-                for (int j = 1; j < everyDataCount; j++)
-                {
-                    var entry = $"entry{((i - 1) * everyDataCount + j)}";
-                    var typhoonDataValue = typhoonDataObject[entry];
-
-                    if (j <= 3 && typhoonDataValue == string.Empty)
-                    {
-                        isInputError = true;
-                        html += "<font color='red'>*欄位必填</font><br>";
-                        break;
-                    }
-
-                    if (j != 1 && typhoonDataValue == string.Empty)
-                    {
-                        typhoonDataValue = -1;
-                    }
-
-                    //TDOD 完成
-                    //if (j == 1)
-                    //{
-                    //    var typhoonName = typhoonDataValue;
-                    //    var content_by_typh_name[typhoonName]['dat'] = sprintf("%' -8.8s ", typhoonDataValue);
-                    //    content_by_typh_name[typhoonName]['txt'] = sprintf("%' -15.15s ", typhoonDataValue);
-                    //}
-                    //else
-                    //{
-                    //    $content_by_typh_name[$typh_name]['dat'].= sprintf( $data_format[j - 1], typhoonDataValue, $data_unit[j - 1]);
-                    //    $content_by_typh_name[$typh_name]['txt'].= sprintf( $data_format[j - 1], typhoonDataValue, $data_unit[j - 1]);
-                    //}
-                }
-
-                if (isInputError) break;
+                return "*欄位必填";
             }
 
-            if (isInputError) return string.Empty;
+            var dirNameParameters = new[]
+            {
+                new{ DirName = "ty", FilePrefix = "dat" },
+                new{ DirName = "ty", FilePrefix = "txt" },
+                new{ DirName = "tdty", FilePrefix = "dat" },
+                new{ DirName = "tdty", FilePrefix = "txt" },
+            };
+            var html = @$"<font size=""1"">
+							<table class=""xdebug-error xe-notice"" dir=""ltr"" border=""1"" cellspacing=""0"" cellpadding=""1""></table>
+						</font>";
 
+            foreach (var data in typhoonSetDatas)
+            {
+                foreach (var dirNameParam in dirNameParameters)
+                {
+                    var isDatType = dirNameParam.FilePrefix == "dat";
+                    var content = $@"{(isDatType ? string.Empty : $"20{dtg}<br>")}
+									 {typhoonSetDatas.Count()}<br>{data.Name.PadRight((isDatType ? 9 : 16), ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM";
+                    html += $@"<h4 class=""typhoon_file_name"">{dirNameParam.DirName}/typhoon{dtg}.dat</h4>
+							   <div id='{dirNameParam.DirName}_{dirNameParam.FilePrefix}_content'>
+									<pre>{content}</pre>
+							   </div>";
+                }
+            }
+
+            html += @$"<br><input type=""button"" class=""form"" value=""Submit"" OnClick=""sendTyphoonDataRequest('post', '{Url.Action(nameof(MaintainToolsController.SaveTyphoonData), "MaintainTools")}', 'file_created_result', '9')"">";
             return html;
         }
     }

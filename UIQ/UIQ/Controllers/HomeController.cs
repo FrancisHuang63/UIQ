@@ -103,7 +103,7 @@ namespace UIQ.Controllers
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()))
             {
-                menus[4].ChildItems.Add(new MenuViewModel("Model_Member set", Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools"), 4));
+                menus[4].ChildItems.Insert(3, new MenuViewModel("Model_Member set", Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools"), 4));
                 menus[5].ChildItems.AddRange(new List<MenuViewModel>
                 {
                     { new MenuViewModel("FX100 Model and node", $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/reference/FX100_Model_and_node.pdf", 4) },

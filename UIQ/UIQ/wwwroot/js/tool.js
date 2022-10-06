@@ -325,43 +325,18 @@ function play_alert_audio() {
 }
 
 function sendTyphoonDataRequest(req_type, uri, div, data_count) {
-    if(uri==="typhoon_preview.php"){
-        $('#file_created_result').empty();
-    }
-
-    // Get form values
-    var dtg = $("#dtg").val();
-    var typoon_num = $('#num').val();
-    var typhoon_data = {};
-
-    for (var i=1; i <= data_count*typoon_num; i++){
-        typhoon_data['entry'+i] = $('#typhoon_data_form input[name="entry'+i+'"]').val();
-    }
-
-    div = '#' + div;
-
-    if (req_type == 'post') {
-        target_url = uri + '?timeStamp=' + new Date().getTime();
-        // to avoid browsers loading the past data from cache
-    } else {
-        target_url = uri;
-    }
+    let form = $('#typhoonSetDataFrom');
 
     $.ajax({
-        url: target_url,
+        url: uri,
         type: 'POST',
         dataType: 'html',
-        data: {
-            p_dtg: dtg,
-            p_typhoon_num: typoon_num,
-            p_typhoon_data: JSON.stringify(typhoon_data),
-            p_every_data_count: data_count
-        },
+        data: form.serialize(),
         error: function () {
             alert("Syntax error on " + uri);
         },
         success: function (response) {
-            $(div).html(response);
+            $('#' + div).html(response);
         }
 
     });

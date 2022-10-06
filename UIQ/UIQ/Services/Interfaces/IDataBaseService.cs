@@ -14,7 +14,13 @@ namespace UIQ.Services.Interfaces
 
         public Task<int> InsertAsync<T>(string tableName, T model);
 
+        public Task<long> InsertAndReturnAutoGenerateIdAsync<T>(string tableName, T model);
+
         public Task<int> UpdateAsync<T>(string tableName, T model, object parameter = null);
+
+        public Task<int> UpsertAsync<T>(string tableName, T model);
+
+        public Task<bool> IsExistAsync(string tableName, object parameter = null);
 
         public Task<int> ExecuteWithTransactionAsync(string sql, object parameter = null, CommandType commandType = CommandType.Text);
 

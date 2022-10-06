@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
+using UIQ.ViewModels;
 
 namespace UIQ.Controllers
 {
@@ -12,14 +13,17 @@ namespace UIQ.Controllers
     {
         private readonly IUiqService _uiqService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IReadLogFileService _readLogFileService;
         private readonly string _hpcCtl;
         private readonly string _rshAccount;
         private readonly string _loginIp;
 
-        public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, IHttpContextAccessor httpContextAccessor)
+        public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService
+            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService)
         {
             _uiqService = uiqService;
             _httpContextAccessor = httpContextAccessor;
+            _readLogFileService = readLogFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
@@ -31,6 +35,38 @@ namespace UIQ.Controllers
         public IActionResult TyphoonInitialData()
         {
             return View();
+        }
+
+        [HttpPost]
+        public async Task<string> SaveTyphoonData(string dtg, TyphoonSetDataViewModel[] typhoonSetDatas)
+        {
+            var dirNameParameters = new[]
+            {
+                new{ DirName = "ty", FilePrefix = "dat" },
+                new{ DirName = "ty", FilePrefix = "txt" },
+                new{ DirName = "tdty", FilePrefix = "dat" },
+                new{ DirName = "tdty", FilePrefix = "txt" },
+            };
+
+            var datContents = new List<string>();
+            var txtContents = new List<string>();
+            foreach (var data in typhoonSetDatas)
+            {
+                datContents.Add($"{typhoonSetDatas.Count()}\n{data.Name.PadRight(9, ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM");
+                txtContents.Add($"20{dtg}\n{typhoonSetDatas.Count()}\n{data.Name.PadRight(16, ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM");
+            }
+
+            foreach (var dirNameParameter in dirNameParameters)
+            {
+                var directoryPath = $"{_readLogFileService.RootPath}\\temp\\{dirNameParameter.DirName}";
+                var fileName = $"typhoon.{dirNameParameter.FilePrefix}";
+                var fullFilePath = $"{directoryPath}\\{fileName}";
+
+                var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents) : string.Join("\n\n", txtContents));
+                await _readLogFileService.WriteDataIntoLogFileAsync(directoryPath, fullFilePath, newDataContent);
+            }
+
+            return "Success";
         }
 
         public IActionResult Command()
@@ -104,7 +140,7 @@ namespace UIQ.Controllers
             ViewBag.ModelItems = _uiqService.GetModelItemsAsync().GetAwaiter().GetResult();
             ViewBag.DataItems = _uiqService.GetDataItemsAsync().GetAwaiter().GetResult();
             ViewBag.WorkItems = _uiqService.GetWorkItemsAsync().GetAwaiter().GetResult();
-            ViewBag.CronTabItems = memberId.HasValue ? _uiqService.GetCronTabItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<CronTab> { new CronTab { Cron_Group = "Normal" } };
+            ViewBag.CronTabItems = memberId.HasValue ? _uiqService.GetCronTabItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<CronTab> { new CronTab { Cron_Group = "Normal", Master_Group = "Normal" } };
             ViewBag.BatchItems = memberId.HasValue ? _uiqService.GetBatchItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Batch> { new Batch() };
             ViewBag.ArchiveItems = memberId.HasValue ? _uiqService.GetArchiveItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Archive> { new Archive() };
             ViewBag.OutputItems = memberId.HasValue ? _uiqService.GetOutputItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Output> { new Output() };
@@ -113,15 +149,46 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public IActionResult ModelMemberSet()
+        public IActionResult ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
+        {
+            if (data == null) return View("Error");
+
+            _uiqService.SaveModelMemberSetData(data);
+
+            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteModel(int? memberId, int? model_Id)
+        {
+            if (model_Id.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+
+            _uiqService.DeleteModelAsync(model_Id.Value);
+            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteMember(int? memberId)
+        {
+            if (memberId.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+
+            _uiqService.DeleteMemberAsync(memberId.Value);
+            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        public IActionResult DocumentManager()
         {
             return View();
         }
 
-        [HttpPost]
-        public IActionResult DeleteModel()
+        public IActionResult RoleSetting()
         {
-            return null;
+            return View();
+        }
+
+        public IActionResult RefreshTimeSetting()
+        {
+            return View();
         }
 
         [HttpPost]
