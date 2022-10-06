@@ -1,4 +1,5 @@
-﻿using UIQ.Enums;
+﻿using System.Data;
+using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
@@ -480,7 +481,12 @@ namespace UIQ.Services
         {
             return await _dataBaseNcsUiService.GetAllAsync<UploadFile>("upload_file");
         }
-        
+
+        public async Task<IEnumerable<Role>> GetRoleItemsAsync()
+        {
+            return await _dataBaseNcsUiService.GetAllAsync<Role>("role");
+        }
+
         #region Private Methods
 
         private void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)
