@@ -13,14 +13,17 @@ namespace UIQ.Controllers
     {
         private readonly IUiqService _uiqService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IReadLogFileService _readLogFileService;
         private readonly string _hpcCtl;
         private readonly string _rshAccount;
         private readonly string _loginIp;
 
-        public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, IHttpContextAccessor httpContextAccessor)
+        public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService
+            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService)
         {
             _uiqService = uiqService;
             _httpContextAccessor = httpContextAccessor;
+            _readLogFileService = readLogFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
@@ -32,6 +35,38 @@ namespace UIQ.Controllers
         public IActionResult TyphoonInitialData()
         {
             return View();
+        }
+
+        [HttpPost]
+        public async Task<string> SaveTyphoonData(string dtg, TyphoonSetDataViewModel[] typhoonSetDatas)
+        {
+            var dirNameParameters = new[]
+            {
+                new{ DirName = "ty", FilePrefix = "dat" },
+                new{ DirName = "ty", FilePrefix = "txt" },
+                new{ DirName = "tdty", FilePrefix = "dat" },
+                new{ DirName = "tdty", FilePrefix = "txt" },
+            };
+
+            var datContents = new List<string>();
+            var txtContents = new List<string>();
+            foreach (var data in typhoonSetDatas)
+            {
+                datContents.Add($"{typhoonSetDatas.Count()}\n{data.Name.PadRight(9, ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM");
+                txtContents.Add($"20{dtg}\n{typhoonSetDatas.Count()}\n{data.Name.PadRight(16, ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM");
+            }
+
+            foreach (var dirNameParameter in dirNameParameters)
+            {
+                var directoryPath = $"{_readLogFileService.RootPath}\\temp\\{dirNameParameter.DirName}";
+                var fileName = $"typhoon.{dirNameParameter.FilePrefix}";
+                var fullFilePath = $"{directoryPath}\\{fileName}";
+
+                var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents) : string.Join("\n\n", txtContents));
+                await _readLogFileService.WriteDataIntoLogFileAsync(directoryPath, fullFilePath, newDataContent);
+            }
+
+            return "Success";
         }
 
         public IActionResult Command()
@@ -116,7 +151,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public IActionResult ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
         {
-            if(data == null) return View("Error");
+            if (data == null) return View("Error");
 
             _uiqService.SaveModelMemberSetData(data);
 
@@ -126,7 +161,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public IActionResult DeleteModel(int? memberId, int? model_Id)
         {
-            if(model_Id.HasValue  == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+            if (model_Id.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
 
             _uiqService.DeleteModelAsync(model_Id.Value);
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
