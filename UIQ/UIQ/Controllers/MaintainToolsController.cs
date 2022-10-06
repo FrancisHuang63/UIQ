@@ -167,7 +167,8 @@ namespace UIQ.Controllers
 
         public IActionResult PermissionSetting() 
         {
-            return View();
+            var model = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
+            return View(model);
         }
 
         public IActionResult PermissionSetting_MenuSet()

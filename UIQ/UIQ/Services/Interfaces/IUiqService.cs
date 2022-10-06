@@ -61,6 +61,8 @@ namespace UIQ.Services.Interfaces
 
         public Task<Member> GetMemberItemAsync(int memberId);
 
-        public Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync();
+        public Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync();        
+
+        public Task<IEnumerable<Role>> GetRoleItemsAsync();
     }
 }

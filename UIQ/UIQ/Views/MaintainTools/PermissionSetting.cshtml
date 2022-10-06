@@ -1,4 +1,8 @@
-﻿@using UIQ.Controllers
+﻿@using System.Security.Claims
+@using UIQ.Controllers
+@using UIQ.Enums
+@model IEnumerable<Role>
+@inject IHttpContextAccessor httpContextAccessor
 @{
 	 Layout = null;
 }
@@ -39,9 +43,6 @@
 		<div id="result" class="huge">
 		  <div class="jtable-main-container">
 			<div class="jtable-busy-panel-background" style="height: 110px;"></div>
-			<div class="jtable-busy-message" style="">
-			  載入中...
-			</div>
 			<table class="jtable" aria-describedby="permission_table">
 			  <thead>
 				<tr>
@@ -68,47 +69,17 @@
 				</tr>
 			  </thead>
 			  <tbody>
+				@foreach (var item in Model)
+				{
 				<tr>
-					<td>1</td>
-					<td>Admin</td>
+					<td>@item.role_id</td>
+					<td>@item.role_name</td>
 					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")">Set</a></td>
 					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools")">Set</a></td>
 				</tr>
-				<tr>
-					<td>2</td>
-					<td>Viwer</td>
-					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")">Set</a></td>
-					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools")">Set</a></td>
-				</tr>
-				<tr class="jtable-no-data-row">
-				  <td colspan="11">查無資料</td>
-				</tr>
+				}
 			  </tbody>
 			</table>
-			<div class="jtable-bottom-panel">
-			  <div class="jtable-left-area">
-				<span class="jtable-page-list"></span>
-				<span class="jtable-goto-page">
-				  <span>跳至: </span>
-				  <select>
-					<option value="1">1</option>
-				  </select>
-				</span>
-				<span class="jtable-page-size-change">
-				  <span>每頁顯示筆數: </span>
-				  <select>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="25">25</option>
-					<option value="50">50</option>
-					<option value="100">100</option>
-				  </select>
-				</span>
-			  </div>
-			  <div class="jtable-right-area">
-				<span class="jtable-page-info"></span>
-			  </div>
-			</div>
 			<div class="jtable-column-resize-bar" style="display: none;"></div>
 			<div class="jtable-column-selection-container"></div>
 		  </div>
