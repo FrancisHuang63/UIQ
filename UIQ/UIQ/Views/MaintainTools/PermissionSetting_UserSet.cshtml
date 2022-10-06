@@ -1,5 +1,68 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    Layout = null;
 }
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-hant">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link href="~/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/bootstrap/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/style.css" rel="stylesheet" type="text/css" />
+        <link href="~/css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
+
+        <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="~/js/bootstrap/bootstrap.min.js"></script>
+        <script type="text/javascript" src="~/js/tool.js"></script>
+        <script type="text/javascript" src="~/js/command.js"></script>
+
+        <title>User Set</title>
+    </head>
+
+    <body>
+        <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
+        <div class=topic>PermissionSetting > User Set</div>
+
+        <div>
+            <form method="post" class="form" action="" enctype="multipart/form-data">
+                <table width="100%" id="edit_command_table" aria-describedby="edit_command_table">
+                     <tr style="display:none;">                
+                        <th scope="col"></th>
+                    </tr>
+                    <tbody>
+                        <tr>
+                            <td width=8%>Role Name</td>
+                            <td>
+                                <input type="text" name="Command_Name" value="@Model?.Command_Name" disabled>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>User</td>
+                            <td>
+                                <input type="checkbox" id="ALL" name="ALL"> <label for="ALL"> ALL</label>
+                                <input type="checkbox" id="AAA" name="AAA"> <label for="AAA"> AAA</label>
+                                <input type="checkbox" id="BBB" name="BBB"> <label for="BBB"> BBB</label>
+                                <input type="checkbox" id="CCC" name="CCC"> <label for="CCC"> CCC</label>
+                                <input type="checkbox" id="DDD" name="DDD"> <label for="DDD"> DDD</label>
+                                <input type="checkbox" id="EEE" name="EEE"> <label for="EEE"> EEE</label>
+                                <input type="checkbox" id="FFF" name="FFF"> <label for="FFF"> FFF</label>
+                                <input type="checkbox" id="GGG" name="GGG"> <label for="GGG"> GGG</label>
+                                <input type="checkbox" id="LLL" name="LLL"> <label for="LLL"> LLL</label>
+                                <input type="checkbox" id="III" name="III"> <label for="III"> III</label>
+                                <input type="checkbox" id="JJJ" name="JJJ"> <label for="JJJ"> JJJ</label>
+                                <input type="checkbox" id="KKK" name="KKK"> <label for="KKK"> KKK</label>
+                                <input type="checkbox" id="ZZZ" name="ZZZ"> <label for="ZZZ"> ZZZ</label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div>
+                    <input type="submit" value="Save">
+                    <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='';}">
+                </div>
+            </form>
+        </div>
+    </body>
+</html>
+
+

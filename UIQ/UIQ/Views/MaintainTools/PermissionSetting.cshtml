@@ -1,4 +1,4 @@
-﻿
+﻿@using UIQ.Controllers
 @{
 	 Layout = null;
 }
@@ -33,7 +33,9 @@
 	</head>
 	<body>
 		<div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
-		<div class=topic>Permission Setting</div>
+		<div class=topic>Permission Setting
+			<input type="submit" value="Add" onclick="location.href='@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")'">
+		</div>
 		<div id="result" class="huge">
 		  <div class="jtable-main-container">
 			<div class="jtable-busy-panel-background" style="height: 110px;"></div>
@@ -69,14 +71,14 @@
 				<tr>
 					<td>1</td>
 					<td>Admin</td>
-					<td><a href="#">Set</a></td>
-					<td><a href="#">Set</a></td>
+					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")">Set</a></td>
+					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools")">Set</a></td>
 				</tr>
 				<tr>
 					<td>2</td>
 					<td>Viwer</td>
-					<td><a href="#">Set</a></td>
-					<td><a href="#">Set</a></td>
+					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")">Set</a></td>
+					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools")">Set</a></td>
 				</tr>
 				<tr class="jtable-no-data-row">
 				  <td colspan="11">查無資料</td>

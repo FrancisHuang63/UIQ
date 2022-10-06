@@ -16,12 +16,12 @@
         <script type="text/javascript" src="~/js/tool.js"></script>
         <script type="text/javascript" src="~/js/command.js"></script>
 
-        <title>NWP Command List</title>
+        <title>Menu Set</title>
     </head>
 
     <body>
         <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
-        <div class=topic>PermissionSetting > MenuSet</div>
+        <div class=topic>PermissionSetting > Menu Set</div>
 
         <div>
             <form method="post" class="form" action="" enctype="multipart/form-data">
@@ -31,76 +31,73 @@
                     </tr>
                     <tbody>
                         <tr>
-                            <td width=8%>Name</td>
+                            <td width=8%>Role Name</td>
                             <td>
                                 <input type="text" name="Command_Name" value="@Model?.Command_Name">
                                 <input type="hidden" name="Command_Id" value="@Model?.Command_Id">
                             </td>
                         </tr>
                         <tr>
-                            <td>Password</td>
-                            <td><input type="password" name="Command_Pwd" value="@Model?.Command_Pwd"></td>
+                            <td>System enquire</td>
+                            <td>
+                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
+                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
+                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
+                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
+                            </td>
                         </tr>
                         <tr>
-                            <td>Execution Time(min)</td>
-                            <td><input id="exec_time" name="Execution_Time" value="@Model?.Execution_Time"></td>
+                            <td>Model enquire</td>
+                            <td>
+                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
+                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
+                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
+                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
+                            </td>
                         </tr>
                         <tr>
-                            <td>Describe</td>
-                            <td><textarea name="Command_Desc">@Html.Raw(Model?.Command_Desc)</textarea></td>
-                        </tr>
+                            <td>Model rerun</td>
+                            <td>
+                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
+                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
+                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
+                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
+                            </td>
+                        </tr>                        
                         <tr>
-                            <td>Content</td>
-                            <td><textarea id="content" name="Command_Content">@Model?.Command_Content</textarea></td>
-                        </tr>
+                            <td>Rescue tools</td>
+                            <td>
+                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
+                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
+                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
+                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
+                            </td>
+                        </tr>                        
                         <tr>
-                            <td>Parameter Example</td>
-                            <td><textarea id="example" name="Command_Example">@Model?.Command_Example</textarea></td>
-                        </tr>
+                            <td>Maintain tools</td>
+                            <td>
+                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
+                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
+                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
+                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
+                            </td>
+                        </tr>                        
                         <tr>
-                            <td>Result</td>
-                            <td><div id="show" class="short">show the Execute result</div></td>
+                            <td>Reference info</td>
+                            <td>
+                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
+                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
+                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
+                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
                 <div>
                     <input type="submit" value="Save">
-                    <input type="button" value="Execute" onclick="showParameterModal('@(Model?.Command_Id)','ADM');" />
                     <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='';}">
                 </div>
             </form>
-        </div>
-
-        <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="parameter_modal" class="modal fade" style="display: none;">
-            <div id="selected_cmd_id" style="display:none"></div>
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button aria-hidden="true" data-dismiss="modal" class="close" type="button">×</button>
-                        <h4 class="modal-title">Please Input Command Information</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form id="parameter_form" role="form" class="form-horizontal">
-                            <div class="form-group">
-                                <label class="col-md-11" for="parameters">Parameter</label>
-                                <div class="col-md-11">
-                                    <input type="text" placeholder="Allow Empty" id="parameters" class="form-control">
-                                </div>
-                            </div>
-                            <div id="pwd_form_group" class="form-group" style="display:none">
-                                <label class="col-md-11" for="password">Password</label>
-                            <div class="col-md-11">
-                                <input type="password" placeholder="" id="password" class="form-control">
-                            </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-info" type="button" id="modal_execute">Execute</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="modal_close">Close</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </body>
 </html>
