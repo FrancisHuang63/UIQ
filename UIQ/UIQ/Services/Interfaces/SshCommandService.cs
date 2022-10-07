@@ -1,4 +1,4 @@
-﻿using Renci.SshNet;
+﻿using System.Diagnostics;
 
 namespace UIQ.Services.Interfaces
 {
@@ -6,24 +6,24 @@ namespace UIQ.Services.Interfaces
     {
         public async Task<string> RunCommandAsync(string command)
         {
-            if(string.IsNullOrWhiteSpace(command)) return null;
+            if (string.IsNullOrWhiteSpace(command)) return null;
 
-            //TDDO
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "bash",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                }
+            };
+            process.Start();
+            await process.StandardInput.WriteLineAsync(command);
+            var output = await process.StandardOutput.ReadLineAsync();
 
-            //var cmd = SSH.CreateCommand("apt update && apt upgrade -y");
-            //var asynch = cmd.BeginExecute();
-            //var reader = new StreamReader(cmd.OutputStream);
-
-            //while (!asynch.IsCompleted)
-            //{
-            //    var result = reader.ReadToEnd();
-            //    if (string.IsNullOrEmpty(result))
-            //        continue;
-            //    Console.Write(result);
-            //}
-            //cmd.EndExecute(asynch);
-
-            return string.Empty;
+            return output;
         }
     }
 }

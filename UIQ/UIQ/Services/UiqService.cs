@@ -400,6 +400,18 @@ namespace UIQ.Services
             return result.FirstOrDefault();
         }
 
+        public async Task<Member> GetMemberItemAsync(string modelName, string memberName, string nickname)
+        {
+            var sql = @"SELECT `member`.*
+                        FROM `member` mb
+                        LEFT JOIN `model` md ON md.`model_id` = mb.`model_id`
+                        WHERE md.`model_name` = @model_name
+                        AND mb.`member_name` = @member_name
+                        AND mb.`nickname` = @nickname";
+            var result = await _dataBaseNcsUiService.GetAllAsync<Member>("member", new { model_name = modelName, member_name = memberName, nickname = nickname });
+            return result.FirstOrDefault();
+        }
+
         public async Task<bool> DeleteModelAsync(int modelId)
         {
             var result = await _dataBaseNcsUiService.DeleteAsync("model", new { Model_Id = modelId });
@@ -423,7 +435,7 @@ namespace UIQ.Services
                 data.Model = new Model { Model_Name = data.New_Model_Name, Model_Position = data.New_Model_Position, };
                 data.Member.Model_Id = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("model", data.Model);
             }
-            
+
             //Member
             var isMemberExist = await _dataBaseNcsUiService.IsExistAsync("member", new { Member_Id = data.Member.Member_Id });
             if (isMemberExist) result += await _dataBaseNcsUiService.UpdateAsync("member", data.Member, new { Member_Id = data.Member.Member_Id });
@@ -476,7 +488,7 @@ namespace UIQ.Services
 
             return result > 0;
         }
-        
+
         public async Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync()
         {
             return await _dataBaseNcsUiService.GetAllAsync<UploadFile>("upload_file");

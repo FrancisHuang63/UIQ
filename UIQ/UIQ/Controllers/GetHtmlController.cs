@@ -12,6 +12,7 @@ namespace UIQ.Controllers
         private readonly string _hpcCtl;
         private readonly string _rshAccount;
         private readonly string _loginIp;
+        private readonly string _prefix;
         private readonly string _logDirectoryPath;
 
         public GetHtmlController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, IReadLogFileService readLogFileService)
@@ -24,6 +25,7 @@ namespace UIQ.Controllers
             var hostName = System.Net.Dns.GetHostName();
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
+            _prefix = runningJobInfo?.Items?.FirstOrDefault()?.Datas?.FirstOrDefault()?.Prefix;
             _logDirectoryPath = $"{_readLogFileService.RootPath}/log";
         }
 
@@ -157,7 +159,6 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<string> ResetModelShow(string modelName, string memberName, string nickname)
         {
-            //TODO 部分邏輯尚未完成
             var configList = _uiqService.GetModelLogFileViewModels();
             var account = configList.FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
@@ -175,6 +176,8 @@ namespace UIQ.Controllers
             var isWeps = modelName == "WEPS" && memberName == "CEN01";
             html += $"<h3>{modelName}_{memberName}(User: {account}, Nickname: {nickname})</h3>";
 
+            var jobIds = new List<string>();
+            var jobNames = new List<string>();
             if (dataArray.Any() == false)
             {
                 html += "There is no job!<br>";
@@ -185,11 +188,62 @@ namespace UIQ.Controllers
                 {
                     html += $"{item}<br>";
                     html += $"-----------------------------------------------------------------<br>";
+
+                    var dataLines = item.Split("\n");
+                    if (dataLines.Length > 1) jobIds.Add(dataLines[1]);
+                    if (dataLines.Length > 6) jobNames.Add(dataLines[6]);
                 }
             }
             html += "</div>";
 
+            if (jobIds.Any() && isWeps)
+            {
+                html += "<select id=\"jobid\" class=\"form\">";
+                html += "    <option>-----</option>";
+                html += "    <option value=\"ALLWEPS\">ALL jobs above</option>";
+                html += "</select>";
+            }
+            else
+            {
+                html += "<select id=\"jobid\" class=\"form\">";
+                html += "   <option>-----</option>";
+                for (var i = 0; i < jobIds.Count; i++)
+                {
+                    html += "    <option value=\"$jobidarr[$i]\">$jobnmarr[$i]($jobidarr[$i])</option>";
+                }
+                html += "</select>";
+            }
+
+            html += $@"<input id=""node"" type=""hidden"" value="""">
+                        <input id=""account"" type=""hidden"" value=""{account}"">
+                        <input id=""adjust"" type=""hidden"" value="""">
+                        <input type=""button"" class=""form"" value=""kill"" OnClick=""if(confirm('Do you want to submit?'))  {{sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.ResetModelResult))}', 'result');}} "">
+                        <div id=""result"" class=""short"">result...</div>";
+
             return html;
+        }
+
+        [HttpPost]
+        public async Task<string> ResetModelResult(string modelName, string memberName, string nickname, string jobId)
+        {
+            var configList = _uiqService.GetModelLogFileViewModels();
+            var account = configList.FirstOrDefault(x => x.Model_Name == modelName
+                                                      && x.Member_Name == memberName
+                                                      && x.Nickname == nickname)?.Account;
+            var member = await _uiqService.GetMemberItemAsync(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var shellName = member?.Reset_Model;
+            if (string.IsNullOrWhiteSpace(shellName))
+                return "Cancel running job function is not available for this member.";
+
+            var command = account == $"{_prefix}weps"
+                ? $"rsh -l {account} {_loginIp} {fullPath}{shellName} {fullPath}"
+                : $"rsh -l ${account} {_loginIp} /ncs/{_hpcCtl}/web/shell/cancel_job.ksh {account} {fullPath}{shellName} {jobId} {fullPath}";
+
+            var result = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + $"Kill Model of {modelName} {memberName} {nickname}\n";
+            result += await _uiqService.RunCommandAsync(command);
+
+            return result;
         }
 
         [HttpPost]

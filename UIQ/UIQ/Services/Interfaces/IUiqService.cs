@@ -61,14 +61,16 @@ namespace UIQ.Services.Interfaces
 
         public Task<Member> GetMemberItemAsync(int memberId);
 
+        public Task<Member> GetMemberItemAsync(string modelName, string memberName, string nickname);
+
         public Task<bool> DeleteModelAsync(int modelId);
 
         public Task<bool> DeleteMemberAsync(int memberId);
 
         public Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
-        
+
         public Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync();
-        
+
         public Task<IEnumerable<Role>> GetRoleItemsAsync();
     }
 }
