@@ -14,16 +14,18 @@ namespace UIQ.Controllers
         private readonly IUiqService _uiqService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IReadLogFileService _readLogFileService;
+        private readonly IUploadFileService _uploadFileService;
         private readonly string _hpcCtl;
         private readonly string _rshAccount;
         private readonly string _loginIp;
 
         public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService
-            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService)
+            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService, IUploadFileService uploadFileService)
         {
             _uiqService = uiqService;
             _httpContextAccessor = httpContextAccessor;
             _readLogFileService = readLogFileService;
+            _uploadFileService = uploadFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
@@ -232,7 +234,7 @@ namespace UIQ.Controllers
             return html;
         }
 
-        public IActionResult PermissionSetting() 
+        public IActionResult PermissionSetting()
         {
             var model = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
             return View(model);
@@ -242,6 +244,7 @@ namespace UIQ.Controllers
         {
             return View();
         }
+
         public IActionResult PermissionSetting_UserSet()
         {
             return View();
@@ -249,13 +252,44 @@ namespace UIQ.Controllers
 
         public IActionResult UploadFile()
         {
-            var model = _uiqService.GetUploadFileItemsAsync().GetAwaiter().GetResult();
-            return View(model);
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles)
+        {
+            if (postedFiles?.Any() == false)
+            {
+                ViewBag.Message = "No file!!";
+                return View();
+            }
+
+            var uploadFileDatas = new List<UploadFile>();
+            foreach (var file in postedFiles)
+            {
+                if (file.Length == 0) continue;
+                await _uploadFileService.UploadFileAsync(file);
+
+                var fileName = Path.GetFileName(file.FileName);
+                var filePath = _uploadFileService.GetUploadPathUrl(fileName);
+                uploadFileDatas.Add(new UploadFile(fileName, filePath));
+            }
+
+            await _uiqService.SetUploadFileItems(uploadFileDatas);
+            ViewBag.Message = "Upload success!!";
+            return View();
         }
 
         public IActionResult ParameterSetting()
         {
             return View();
+        }
+
+        [HttpPost]
+        public JsonResult GetUploadFile(int jtStartIndex = 0, int jtPageSize = 20)
+        {
+            var datas = _uiqService.GetUploadFilePageItems(jtStartIndex, jtPageSize, out var totalCnt).ToList();
+            return new JsonResult(new PageDataResponse<IEnumerable<UploadFile>>(datas, totalCnt));
         }
     }
 }

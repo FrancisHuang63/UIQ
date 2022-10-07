@@ -72,8 +72,8 @@
 				@foreach (var item in Model)
 				{
 				<tr>
-					<td>@item.role_id</td>
-					<td>@item.role_name</td>
+					<td>@item.Role_Id</td>
+					<td>@item.Role_Name</td>
 					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")">Set</a></td>
 					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools")">Set</a></td>
 				</tr>

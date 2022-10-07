@@ -69,8 +69,10 @@ namespace UIQ.Services.Interfaces
 
         public Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
 
-        public Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync();
+        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount);
 
         public Task<IEnumerable<Role>> GetRoleItemsAsync();
+
+        public Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas);
     }
 }

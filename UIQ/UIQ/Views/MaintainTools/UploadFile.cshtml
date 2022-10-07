@@ -1,10 +1,10 @@
 ﻿@using System.Security.Claims
 @using UIQ.Controllers
 @using UIQ.Enums
-@model IEnumerable<UploadFile>
 @inject IHttpContextAccessor httpContextAccessor
 @{
     Layout = null;
+    string message = ViewBag.Message ?? string.Empty;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -13,103 +13,97 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
 		<link rel="stylesheet" href="~/css/style.css" type="text/css">
-		<link rel="stylesheet" href="~/css/jtable/themes/lightcolor/gray/jtable.min.css" type="text/css">
-		<link rel="stylesheet" href="~/css/jtable/custom.css" type="text/css">
+        <link rel="stylesheet" href="~/css/jquery-ui.min.css" type="text/css" />
+        <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" type="text/css" />
+        <link rel="stylesheet" href="~/css/bootstrap/custom.css" type="text/css" />
+        <link rel="stylesheet" href="~/packages/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
+        <link rel="stylesheet" href="~/packages/jtable/2.4.0/custom.css" type="text/css">
 
-		<script type="text/javascript" src="~/js/jtable/jquery.jtable.js"></script>
-		<script type="text/javascript" src="~/js/jtable/custom.js"></script>
+        <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+        <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="~/js/bootstrap/bootstrap.min.js"></script>
+        <script type="text/javascript" src="~/js/bootstrap/custom.min.js"></script>
+        <script type="text/javascript" src="~/js/lib.min.js"></script>
+        <script type="text/javascript" src="~/packages/jtable/2.4.0/jquery.jtable.js"></script>
+        <script type="text/javascript" src="~/packages/jtable/2.4.0/custom.js"></script>
 
         <title>Upload File</title>
     </head>
     <body>
         <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
         <div class=topic>Upload File</div>
-        <div class="m-10" style="display:inline-flex;">
-            <input type="file" />
-            <input type=submit value="Upload" style="width:50px">
-        </div>
+        <form method="post" action="@Url.Action(nameof(MaintainToolsController.UploadFile))" enctype="multipart/form-data">
+            <div class="m-10" style="display:inline-flex;">
+                <input type="file" name="postedFiles" multiple="multiple" />
+                <input type=submit value="Upload" style="width:50px">
+            </div>
+        </form>
 
-		<div id="result" class="huge">
-		  <div class="jtable-main-container">
-			<div class="jtable-busy-panel-background" style="height: 110px;"></div>
-			<table class="jtable">
-			  <thead>
-				<tr>
-				  <th class="jtable-column-header" style="width: 10%;" scope="col">
-					<div class="jtable-column-header-container">
-					  <span class="jtable-column-header-text">SN</span>
-					</div>
-				  </th>
-				  <th class="jtable-column-header" style="width: 50%;" scope="col">
-					<div class="jtable-column-header-container">
-					  <span class="jtable-column-header-text">Name</span>
-					</div>
-				  </th>
-				  <th class="jtable-column-header" style="width: 20%;" scope="col">
-					<div class="jtable-column-header-container">
-					  <span class="jtable-column-header-text">Upload Time</span>
-					</div>
-				  </th>
-				  <th class="jtable-column-header" style="width: 10%;" scope="col">
-					<div class="jtable-column-header-container">
-					  <span class="jtable-column-header-text"></span>
-					</div>
-				  </th>				
-				  <th class="jtable-column-header" style="width: 10%;" scope="col">
-					<div class="jtable-column-header-container">
-					  <span class="jtable-column-header-text"></span>
-					</div>
-				  </th>					  
-				</tr>
-			  </thead>
-			  <tbody>
-				@foreach (var item in Model)
-				{
-				<tr>
-					<td>@item.file_id</td>
-					<td>@item.file_name</td>
-					<td>@item.create_datetime</td>
-					<td><a href="@item.file_path">Donload</a></td>
-					<td><a href="#">Delete</a></td>
-				</tr>
-				}
+		<div id="result" class="huge"></div>
 
-					@if (1==1) {  /*Priya*/
-						<tr class="jtable-no-data-row">
-						  <td colspan="11">查無資料</td>
-						</tr>
-					}
+		<script>
+			$(function(){
+				$('#result').initial_jtable({
+                    config: CreateTable,
+                    text: false
+                });
 
-			  </tbody>
-			</table>
-			<div class="jtable-bottom-panel">
-			  <div class="jtable-left-area">
-				<span class="jtable-page-list"></span>
-				<span class="jtable-goto-page">
-				  <span>跳至: </span>
-				  <select>
-					<option value="1">1</option>
-				  </select>
-				</span>
-				<span class="jtable-page-size-change">
-				  <span>每頁顯示筆數: </span>
-				  <select>
-					<option value="10">10</option>
-					<option value="20">20</option>
-					<option value="25">25</option>
-					<option value="50">50</option>
-					<option value="100">100</option>
-				  </select>
-				</span>
-			  </div>
-			  <div class="jtable-right-area">
-				<span class="jtable-page-info"></span>
-			  </div>
-			</div>
-			<div class="jtable-column-resize-bar" style="display: none;"></div>
-			<div class="jtable-column-selection-container"></div>
-		  </div>
-		</div>
+                let message = '@message';
+                if (message){
+                    alert(message);
+                }
+			});
+
+			function CreateTable() {
+                return{
+                    sorting: false,
+                    pageSize: 20,
+                    pageSizes: [10,20,25,50,100],
+                    actions: {
+                        listAction: '@(Url.Action(nameof(MaintainToolsController.GetUploadFile)))'
+                    },
+                    fields: {
+                        file_id: {
+                            title: 'SN',
+                            width: '3%'
+                        },
+                        file_name: {
+                            title: 'Name',
+                            width: '3%'
+                        },
+                        create_datetime: {
+                            title: 'Upload Time',
+                            width: '4%',
+                            display: function(uploadFileData){
+                                let date = new Date(uploadFileData.record.create_datetime)
+                                return GetFormattedDate(date);
+                            }
+                        },
+                        functions: {
+                            title: 'Download',
+                            width: '1%',
+                            sorting: false,
+                            edit: false,
+                            create: false,
+                            display: function (uploadFileData) {
+                                let url = encodeURI(uploadFileData.record.file_path);
+                                return $(`<td><a href="${url}" target="_blank" download>${uploadFileData.record.file_name}</a></td>`);
+                            }
+                        },
+                    }
+                };
+            }
+
+            function GetFormattedDate(date) {
+                var month = ("0" + (date.getMonth() + 1)).slice(-2);
+                var day  = ("0" + (date.getDate())).slice(-2);
+                var year = date.getFullYear();
+                var hour =  ("0" + (date.getHours())).slice(-2);
+                var min =  ("0" + (date.getMinutes())).slice(-2);
+                var seg = ("0" + (date.getSeconds())).slice(-2);
+                return year + "-" + month + "-" + day + " " + hour + ":" +  min + ":" + seg;
+            }
+		</script>
     </body>
 </html>
 

@@ -489,9 +489,22 @@ namespace UIQ.Services
             return result > 0;
         }
 
-        public async Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync()
+        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount)
         {
-            return await _dataBaseNcsUiService.GetAllAsync<UploadFile>("upload_file");
+            var sql = @$"SELECT SQL_CALC_FOUND_ROWS * 
+                         FROM `upload_file`
+                         ORDER BY `create_datetime` DESC
+                         LIMIT {pageSize} OFFSET {startIndex}";
+
+            var result = _dataBaseNcsUiService.QueryAsync<UploadFile>(sql).GetAwaiter().GetResult();
+            totalCount = _dataBaseNcsUiService.QueryAsync<int>("SELECT FOUND_ROWS() as total").GetAwaiter().GetResult().FirstOrDefault();
+            return result;
+        }
+
+        public async Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas)
+        {
+            var result = await _dataBaseNcsUiService.InsertAsync("upload_file", uploadFileDatas);
+            return result > 0;
         }
 
         public async Task<IEnumerable<Role>> GetRoleItemsAsync()
