@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.ComponentModel.Design;
+using UIQ.Attributes;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -36,6 +35,7 @@ namespace UIQ.Controllers
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.SetTyphoonData)]
         public IActionResult TyphoonInitialData()
         {
             return View();
@@ -73,6 +73,7 @@ namespace UIQ.Controllers
             return "Success";
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.Command)]
         public IActionResult Command()
         {
             var model = _uiqService.GetCommandItemsAsync().GetAwaiter().GetResult();
@@ -100,12 +101,14 @@ namespace UIQ.Controllers
             return RedirectToAction(nameof(Command));
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.CronSetting)]
         public IActionResult CronSetting()
         {
             var model = _uiqService.GetCronSettingViewModels();
             return View(model);
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.CronSetting)]
         [HttpPost]
         public IActionResult CronSetting(string cronMode)
         {
@@ -138,6 +141,7 @@ namespace UIQ.Controllers
             return View(model);
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
         public IActionResult ModelMemberSet(int? memberId)
         {
             ViewBag.IsNew = memberId == null;
@@ -152,6 +156,7 @@ namespace UIQ.Controllers
             return View(model);
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
         [HttpPost]
         public IActionResult ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
         {
@@ -160,6 +165,100 @@ namespace UIQ.Controllers
             _uiqService.SaveModelMemberSetData(data);
 
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
+        public IActionResult PermissionSetting()
+        {
+            var model = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
+            return View(model);
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
+        public IActionResult PermissionSetting_MenuSet(int? roleId)
+        {
+            var menus = _uiqService.GetMenuRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
+            var role = roleId.HasValue ? _uiqService.GetRoleItemAsync(roleId.Value).GetAwaiter().GetResult() : null;
+            ViewBag.Role = role;
+            return View(menus);
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
+        [HttpPost]
+        public IActionResult PermissionSetting_MenuSet(int? roleId, string roleName, int[] menuIds)
+        {
+            var actualRoleId = roleId ?? 0;
+            if (roleId == null) _uiqService.AddNewRole(roleName, out actualRoleId);
+            else _uiqService.UpdateRoleAsync(roleId.Value, roleName);
+
+            _uiqService.UpdateMenuToRole(actualRoleId, menuIds);
+            return RedirectToAction(nameof(PermissionSetting));
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
+        public IActionResult PermissionSetting_UserSet(int roleId)
+        {
+            var users = _uiqService.GetUserRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
+            var role = _uiqService.GetRoleItemAsync(roleId).GetAwaiter().GetResult();
+            ViewBag.Role = role;
+            return View(users);
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
+        [HttpPost]
+        public IActionResult PermissionSetting_UserSet(int roleId, int[] userIds)
+        {
+            _uiqService.UpdateUserToRole(roleId, userIds);
+            return RedirectToAction(nameof(PermissionSetting));
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
+        public IActionResult UploadFile()
+        {
+            return View();
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles)
+        {
+            if (postedFiles?.Any() == false)
+            {
+                ViewBag.Message = "No file!!";
+                return View();
+            }
+
+            var uploadFileDatas = new List<UploadFile>();
+            foreach (var file in postedFiles)
+            {
+                if (file.Length == 0) continue;
+                await _uploadFileService.UploadFileAsync(file);
+
+                var fileName = Path.GetFileName(file.FileName);
+                var filePath = _uploadFileService.GetUploadPathUrl(fileName);
+                uploadFileDatas.Add(new UploadFile(fileName, filePath));
+            }
+
+            await _uiqService.SetUploadFileItems(uploadFileDatas);
+            ViewBag.Message = "Upload success!!";
+            return View();
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.ParameterSetting)]
+        public IActionResult ParameterSetting()
+        {
+            var model = _uiqService.GetParameterItemAsync().GetAwaiter().GetResult();
+            return View(model);
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.ParameterSetting)]
+        [HttpPost]
+        public IActionResult ParameterSetting(Parameter data)
+        {
+            if (data == null) return RedirectToAction(nameof(ParameterSetting));
+
+            _uiqService.UpdateParameterAsync(data);
+            return RedirectToAction(nameof(ParameterSetting));
         }
 
         [HttpPost]
@@ -178,21 +277,6 @@ namespace UIQ.Controllers
 
             _uiqService.DeleteMemberAsync(memberId.Value);
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
-        }
-
-        public IActionResult DocumentManager()
-        {
-            return View();
-        }
-
-        public IActionResult RoleSetting()
-        {
-            return View();
-        }
-
-        public IActionResult RefreshTimeSetting()
-        {
-            return View();
         }
 
         [HttpPost]
@@ -236,97 +320,11 @@ namespace UIQ.Controllers
             return html;
         }
 
-        public IActionResult PermissionSetting()
-        {
-            var model = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
-            return View(model);
-        }
-
-        public IActionResult PermissionSetting_MenuSet(int? roleId)
-        {
-            var menus = _uiqService.GetMenuRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
-            var role = roleId.HasValue ? _uiqService.GetRoleItemAsync(roleId.Value).GetAwaiter().GetResult() : null;
-            ViewBag.Role = role;
-            return View(menus);
-        }
-
-        [HttpPost]
-        public IActionResult PermissionSetting_MenuSet(int? roleId, string roleName, int[] menuIds)
-        {
-            var actualRoleId = roleId ?? 0;
-            if (roleId == null) _uiqService.AddNewRole(roleName, out actualRoleId);
-            else _uiqService.UpdateRoleAsync(roleId.Value, roleName);
-
-            _uiqService.UpdateMenuToRole(actualRoleId, menuIds);
-            return RedirectToAction(nameof(PermissionSetting));
-        }
-
-        public IActionResult PermissionSetting_UserSet(int roleId)
-        {
-            var users = _uiqService.GetUserRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
-            var role = _uiqService.GetRoleItemAsync(roleId).GetAwaiter().GetResult();
-            ViewBag.Role = role;
-            return View(users);
-        }
-
-        [HttpPost]
-        public IActionResult PermissionSetting_UserSet(int roleId, int[] userIds)
-        {
-            _uiqService.UpdateUserToRole(roleId, userIds);
-            return RedirectToAction(nameof(PermissionSetting));
-        }
-
-        public IActionResult UploadFile()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles)
-        {
-            if (postedFiles?.Any() == false)
-            {
-                ViewBag.Message = "No file!!";
-                return View();
-            }
-
-            var uploadFileDatas = new List<UploadFile>();
-            foreach (var file in postedFiles)
-            {
-                if (file.Length == 0) continue;
-                await _uploadFileService.UploadFileAsync(file);
-
-                var fileName = Path.GetFileName(file.FileName);
-                var filePath = _uploadFileService.GetUploadPathUrl(fileName);
-                uploadFileDatas.Add(new UploadFile(fileName, filePath));
-            }
-
-            await _uiqService.SetUploadFileItems(uploadFileDatas);
-            ViewBag.Message = "Upload success!!";
-            return View();
-        }
-
-        public IActionResult ParameterSetting()
-        {
-            var model = _uiqService.GetParameterItemAsync().GetAwaiter().GetResult();
-            return View(model);
-        }
-
-        [HttpPost]
-        public IActionResult ParameterSetting(Parameter data)
-        {
-            if (data == null) return RedirectToAction(nameof(ParameterSetting));
-
-            _uiqService.UpdateParameterAsync(data);
-            return RedirectToAction(nameof(ParameterSetting));
-        }
-        
         [HttpPost]
         public JsonResult GetUploadFile(int jtStartIndex = 0, int jtPageSize = 20)
         {
             var datas = _uiqService.GetUploadFilePageItems(jtStartIndex, jtPageSize, out var totalCnt).ToList();
             return new JsonResult(new PageDataResponse<IEnumerable<UploadFile>>(datas, totalCnt));
         }
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.Design;
-using System.Data;
+﻿using System.Data;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -327,7 +326,7 @@ namespace UIQ.Services
 
         public async Task<IEnumerable<Command>> GetCommandItemsAsync()
         {
-             return await _dataBaseNcsUiService.GetAllAsync<Command>("command");
+            return await _dataBaseNcsUiService.GetAllAsync<Command>("command");
         }
 
         public async Task<bool> UpsertCommandAsync(Command data)
@@ -599,19 +598,18 @@ namespace UIQ.Services
 
             return result > 0;
         }
-        
+
         public async Task<Parameter> GetParameterItemAsync()
         {
             var sql = @"SELECT * FROM `parameter` WHERE `parameter_id` = @ParameterId";
             return (await _dataBaseNcsUiService.QueryAsync<Parameter>(sql, new { ParameterId = "HomeFreshFrequency" })).FirstOrDefault();
-
         }
 
         public async Task<bool> UpdateParameterAsync(Parameter data)
         {
-             return await _dataBaseNcsUiService.UpdateAsync("parameter", data, new { parameter_id = data.Parameter_Id }) > 0;
+            return await _dataBaseNcsUiService.UpdateAsync("parameter", data, new { parameter_id = data.Parameter_Id }) > 0;
         }
-        
+
         #region Private Methods
 
         private void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)

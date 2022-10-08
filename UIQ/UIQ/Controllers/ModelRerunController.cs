@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using UIQ.Attributes;
 using UIQ.Services.Interfaces;
 
 namespace UIQ.Controllers
@@ -24,24 +25,28 @@ namespace UIQ.Controllers
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.ResetModel)]
         public IActionResult ResetModel()
         {
             ViewBag.ConfigList = _uiqService.GetModelLogFileViewModels();
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.DtgAdjust)]
         public IActionResult DtgAdjust()
         {
             ViewBag.ConfigList = _uiqService.GetModelLogFileViewModels();
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.LidAdjust)]
         public IActionResult LidAdjust()
         {
             ViewBag.ConfigList = _uiqService.GetModelLogFileViewModels();
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.SubmitModel)]
         public IActionResult SubmitModel()
         {
             ViewBag.ConfigList = _uiqService.GetModelLogFileViewModels();

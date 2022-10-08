@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using UIQ.Attributes;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
 
@@ -25,6 +26,7 @@ namespace UIQ.Controllers
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.ModelLogFiles)]
         public IActionResult ModelLogFiles()
         {
             return View();
@@ -36,12 +38,14 @@ namespace UIQ.Controllers
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.RunningStatus)]
         public IActionResult RunningStatus()
         {
             ViewBag.ConfigList = _uiqService.GetModelLogFileViewModels();
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.DailyReport)]
         public IActionResult DailyReport()
         {
             var command = $"rsh -l ${_rshAccount} ${_loginIp} ls /ncs/{_hpcCtl}/daily_log/ | grep -v old_log";
@@ -49,6 +53,7 @@ namespace UIQ.Controllers
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.TyphoonInitialData)]
         public IActionResult TyphoonInitialData()
         {
             var command = $"rsh -l {_rshAccount} {_loginIp} cat /ncs/ncsatyp/TYP/M00/tmp/typhoon.ini";
@@ -56,6 +61,7 @@ namespace UIQ.Controllers
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.BatchHistory)]
         public IActionResult BatchHistory()
         {
             return View();

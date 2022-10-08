@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UIQ.Attributes;
 using UIQ.Services.Interfaces;
 
 namespace UIQ.Controllers
@@ -14,16 +15,19 @@ namespace UIQ.Controllers
             _uiqService = uiqService;
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.NwpRunningJobs)]
         public IActionResult NwpRunningJobs()
         {
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.CronStatus)]
         public IActionResult CronStatus()
         {
             return View();
         }
 
+        [MenuPageAuthorize(Enums.MenuEnum.HpcStatus)]
         public IActionResult HpcStatus()
         {
             return View();
