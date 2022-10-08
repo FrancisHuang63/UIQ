@@ -1,5 +1,9 @@
-﻿@{
+﻿@using UIQ.Controllers
+@using UIQ.ViewModels
+@model IEnumerable<MenuRoleSetViewModel>
+@{
     Layout = null;
+    Role role = ViewBag.Role;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -24,7 +28,7 @@
         <div class=topic>PermissionSetting > Menu Set</div>
 
         <div>
-            <form method="post" class="form" action="" enctype="multipart/form-data">
+            <form method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet)))" enctype="multipart/form-data">
                 <table width="100%" id="edit_command_table" aria-describedby="edit_command_table">
                      <tr style="display:none;">                
                         <th scope="col"></th>
@@ -33,72 +37,50 @@
                         <tr>
                             <td width=8%>Role Name</td>
                             <td>
-                                <input type="text" name="Command_Name" value="@Model?.Command_Name">
-                                <input type="hidden" name="Command_Id" value="@Model?.Command_Id">
+                                <input type="text" name="roleName" value="@(role?.Role_Name)">
+                                <input type="hidden" name="roleId" value="@(role == null ? null : (int?)role.Role_Id)">
                             </td>
                         </tr>
-                        <tr>
-                            <td>System enquire</td>
-                            <td>
-                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
-                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
-                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
-                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Model enquire</td>
-                            <td>
-                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
-                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
-                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
-                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Model rerun</td>
-                            <td>
-                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
-                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
-                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
-                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
-                            </td>
-                        </tr>                        
-                        <tr>
-                            <td>Rescue tools</td>
-                            <td>
-                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
-                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
-                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
-                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
-                            </td>
-                        </tr>                        
-                        <tr>
-                            <td>Maintain tools</td>
-                            <td>
-                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
-                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
-                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
-                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
-                            </td>
-                        </tr>                        
-                        <tr>
-                            <td>Reference info</td>
-                            <td>
-                                <input type="checkbox" id="Menu1" name="Menu1"> <label for="Menu1"> ALL</label>
-                                <input type="checkbox" id="Menu2" name="Menu2"> <label for="Menu2"> NWP running jobs</label>
-                                <input type="checkbox" id="Menu3" name="Menu3"> <label for="Menu3"> CRON table status</label>
-                                <input type="checkbox" id="Menu4" name="Menu4"> <label for="Menu4"> HPC system status</label>
-                            </td>
-                        </tr>
+                        @foreach (var mainMenu in Model.Where(x => x.Parent_Id == null))
+                        {
+                            var subMenus = Model.Where(x => x.Parent_Id == mainMenu.Menu_Id);
+
+                            <tr>
+                                <td>@mainMenu.Name</td>
+                                <td>
+                                    <input type="checkbox" id="menuAll_@(mainMenu.Menu_Id)" class="all-menu-check" data-id="@(mainMenu.Menu_Id)" @(subMenus.All(x => x.Is_Selected) ? "checked" : string.Empty)><label for="menuAll_@(mainMenu.Menu_Id)"> ALL</label>
+                                    <input type="checkbox" id="menu_@(mainMenu.Menu_Id)" name="menuIds" value="@mainMenu.Menu_Id" @(mainMenu.Is_Selected ? "checked" : string.Empty) style="display:none;" />
+                                    @foreach (var subMenu in subMenus)
+                                    {
+                                        <input type="checkbox" id="menu_@(subMenu.Menu_Id)" name="menuIds" class="menu-check" data-id="@(mainMenu.Menu_Id)" value="@subMenu.Menu_Id" @(subMenu.Is_Selected ? "checked" : string.Empty)> <label for="menu_@(subMenu.Menu_Id)">@subMenu.Name</label>
+                                    }
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
                 <div>
                     <input type="submit" value="Save">
-                    <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='';}">
+                    <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='@(Url.Action(nameof(MaintainToolsController.PermissionSetting)))'}">
                 </div>
             </form>
         </div>
+
+        <script>
+            $('.all-menu-check').change(function(){
+                let mainMenuId = $(this).data('id');
+                $(`input[data-id='${mainMenuId}']`).prop('checked', $(this).prop('checked'));
+            });
+
+            $('.menu-check').change(function(){
+                let mainMenuId = $(this).data('id');
+                let isAnySubMenuChecked = $(`input.menu-check[data-id='${mainMenuId}']:checked`).length > 0;
+                $(`#menu_${mainMenuId}`).prop('checked', isAnySubMenuChecked);
+
+                let isAllSubMenuChecked = $(`input.menu-check[data-id='${mainMenuId}']:checked`).length == $(`input.menu-check[data-id='${mainMenuId}']`).length;
+                $(`#menuAll_${mainMenuId}`).prop('checked', isAllSubMenuChecked);
+            });
+        </script>
     </body>
 </html>
 

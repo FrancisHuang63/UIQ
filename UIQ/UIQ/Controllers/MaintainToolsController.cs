@@ -16,16 +16,18 @@ namespace UIQ.Controllers
         private readonly IUiqService _uiqService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IReadLogFileService _readLogFileService;
+        private readonly IUploadFileService _uploadFileService;
         private readonly string _hpcCtl;
         private readonly string _rshAccount;
         private readonly string _loginIp;
 
         public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService
-            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService)
+            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService, IUploadFileService uploadFileService)
         {
             _uiqService = uiqService;
             _httpContextAccessor = httpContextAccessor;
             _readLogFileService = readLogFileService;
+            _uploadFileService = uploadFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
@@ -234,25 +236,74 @@ namespace UIQ.Controllers
             return html;
         }
 
-        public IActionResult PermissionSetting() 
+        public IActionResult PermissionSetting()
         {
             var model = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
             return View(model);
         }
 
-        public IActionResult PermissionSetting_MenuSet()
+        public IActionResult PermissionSetting_MenuSet(int? roleId)
         {
-            return View();
+            var menus = _uiqService.GetMenuRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
+            var role = roleId.HasValue ? _uiqService.GetRoleItemAsync(roleId.Value).GetAwaiter().GetResult() : null;
+            ViewBag.Role = role;
+            return View(menus);
         }
-        public IActionResult PermissionSetting_UserSet()
+
+        [HttpPost]
+        public IActionResult PermissionSetting_MenuSet(int? roleId, string roleName, int[] menuIds)
         {
-            return View();
+            var actualRoleId = roleId ?? 0;
+            if (roleId == null) _uiqService.AddNewRole(roleName, out actualRoleId);
+            else _uiqService.UpdateRoleAsync(roleId.Value, roleName);
+
+            _uiqService.UpdateMenuToRole(actualRoleId, menuIds);
+            return RedirectToAction(nameof(PermissionSetting));
+        }
+
+        public IActionResult PermissionSetting_UserSet(int roleId)
+        {
+            var users = _uiqService.GetUserRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
+            var role = _uiqService.GetRoleItemAsync(roleId).GetAwaiter().GetResult();
+            ViewBag.Role = role;
+            return View(users);
+        }
+
+        [HttpPost]
+        public IActionResult PermissionSetting_UserSet(int roleId, int[] userIds)
+        {
+            _uiqService.UpdateUserToRole(roleId, userIds);
+            return RedirectToAction(nameof(PermissionSetting));
         }
 
         public IActionResult UploadFile()
         {
-            var model = _uiqService.GetUploadFileItemsAsync().GetAwaiter().GetResult();
-            return View(model);
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles)
+        {
+            if (postedFiles?.Any() == false)
+            {
+                ViewBag.Message = "No file!!";
+                return View();
+            }
+
+            var uploadFileDatas = new List<UploadFile>();
+            foreach (var file in postedFiles)
+            {
+                if (file.Length == 0) continue;
+                await _uploadFileService.UploadFileAsync(file);
+
+                var fileName = Path.GetFileName(file.FileName);
+                var filePath = _uploadFileService.GetUploadPathUrl(fileName);
+                uploadFileDatas.Add(new UploadFile(fileName, filePath));
+            }
+
+            await _uiqService.SetUploadFileItems(uploadFileDatas);
+            ViewBag.Message = "Upload success!!";
+            return View();
         }
 
         public IActionResult ParameterSetting()
@@ -268,6 +319,13 @@ namespace UIQ.Controllers
 
             _uiqService.UpdateParameterAsync(data);
             return RedirectToAction(nameof(ParameterSetting));
+        }
+        
+        [HttpPost]
+        public JsonResult GetUploadFile(int jtStartIndex = 0, int jtPageSize = 20)
+        {
+            var datas = _uiqService.GetUploadFilePageItems(jtStartIndex, jtPageSize, out var totalCnt).ToList();
+            return new JsonResult(new PageDataResponse<IEnumerable<UploadFile>>(datas, totalCnt));
         }
 
     }

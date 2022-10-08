@@ -7,5 +7,8 @@ namespace UIQ.ViewModels
     {
         [JsonPropertyName("group_name")]
         public string Group_Name { get; set; }
+
+        [JsonPropertyName("roles")]
+        public string Roles { get; set; }
     }
 }

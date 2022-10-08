@@ -7,16 +7,26 @@ namespace UIQ.Models
 	{
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [JsonPropertyName("role_id")]
-        public int? role_id { get; set; }
+        public int Role_Id { get; set; }
 
         [JsonPropertyName("role_name")]
-        public string? role_name { get; set; }
+        public string Role_Name { get; set; }
 
         [JsonPropertyName("create_datetime")]
-        public string? create_datetime { get; set; }
+        public DateTime Create_DateTime { get; set; }
 
         [JsonPropertyName("last_update_datetime")]
-        public string? last_update_datetime { get; set; }
-        
+        public DateTime? Last_Update_DateTime { get; set; }
+
+        public Role(string roleName)
+        {
+            Role_Name = roleName;
+            Create_DateTime = DateTime.Now;
+        }
+
+        public Role()
+        {
+
+        }
     }
 }

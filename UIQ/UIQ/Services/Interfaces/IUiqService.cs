@@ -41,6 +41,8 @@ namespace UIQ.Services.Interfaces
 
         public Task<Command> GetCommandItemAsync(int commandId);
 
+        public Task<IEnumerable<MenuViewModel>> GetMenuItemsWithPermissonAsync();
+
         public IEnumerable<CronSettingViewModel> GetCronSettingViewModels();
 
         public void UpdateGroupValidationWhoHasCronMode(string cronMode);
@@ -69,12 +71,28 @@ namespace UIQ.Services.Interfaces
 
         public Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
 
-        public Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync();
+        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount);
 
         public Task<IEnumerable<Role>> GetRoleItemsAsync();
 
+        public Task<Role> GetRoleItemAsync(int roleId);
+
+        public Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas);
+
+        public Task<IEnumerable<MenuRoleSetViewModel>> GetMenuRoleSetItemsAsync(int? roleId);
+
+        public bool AddNewRole(string roleName, out int newRoleId);
+
+        public Task<bool> UpdateRoleAsync(int roleId, string roleName);
+
+        public Task<bool> UpdateMenuToRole(int roleId, int[] menuIds);
+
+        public Task<IEnumerable<UserRoleSetViewModel>> GetUserRoleSetItemsAsync(int roleId);
+
+        public Task<bool> UpdateUserToRole(int roleId, int[] userIds);
+        
         public Task<Parameter> GetParameterItemAsync();
 
         public Task<bool> UpdateParameterAsync(Parameter data);
-    } 
+    }
 }

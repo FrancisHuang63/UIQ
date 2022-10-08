@@ -1,5 +1,9 @@
-﻿@{
+﻿@using UIQ.Controllers
+@using UIQ.ViewModels
+@model IEnumerable<UserRoleSetViewModel>
+@{
     Layout = null;
+    Role role = ViewBag.Role;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -14,7 +18,6 @@
         <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
         <script type="text/javascript" src="~/js/bootstrap/bootstrap.min.js"></script>
         <script type="text/javascript" src="~/js/tool.js"></script>
-        <script type="text/javascript" src="~/js/command.js"></script>
 
         <title>User Set</title>
     </head>
@@ -24,7 +27,7 @@
         <div class=topic>PermissionSetting > User Set</div>
 
         <div>
-            <form method="post" class="form" action="" enctype="multipart/form-data">
+            <form method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet)))" enctype="multipart/form-data">
                 <table width="100%" id="edit_command_table" aria-describedby="edit_command_table">
                      <tr style="display:none;">                
                         <th scope="col"></th>
@@ -33,35 +36,40 @@
                         <tr>
                             <td width=8%>Role Name</td>
                             <td>
-                                <input type="text" name="Command_Name" value="@Model?.Command_Name" disabled>
+                                <input type="text" value="@role?.Role_Name" disabled>
+                                <input type="hidden" name="roleId" value="@role?.Role_Id">
                             </td>
                         </tr>
                         <tr>
                             <td>User</td>
                             <td>
-                                <input type="checkbox" id="ALL" name="ALL"> <label for="ALL"> ALL</label>
-                                <input type="checkbox" id="AAA" name="AAA"> <label for="AAA"> AAA</label>
-                                <input type="checkbox" id="BBB" name="BBB"> <label for="BBB"> BBB</label>
-                                <input type="checkbox" id="CCC" name="CCC"> <label for="CCC"> CCC</label>
-                                <input type="checkbox" id="DDD" name="DDD"> <label for="DDD"> DDD</label>
-                                <input type="checkbox" id="EEE" name="EEE"> <label for="EEE"> EEE</label>
-                                <input type="checkbox" id="FFF" name="FFF"> <label for="FFF"> FFF</label>
-                                <input type="checkbox" id="GGG" name="GGG"> <label for="GGG"> GGG</label>
-                                <input type="checkbox" id="LLL" name="LLL"> <label for="LLL"> LLL</label>
-                                <input type="checkbox" id="III" name="III"> <label for="III"> III</label>
-                                <input type="checkbox" id="JJJ" name="JJJ"> <label for="JJJ"> JJJ</label>
-                                <input type="checkbox" id="KKK" name="KKK"> <label for="KKK"> KKK</label>
-                                <input type="checkbox" id="ZZZ" name="ZZZ"> <label for="ZZZ"> ZZZ</label>
+                                <input type="checkbox" id="allUser" @(Model.All(x => x.Is_Selected) ? "checked" : string.Empty) /> <label for="ALL"> ALL</label>
+                                
+                                @foreach (var user in Model)
+                                {
+                                    <input type="checkbox" id="user_@(user.User_Id)" name="userIds" class="user-check" value="@(user.User_Id)" @(user.Is_Selected ? "checked" : string.Empty) /> <label for="user_@(user.User_Id)">@user.Account</label>
+                                }
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 <div>
                     <input type="submit" value="Save">
-                    <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='';}">
+                    <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='@(Url.Action(nameof(MaintainToolsController.PermissionSetting)))';}">
                 </div>
             </form>
         </div>
+
+        <script>
+            $('#allUser').change(function(){
+                $(`input.user-check`).prop('checked', $(this).prop('checked'));
+            });
+
+            $('input.user-check').change(function(){
+                let isAllUserChecked = $(`input.user-check:checked`).length == $(`input.user-check`).length;
+                $(`#allUser`).prop('checked', isAllUserChecked);
+            });
+        </script>
     </body>
 </html>
 

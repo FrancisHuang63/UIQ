@@ -74,7 +74,11 @@ namespace UIQ.Services
         public async Task<int> InsertAsync<T>(string tableName, T model)
         {
             if (model == null) return 0;
-            var props = model.GetType().GetProperties().Where(x => !x.CustomAttributes.Any(a => a.AttributeType == typeof(NotMappedAttribute) || a.AttributeType == typeof(DatabaseGeneratedAttribute)));
+            
+            var isEnumerable = IsEnumerableType(model.GetType());
+            var modelType = isEnumerable ? model.GetType().GetGenericArguments()[0] : model.GetType();
+
+            var props = modelType.GetProperties().Where(x => !x.CustomAttributes.Any(a => a.AttributeType == typeof(NotMappedAttribute) || a.AttributeType == typeof(DatabaseGeneratedAttribute)));
             var fieldNames = props.Select(x => $"`{x.Name.ToLower()}`");
             var fieldValues = props.Select(x => $"@{x.Name}");
 
