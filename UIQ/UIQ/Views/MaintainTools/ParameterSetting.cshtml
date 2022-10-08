@@ -1,4 +1,6 @@
-﻿@{
+﻿@using UIQ.Controllers
+@model Parameter
+@{
     Layout = null;
 }
 
@@ -8,17 +10,20 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link href="~/css/style.css" rel="stylesheet" type="text/css" />
 
-        <title>Cron mode Setting</title>
+        <title>Parameter Setting</title>
     </head>
     <body>
+        <form method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.ParameterSetting)))" enctype="multipart/form-data">
         <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
         <div class=topic>Parameter Setting</div>
         <div class="mt-10">
             <span> Homepage Update Frequency : </span>
-            <input type="number" value="" /> <span>sec</span>
+            <input type="text" name="Parameter_Value"  value="@Model?.Parameter_Value" /> <span>sec</span>
+            <input type="hidden" name="Parameter_Id"  value="@Model?.Parameter_Id" /> 
         </div>
 
         <input class="mt-10" type=submit value="Save" style="width:100px">
+        </form>
     </body>
 </html>
 

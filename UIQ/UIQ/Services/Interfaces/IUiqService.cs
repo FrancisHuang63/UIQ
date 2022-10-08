@@ -72,5 +72,9 @@ namespace UIQ.Services.Interfaces
         public Task<IEnumerable<UploadFile>> GetUploadFileItemsAsync();
 
         public Task<IEnumerable<Role>> GetRoleItemsAsync();
-    }
+
+        public Task<Parameter> GetParameterItemAsync();
+
+        public Task<bool> UpdateParameterAsync(Parameter data);
+    } 
 }

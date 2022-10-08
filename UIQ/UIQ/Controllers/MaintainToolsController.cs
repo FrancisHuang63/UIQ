@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.ComponentModel.Design;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -255,7 +257,18 @@ namespace UIQ.Controllers
 
         public IActionResult ParameterSetting()
         {
-            return View();
+            var model = _uiqService.GetParameterItemAsync().GetAwaiter().GetResult();
+            return View(model);
         }
+
+        [HttpPost]
+        public IActionResult ParameterSetting(Parameter data)
+        {
+            if (data == null) return RedirectToAction(nameof(ParameterSetting));
+
+            _uiqService.UpdateParameterAsync(data);
+            return RedirectToAction(nameof(ParameterSetting));
+        }
+
     }
 }
