@@ -25,8 +25,10 @@ namespace UIQ.Controllers
         {
             var models = _uiqService.GetHomeTableDatas();
             var menus = GenerateMenuItems();
+            int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
 
             ViewBag.Menu = menus;
+            ViewBag.RefreshTimeSeconds = refreshSeconds;
             return View(models);
         }
 
@@ -34,8 +36,10 @@ namespace UIQ.Controllers
         {
             var models = _uiqService.GetHomeTableDatas();
             var menus = GenerateMenuItems();
+            int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
 
             ViewBag.Menu = menus;
+            ViewBag.RefreshTimeSeconds = refreshSeconds;
             return View(models);
         }
 

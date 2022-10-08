@@ -9,6 +9,7 @@
     Layout = null;
     var user = httpContextAccessor.HttpContext?.User;
     IEnumerable<MenuViewModel> menus = ViewBag.Menu;
+    int refreshTimeSeconds = ViewBag.RefreshTimeSeconds == 0 ? 60000 : ((int)ViewBag.RefreshTimeSeconds) * 1000;
     ViewData["Title"] = "DetailedStatus";
 }
 
@@ -43,7 +44,7 @@
             {
                 window.location.reload();
             }
-            setTimeout('page_refresh()',60000);
+            setTimeout('page_refresh()', @refreshTimeSeconds);
         </script>
     </head>
 
