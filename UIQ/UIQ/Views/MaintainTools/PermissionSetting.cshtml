@@ -12,17 +12,16 @@
 <link rel="stylesheet" href="~/css/jquery-ui.min.css" type="text/css" />
 <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" type="text/css" />
 <link rel="stylesheet" href="~/css/bootstrap/custom.css" type="text/css" />
-<link rel="stylesheet" href="~/css/jtable/themes/lightcolor/gray/jtable.min.css" type="text/css">
-<link rel="stylesheet" href="~/css/jtable/custom.css" type="text/css">
+<link rel="stylesheet" href="~/packages/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
+<link rel="stylesheet" href="~/packages/jtable/2.4.0/custom.css" type="text/css">
 
 <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
 <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
 <script type="text/javascript" src="~/js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="~/js/bootstrap/custom.min.js"></script>
 <script type="text/javascript" src="~/js/lib.min.js"></script>
-<script type="text/javascript" src="~/js/jtable/jquery.jtable.js"></script>
-<script type="text/javascript" src="~/js/jtable/custom.js"></script>
-<script type="text/javascript" src="~/js/batch_history.js"></script>
+<script type="text/javascript" src="~/packages/jtable/2.4.0/jquery.jtable.min.js"></script>
+<script type="text/javascript" src="~/packages/jtable/2.4.0/custom.js"></script>
 
 <html xmlns="http://www.w3.org/1999/xhtml"  lang="zh-hant">
 	<head>
@@ -74,8 +73,8 @@
 				<tr>
 					<td>@item.Role_Id</td>
 					<td>@item.Role_Name</td>
-					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools")">Set</a></td>
-					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools")">Set</a></td>
+					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_MenuSet), "MaintainTools", new{ roleId = item.Role_Id})">Set</a></td>
+					<td><a href="@Url.Action(nameof(MaintainToolsController.PermissionSetting_UserSet), "MaintainTools", new{ roleId = item.Role_Id})">Set</a></td>
 				</tr>
 				}
 			  </tbody>

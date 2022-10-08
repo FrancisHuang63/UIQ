@@ -61,12 +61,12 @@
                             @foreach(var menu in menus.OrderBy(x => x.Sort))
                             {
                                 <li>
-                                    <a href="javascript:;">@menu.Title</a>
+                                    <a href="javascript:;">@menu.Name</a>
                                     <ul>
                                         @foreach(var subMenu in menu.ChildItems.OrderBy(x => x.Sort))
                                         {
                                             <li>
-                                                <a href="@subMenu.LinkUrl" target='_blank'>@subMenu.Title</a>
+                                                <a href="@subMenu.Url" target='_blank'>@subMenu.Name</a>
                                             </li>
                                         }
                                     </ul>

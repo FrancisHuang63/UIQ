@@ -1,32 +1,12 @@
-﻿namespace UIQ.ViewModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using UIQ.Models;
+
+namespace UIQ.ViewModels
 {
-    public class MenuViewModel
+    public class MenuViewModel : Menu
     {
-        public string Title { get; set; }
-
-        public string LinkUrl { get; set; }
-
-        public int Sort { get; set; }
-
+        [NotMapped]
         public List<MenuViewModel> ChildItems { get; set; }
-
-        public MenuViewModel(string title, string linkUrl, int sort)
-        {
-            Title = title;
-            LinkUrl = linkUrl;
-            Sort = sort;
-        }
-
-        public MenuViewModel(string title, int sort, IEnumerable<MenuViewModel> childItem)
-        {
-            Title = title;
-            Sort = sort;
-            ChildItems = childItem.ToList();
-        }
-
-        public MenuViewModel()
-        {
-
-        }
     }
 }

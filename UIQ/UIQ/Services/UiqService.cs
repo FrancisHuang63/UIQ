@@ -348,6 +348,19 @@ namespace UIQ.Services
             return (await _dataBaseNcsUiService.QueryAsync<Command>(sql, new { CommandId = commandId })).FirstOrDefault();
         }
 
+        public async Task<IEnumerable<MenuViewModel>> GetMenuItemsWithPermissonAsync()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null) return new List<MenuViewModel>();
+
+            var roleIds = (user.Claims.FirstOrDefault(x => x.Type == "RoleIds").Value ?? string.Empty).Split(",");
+            var sql = @"SELECT * FROM `menu`
+                        WHERE `menu_id` IN (SELECT `menu_id` FROM `role_menu` WHERE `role_id` IN @RoleIds)
+                        ORDER BY `sort`";
+            var result = await _dataBaseNcsUiService.QueryAsync<MenuViewModel>(sql, new { RoleIds = roleIds });
+            return result;
+        }
+
         public IEnumerable<CronSettingViewModel> GetCronSettingViewModels()
         {
             var sql = @"SELECT `cron_group`, CASE WHEN `cron_group` = (SELECT `master_group` FROM `crontab` GROUP BY `master_group` LIMIT 1) THEN 1
@@ -491,7 +504,7 @@ namespace UIQ.Services
 
         public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount)
         {
-            var sql = @$"SELECT SQL_CALC_FOUND_ROWS * 
+            var sql = @$"SELECT SQL_CALC_FOUND_ROWS *
                          FROM `upload_file`
                          ORDER BY `create_datetime` DESC
                          LIMIT {pageSize} OFFSET {startIndex}";
@@ -507,9 +520,83 @@ namespace UIQ.Services
             return result > 0;
         }
 
+        public async Task<IEnumerable<MenuRoleSetViewModel>> GetMenuRoleSetItemsAsync(int? roleId)
+        {
+            var sql = $@"SELECT m.*, (SELECT EXISTS(SELECT 1
+                                                   FROM `role_menu`
+                                                   WHERE `menu_id` = m.`menu_id` AND `role_id` = @RoleId))
+                                      AS `is_selected`
+                         FROM `menu` m
+                         ORDER BY `sort`";
+            var result = await _dataBaseNcsUiService.QueryAsync<MenuRoleSetViewModel>(sql, new { RoleId = roleId });
+            return result;
+        }
+
         public async Task<IEnumerable<Role>> GetRoleItemsAsync()
         {
             return await _dataBaseNcsUiService.GetAllAsync<Role>("role");
+        }
+
+        public async Task<Role> GetRoleItemAsync(int roleId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<Role>("role", new { role_id = roleId });
+            return result.FirstOrDefault();
+        }
+
+        public bool AddNewRole(string roleName, out int newRoleId)
+        {
+            var role = new Role(roleName);
+            newRoleId = (int)_dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("role", role).GetAwaiter().GetResult();
+            return newRoleId > 0;
+        }
+
+        public async Task<bool> UpdateRoleAsync(int roleId, string roleName)
+        {
+            var sql = @"UPDATE `role`
+                        SET `role_name` = @RoleName,
+                            `last_update_datetime` = @LastUpdateDatetime
+                        WHERE `role_id` = @RoleId";
+            var param = new
+            {
+                RoleId = roleId,
+                RoleName = roleName,
+                LastUpdateDatetime = DateTime.Now,
+            };
+            var result = await _dataBaseNcsUiService.ExecuteWithTransactionAsync(sql, param);
+            return result > 0;
+        }
+
+        public async Task<bool> UpdateMenuToRole(int roleId, int[] menuIds)
+        {
+            var result = 0;
+            result += await _dataBaseNcsUiService.DeleteAsync("role_menu", new { role_id = roleId });
+
+            var datas = menuIds?.Select(menuId => new RoleMenu(roleId, menuId)).ToList();
+            result += await _dataBaseNcsUiService.InsertAsync("role_menu", datas);
+
+            return result > 0;
+        }
+
+        public async Task<IEnumerable<UserRoleSetViewModel>> GetUserRoleSetItemsAsync(int roleId)
+        {
+            var sql = $@"SELECT u.*, (SELECT EXISTS(SELECT 1
+                                                   FROM `role_user`
+                                                   WHERE `user_id` = u.`user_id` AND `role_id` = @RoleId))
+                                      AS `is_selected`
+                         FROM `user` u";
+            var result = await _dataBaseNcsUiService.QueryAsync<UserRoleSetViewModel>(sql, new { RoleId = roleId });
+            return result;
+        }
+
+        public async Task<bool> UpdateUserToRole(int roleId, int[] userIds)
+        {
+            var result = 0;
+            result += await _dataBaseNcsUiService.DeleteAsync("role_user", new { role_id = roleId });
+
+            var datas = userIds?.Select(userId => new RoleUser(roleId, userId)).ToList();
+            result += await _dataBaseNcsUiService.InsertAsync("role_user", datas);
+
+            return result > 0;
         }
 
         #region Private Methods

@@ -17,6 +17,16 @@ namespace UIQ.Models
 
         [JsonPropertyName("last_update_datetime")]
         public DateTime? Last_Update_DateTime { get; set; }
-        
+
+        public Role(string roleName)
+        {
+            Role_Name = roleName;
+            Create_DateTime = DateTime.Now;
+        }
+
+        public Role()
+        {
+
+        }
     }
 }

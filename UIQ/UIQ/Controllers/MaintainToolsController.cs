@@ -240,14 +240,38 @@ namespace UIQ.Controllers
             return View(model);
         }
 
-        public IActionResult PermissionSetting_MenuSet()
+        public IActionResult PermissionSetting_MenuSet(int? roleId)
         {
-            return View();
+            var menus = _uiqService.GetMenuRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
+            var role = roleId.HasValue ? _uiqService.GetRoleItemAsync(roleId.Value).GetAwaiter().GetResult() : null;
+            ViewBag.Role = role;
+            return View(menus);
         }
 
-        public IActionResult PermissionSetting_UserSet()
+        [HttpPost]
+        public IActionResult PermissionSetting_MenuSet(int? roleId, string roleName, int[] menuIds)
         {
-            return View();
+            var actualRoleId = roleId ?? 0;
+            if (roleId == null) _uiqService.AddNewRole(roleName, out actualRoleId);
+            else _uiqService.UpdateRoleAsync(roleId.Value, roleName);
+
+            _uiqService.UpdateMenuToRole(actualRoleId, menuIds);
+            return RedirectToAction(nameof(PermissionSetting));
+        }
+
+        public IActionResult PermissionSetting_UserSet(int roleId)
+        {
+            var users = _uiqService.GetUserRoleSetItemsAsync(roleId).GetAwaiter().GetResult().ToList();
+            var role = _uiqService.GetRoleItemAsync(roleId).GetAwaiter().GetResult();
+            ViewBag.Role = role;
+            return View(users);
+        }
+
+        [HttpPost]
+        public IActionResult PermissionSetting_UserSet(int roleId, int[] userIds)
+        {
+            _uiqService.UpdateUserToRole(roleId, userIds);
+            return RedirectToAction(nameof(PermissionSetting));
         }
 
         public IActionResult UploadFile()

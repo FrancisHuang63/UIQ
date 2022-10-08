@@ -27,7 +27,7 @@ namespace UIQ.Services
             await SetLogin(userInfo);
             return true;
         }
-        
+
         public async Task Logout()
         {
             await _httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -38,8 +38,11 @@ namespace UIQ.Services
 
         private async Task<UserViewModel> GetUserInfo(string userId, string password)
         {
-            var sql = $@"SELECT `user`.*, `group`.`group_name` FROM `user`
-                         JOIN `group` ON `user`.`group_id` = `group`.`group_id`
+            var sql = $@"SELECT u.*, g.`group_name`, (SELECT GROUP_CONCAT(`role_id`)
+                                                      FROM `role_user` ru
+                                                      WHERE ru.`user_id` = u.`user_id`) AS `roles`
+                         FROM `user` u
+                         JOIN `group` g ON g.`group_id` = u.`group_id`
                          WHERE `account` = @Account AND `passwd` = @Password";
 
             return _dataBaseNcsUiService.QueryAsync<UserViewModel>(sql, new { Account = userId, Password = password }).GetAwaiter().GetResult().Single();
@@ -53,6 +56,7 @@ namespace UIQ.Services
                 new Claim("Id", userInfo.User_Id.ToString()),
                 new Claim(ClaimTypes.Role, userInfo.Group_Name),
                 new Claim("GourpId", userInfo.Group_Id.ToString()),
+                new Claim("RoleIds", (userInfo.Roles ?? string.Empty)),
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
