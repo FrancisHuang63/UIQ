@@ -222,7 +222,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadFile(IFormFile[] postedFiles)
         {
-            if (postedFiles?.Any() == false)
+            if (postedFiles == null || postedFiles.Any() == false)
             {
                 ViewBag.Message = "No file!!";
                 return View();

@@ -21,7 +21,7 @@ namespace UIQ.Controllers
             var logPath = $"{_readLogFileService.RootPath}/log/{modelName}/{account}/{memberName}.log";
             var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
-            if(logContent == null) Content($"<pre> There is no log file of {modelName}_{memberName}.");
+            if(logContent == null) return Content($"<pre> There is no log file of {modelName}_{memberName}.");
 
             var returnContent = $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">
 									<pre>";

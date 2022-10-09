@@ -84,7 +84,7 @@ namespace UIQ.Services
             if (!string.IsNullOrWhiteSpace(selNode)) return string.Empty;
 
             var resultHtml = string.Empty;
-            var nodes = selNode.Split(',');
+            var nodes = (selNode ?? string.Empty).Split(',');
             foreach (var node in nodes)
             {
                 var command = $"rsh -l ${_RshAccount} {node} /ncs/${_HpcCtl}/web/shell/ps.ksh";

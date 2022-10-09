@@ -82,7 +82,7 @@
 										<th scope="col"></th>
 									</tr>
 									<tr>
-										<td><input type="radio" name="IsNewModelName" value="False" @(isNew ? "checked" : string.Empty)>Old Model Name<font color="red">*</font>：</td>
+										<td><input type="radio" name="IsNewModelName" value="False" @(isNew ? "checked" : string.Empty)>Old Model Name<span color="red">*</span>：</td>
 										<td>
 											<select id="model_select" name="Model.Model_Id">
 												@foreach (var item in modelItems)

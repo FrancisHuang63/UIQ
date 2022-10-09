@@ -11,7 +11,7 @@ namespace UIQ.Services
 
         public async Task UploadFileAsync(IFormFile file)
         {
-            if (file?.Length == 0) return;
+            if (file == null || file?.Length == 0) return;
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload", file.FileName);
 
