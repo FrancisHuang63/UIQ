@@ -136,7 +136,7 @@ namespace UIQ.Services
 
         public async Task<IEnumerable<Model>> GetModelItemsAsync()
         {
-            var datas = await _dataBaseNcsUiService.GetAllAsync<Model>(nameof(Model));
+            var datas = await _dataBaseNcsUiService.GetAllAsync<Model>("model");
             return datas;
         }
 
