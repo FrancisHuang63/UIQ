@@ -45,7 +45,7 @@ namespace UIQ.Services
                          JOIN `group` g ON g.`group_id` = u.`group_id`
                          WHERE `account` = @Account AND `passwd` = @Password";
 
-            return _dataBaseNcsUiService.QueryAsync<UserViewModel>(sql, new { Account = userId, Password = password }).GetAwaiter().GetResult().Single();
+            return _dataBaseNcsUiService.QueryAsync<UserViewModel>(sql, new { Account = userId, Password = password }).GetAwaiter().GetResult().FirstOrDefault();
         }
 
         private async Task SetLogin(UserViewModel userInfo)

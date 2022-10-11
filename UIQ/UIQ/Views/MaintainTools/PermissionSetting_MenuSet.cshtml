@@ -49,7 +49,7 @@
                                 <td>@mainMenu.Name</td>
                                 <td>
                                     <input type="checkbox" id="menuAll_@(mainMenu.Menu_Id)" class="all-menu-check" data-id="@(mainMenu.Menu_Id)" @(subMenus.All(x => x.Is_Selected) ? "checked" : string.Empty)><label for="menuAll_@(mainMenu.Menu_Id)"> ALL</label>
-                                    <input type="checkbox" id="menu_@(mainMenu.Menu_Id)" name="menuIds" value="@mainMenu.Menu_Id" @(mainMenu.Is_Selected ? "checked" : string.Empty) style="display:none;" />
+                                    <input type="checkbox" id="menu_@(mainMenu.Menu_Id)" name="menuIds" data-id="@(mainMenu.Menu_Id)" value="@mainMenu.Menu_Id" @(mainMenu.Is_Selected ? "checked" : string.Empty) style="display:none;" />
                                     @foreach (var subMenu in subMenus)
                                     {
                                         <input type="checkbox" id="menu_@(subMenu.Menu_Id)" name="menuIds" class="menu-check" data-id="@(mainMenu.Menu_Id)" value="@subMenu.Menu_Id" @(subMenu.Is_Selected ? "checked" : string.Empty)> <label for="menu_@(subMenu.Menu_Id)">@subMenu.Name</label>
