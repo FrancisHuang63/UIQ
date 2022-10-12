@@ -4,7 +4,9 @@
 @inject IHttpContextAccessor httpContextAccessor
 @{
     Layout = null;
+    IEnumerable<Role> roles = ViewBag.Roles;
     string message = ViewBag.Message ?? string.Empty;
+    var roleIds = (httpContextAccessor?.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == "RoleIds").Value ?? string.Empty).Split(',');
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -32,13 +34,20 @@
     <body>
         <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
         <div class=topic>Upload File</div>
-        <form method="post" action="@Url.Action(nameof(MaintainToolsController.UploadFile))" enctype="multipart/form-data">
+        <form id="postFrm" method="post" action="@Url.Action(nameof(MaintainToolsController.UploadFile))" enctype="multipart/form-data">
             <div class="m-10" style="display:inline-flex;">
                 <input type="file" name="postedFiles" multiple="multiple" />
+                <div style="margin-right: 10px">
+                    <span>Select file role permissoin</span>
+                    @foreach (var role in roles)
+                    {
+                        <input type="checkbox" id="chk_@(role.Role_Id)" name="roleIds" value="@role.Role_Id" @(roleIds.Contains(role.Role_Id.ToString()) ? "checked" : string.Empty) />
+                        <label for="chk_@(role.Role_Id)">@role.Role_Name</label>
+                    }
+                </div>
                 <input type=submit value="Upload" style="width:50px">
             </div>
         </form>
-
 		<div id="result" class="huge"></div>
 
 		<script>
@@ -48,12 +57,19 @@
                     text: false
                 });
 
+                $('#postFrm').on('submit', function(e){
+                    if($('input[name="roleIds"]:checked').length == 0){
+                        e.preventDefault();
+                        alert('Please select role!!');
+                    }
+                });
+
                 let message = '@message';
                 if (message){
                     alert(message);
                 }
 			});
-
+            
 			function CreateTable() {
                 return{
                     sorting: false,
@@ -90,6 +106,17 @@
                                 return $(`<td><a href="${url}" target="_blank" download>${uploadFileData.record.file_name}</a></td>`);
                             }
                         },
+                        del: {
+                            title: 'Delete',
+                            width: '1%',
+                            sorting: false,
+                            edit: false,
+                            create: false,
+                            display: function (uploadFileData) {
+                                
+                                return $(`<td><a href="javascript:;" onclick="if (confirm('Sure delete this file?')){DeleteFile(${uploadFileData.record.file_id});}" >Delete</a></td>`);
+                            }
+                        },
                     }
                 };
             }
@@ -102,6 +129,21 @@
                 var min =  ("0" + (date.getMinutes())).slice(-2);
                 var seg = ("0" + (date.getSeconds())).slice(-2);
                 return year + "-" + month + "-" + day + " " + hour + ":" +  min + ":" + seg;
+            }
+
+            function DeleteFile(fileId){
+                $.ajax({
+                    url: '@Url.Action(nameof(MaintainToolsController.DeleteUploadFile))',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {fileId: fileId},
+                    success: function(resp){
+                        alert(resp.message);
+                        if(resp.success == true){
+                            location.href = location.href;
+                        }
+                    }
+                });
             }
 		</script>
     </body>

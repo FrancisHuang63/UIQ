@@ -17,6 +17,7 @@ namespace UIQ.Controllers
         private readonly IReadLogFileService _readLogFileService;
         private readonly IUploadFileService _uploadFileService;
         private readonly string _hpcCtl;
+        private readonly string _systemName;
         private readonly string _rshAccount;
         private readonly string _loginIp;
 
@@ -28,6 +29,7 @@ namespace UIQ.Controllers
             _readLogFileService = readLogFileService;
             _uploadFileService = uploadFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
+            _systemName = configuration.GetValue<string>("SystemName");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
             var hostName = System.Net.Dns.GetHostName();
@@ -62,9 +64,9 @@ namespace UIQ.Controllers
 
             foreach (var dirNameParameter in dirNameParameters)
             {
-                var directoryPath = $"{_readLogFileService.RootPath}\\temp\\{dirNameParameter.DirName}";
+                var directoryPath = Path.Combine(_readLogFileService.RootPath, "temp", dirNameParameter.DirName);
                 var fileName = $"typhoon.{dirNameParameter.FilePrefix}";
-                var fullFilePath = $"{directoryPath}\\{fileName}";
+                var fullFilePath = Path.Combine(directoryPath, fileName);
 
                 var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents) : string.Join("\n\n", txtContents));
                 await _readLogFileService.WriteDataIntoLogFileAsync(directoryPath, fullFilePath, newDataContent);
@@ -120,17 +122,17 @@ namespace UIQ.Controllers
             {
                 case "Normal":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /ncs/${_hpcCtl}/shfun/shbin/Change_mode.ksh Normal");
+                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /{_systemName}/${_hpcCtl}/shfun/shbin/Change_mode.ksh Normal");
                     break;
 
                 case "Backup":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /ncs/{_hpcCtl}/shfun/shbin/Change_mode.ksh Backup");
+                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Backup");
                     break;
 
                 case "Typhoon":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /ncs/{_hpcCtl}/shfun/shbin/Change_mode.ksh Typhoon");
+                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Typhoon");
                     break;
 
                 default:
@@ -215,13 +217,16 @@ namespace UIQ.Controllers
         [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
         public IActionResult UploadFile()
         {
+            var p = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+            ViewBag.Roles = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
             return View();
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
         [HttpPost]
-        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles)
+        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles, int[] roleIds)
         {
+            ViewBag.Roles = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
             if (postedFiles == null || postedFiles.Any() == false)
             {
                 ViewBag.Message = "No file!!";
@@ -239,9 +244,19 @@ namespace UIQ.Controllers
                 uploadFileDatas.Add(new UploadFile(fileName, filePath));
             }
 
-            await _uiqService.SetUploadFileItems(uploadFileDatas);
+            await _uiqService.SetUploadFileItems(uploadFileDatas, roleIds);
             ViewBag.Message = "Upload success!!";
             return View();
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
+        [HttpPost]
+        public async Task<ApiResponse<string>> DeleteUploadFile(int? fileId)
+        {
+            if (fileId == null) return new ApiResponse<string>("") { Message = "File sn is error" };
+
+            var result = await _uiqService.DeleteUploadFile(fileId.Value);
+            return new ApiResponse<string>("") { Success = result, Message = $"File delete {(result ? "success" : "error")}" };
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ParameterSetting)]

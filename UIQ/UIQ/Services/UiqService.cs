@@ -10,18 +10,22 @@ namespace UIQ.Services
     {
         private readonly IDataBaseService _dataBaseNcsUiService;
         private readonly IDataBaseService _dataBaseNcsLogService;
+        private readonly IUploadFileService _uploadFileService;
         private readonly ISshCommandService _sshCommandService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private string _HpcCtl { get; set; }
+        private string _SystemName { get; set; }
         private string _RshAccount { get; set; }
 
-        public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration)
+        public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration, IUploadFileService uploadFileService)
         {
             _dataBaseNcsUiService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsUi);
             _dataBaseNcsLogService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsLog);
+            _uploadFileService = uploadFileService;
             _sshCommandService = sshCommandService;
             _httpContextAccessor = httpContextAccessor;
             _HpcCtl = configuration.GetValue<string>("HpcCTL");
+            _SystemName = configuration.GetValue<string>("SystemName");
             _RshAccount = configuration.GetValue<string>("RshAccount");
         }
 
@@ -87,7 +91,7 @@ namespace UIQ.Services
             var nodes = (selNode ?? string.Empty).Split(',');
             foreach (var node in nodes)
             {
-                var command = $"rsh -l ${_RshAccount} {node} /ncs/${_HpcCtl}/web/shell/ps.ksh";
+                var command = $"rsh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/shell/ps.ksh";
 
                 resultHtml += "<pre>";
                 resultHtml += $"<h3>{node}</h3>";
@@ -131,7 +135,7 @@ namespace UIQ.Services
             var result = datas.FirstOrDefault();
             if (result == null) return null;
 
-            return $"/ncs/{result.Account}{result.Member_Path}/{modelName}/{memberName}";
+            return $"/{_SystemName}/{result.Account}{result.Member_Path}/{modelName}/{memberName}";
         }
 
         public async Task<IEnumerable<Model>> GetModelItemsAsync()
@@ -506,17 +510,25 @@ namespace UIQ.Services
         {
             var sql = @$"SELECT SQL_CALC_FOUND_ROWS *
                          FROM `upload_file`
+                         WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE role_id IN @RoleIds)
                          ORDER BY `create_datetime` DESC
                          LIMIT {pageSize} OFFSET {startIndex}";
 
-            var result = _dataBaseNcsUiService.QueryAsync<UploadFile>(sql).GetAwaiter().GetResult();
+            var roleIds = (_httpContextAccessor?.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "RoleIds").Value ?? string.Empty).Split(',').Select(x => int.Parse(x));
+
+            var result = _dataBaseNcsUiService.QueryAsync<UploadFile>(sql, new { RoleIds = roleIds }).GetAwaiter().GetResult();
             totalCount = _dataBaseNcsUiService.QueryAsync<int>("SELECT FOUND_ROWS() as total").GetAwaiter().GetResult().FirstOrDefault();
             return result;
         }
 
-        public async Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas)
+        public async Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas, IEnumerable<int> roleIds)
         {
-            var result = await _dataBaseNcsUiService.InsertAsync("upload_file", uploadFileDatas);
+            var result = 0;
+            foreach (var uploadFileData in uploadFileDatas)
+            {
+                var newId = await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("upload_file", uploadFileData);
+                result = await _dataBaseNcsUiService.InsertAsync("role_upload_file", roleIds.Select(x => new RoleUploadFile(x, (int)newId)).ToList());
+            }
             return result > 0;
         }
 
@@ -608,6 +620,25 @@ namespace UIQ.Services
         public async Task<bool> UpdateParameterAsync(Parameter data)
         {
             return await _dataBaseNcsUiService.UpdateAsync("parameter", data, new { parameter_id = data.Parameter_Id }) > 0;
+        }
+
+        public async Task<bool> DeleteUploadFile(int fileId)
+        {
+            var uploadFile = await GetUploadFileItemAsync(fileId);
+            if (uploadFile == null) return false;
+
+            var sql = @"DELETE FROM `role_upload_file` WHERE `file_id` = @FileId;
+                        DELETE FROM `upload_file` WHERE `file_id` = @FileId";
+
+            var result = (await _dataBaseNcsUiService.ExecuteWithTransactionAsync(sql, new { FileId = fileId })) > 0;
+            result &= _uploadFileService.DeleteUploadFile(uploadFile.File_Name);
+            return result;
+        }
+
+        private async Task<UploadFile> GetUploadFileItemAsync(int fileId)
+        {
+            var data = await _dataBaseNcsUiService.GetAllAsync<UploadFile>("upload_file", new { file_id = fileId });
+            return data.FirstOrDefault();
         }
 
         #region Private Methods

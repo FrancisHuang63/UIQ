@@ -12,6 +12,7 @@ namespace UIQ.Controllers
     {
         private readonly IUiqService _uiqService;
         private readonly string _hpcCtl;
+        private readonly string _systemName;
         private readonly string _rshAccount;
         private readonly string _loginIp;
 
@@ -19,6 +20,7 @@ namespace UIQ.Controllers
         {
             _uiqService = uiqService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
+            _systemName = configuration.GetValue<string>("SystemName");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
             var hostName = System.Net.Dns.GetHostName();
@@ -48,7 +50,7 @@ namespace UIQ.Controllers
         [MenuPageAuthorize(Enums.MenuEnum.DailyReport)]
         public IActionResult DailyReport()
         {
-            var command = $"rsh -l ${_rshAccount} ${_loginIp} ls /ncs/{_hpcCtl}/daily_log/ | grep -v old_log";
+            var command = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{_hpcCtl}/daily_log/ | grep -v old_log";
             ViewBag.Data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
             return View();
         }
@@ -56,7 +58,7 @@ namespace UIQ.Controllers
         [MenuPageAuthorize(Enums.MenuEnum.TyphoonInitialData)]
         public IActionResult TyphoonInitialData()
         {
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat /ncs/ncsatyp/TYP/M00/tmp/typhoon.ini";
+            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/ncsatyp/TYP/M00/tmp/typhoon.ini";
             ViewBag.Data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
             return View();
         }

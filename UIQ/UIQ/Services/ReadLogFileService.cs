@@ -1,10 +1,20 @@
-﻿using UIQ.Services.Interfaces;
+﻿using System.Reflection;
+using UIQ.Services.Interfaces;
 
 namespace UIQ.Services
 {
     public class ReadLogFileService : IReadLogFileService
     {
-        public string RootPath => $"{Directory.GetCurrentDirectory()}\\wwwroot";
+        public string RootPath
+        {
+            get
+            {
+#if DEBUG
+                return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+#endif
+                return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wwwroot");
+            }
+        }
 
         public async Task<string> ReadLogFileAsync(string filePath)
         {

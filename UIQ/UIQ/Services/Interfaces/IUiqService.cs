@@ -77,7 +77,7 @@ namespace UIQ.Services.Interfaces
 
         public Task<Role> GetRoleItemAsync(int roleId);
 
-        public Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas);
+        public Task<bool> SetUploadFileItems(IEnumerable<UploadFile> uploadFileDatas, IEnumerable<int> roleIds);
 
         public Task<IEnumerable<MenuRoleSetViewModel>> GetMenuRoleSetItemsAsync(int? roleId);
 
@@ -90,9 +90,11 @@ namespace UIQ.Services.Interfaces
         public Task<IEnumerable<UserRoleSetViewModel>> GetUserRoleSetItemsAsync(int roleId);
 
         public Task<bool> UpdateUserToRole(int roleId, int[] userIds);
-        
+
         public Task<Parameter> GetParameterItemAsync();
 
         public Task<bool> UpdateParameterAsync(Parameter data);
+
+        public Task<bool> DeleteUploadFile(int fileId);
     }
 }

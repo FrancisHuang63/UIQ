@@ -12,7 +12,7 @@ namespace UIQ.Services.Interfaces
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "bash",
+                    FileName = command,
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -20,8 +20,9 @@ namespace UIQ.Services.Interfaces
                 }
             };
             process.Start();
-            await process.StandardInput.WriteLineAsync(command);
-            var output = await process.StandardOutput.ReadLineAsync();
+            var output = await process.StandardOutput.ReadToEndAsync();
+            await process.StandardOutput.ReadLineAsync();
+            process.WaitForExit();
 
             return output;
         }

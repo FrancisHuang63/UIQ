@@ -63,9 +63,7 @@
         <div id='top'>
 
             <table aria-describedby="top">
-                <tr style="display:none;">                
-                    <th scope="col"></th>
-                </tr>
+                <tr style="display:none;"><th scope="col"></th></tr>
                 <tr>
                     <td height="107" valign="bottom" background="@Href("~/images/index_inside_01.jpg")">
                         <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
