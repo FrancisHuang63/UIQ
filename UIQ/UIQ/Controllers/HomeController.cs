@@ -49,6 +49,39 @@ namespace UIQ.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        public IActionResult Test()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Test(string command)
+        {
+            if(string.IsNullOrWhiteSpace(command)) return View();
+
+            ViewBag.ResultWithC = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
+
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \" {command} \"",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
+                }
+            };
+            process.Start();
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            process.WaitForExit();
+
+            ViewBag.ResultWithoutC = output;
+
+            return View(command);
+        }
+
         #region Private Methods
 
         private IEnumerable<MenuViewModel> GenerateMenuItems()
