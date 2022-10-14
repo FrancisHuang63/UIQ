@@ -1,0 +1,37 @@
+﻿@model string
+@{
+    Layout = null;
+    var resultWithC = ViewBag.ResultWithC ?? string.Empty;
+    var resultWithoutC = ViewBag.ResultWithoutC ?? string.Empty;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Test</title>
+</head>
+<body>
+    <form method="post" action="@Url.Action("Test")" enctype="application/x-www-form-urlencoded">
+        <div>
+            input command : 
+            <input type="text" name="command" value="@Model" style="width:900px;">
+        </div>
+        <br>
+        <div>
+            <p>Command result with -c : </p>
+            <p>@resultWithC</p>
+        </div>
+        <br>
+        <hr>
+        <br>
+        <div>
+            <p>Command result without -c : </p>
+            <p>@resultWithoutC</p>
+        </div>
+
+        <input type="submit" value="Submit" />
+    </form>
+</body>
+</html>

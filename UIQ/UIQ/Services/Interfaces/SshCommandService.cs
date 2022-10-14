@@ -22,7 +22,6 @@ namespace UIQ.Services.Interfaces
             };
             process.Start();
             var output = await process.StandardOutput.ReadToEndAsync();
-            //await process.StandardOutput.ReadLineAsync();
             process.WaitForExit();
 
             return output;
