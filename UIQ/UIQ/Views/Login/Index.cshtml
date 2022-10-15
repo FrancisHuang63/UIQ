@@ -1,6 +1,6 @@
 ﻿@{
 	Layout = null;
-	var message = ViewData["Message"];
+	var message = ViewData["Message"] ?? string.Empty;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -9,6 +9,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>NWP Login page</title>
 	<link href="~/css/style.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
 </head>
 
 <body>
@@ -82,8 +83,8 @@
 </body>
 <script>
 	$(function(){
-		if('@message' != null){
-			alert('@message'); 
+		if('@message'){
+			alert('@(Html.Raw(message))');
 			window.location = '@Url.Action("Index")';
 		}
 	});

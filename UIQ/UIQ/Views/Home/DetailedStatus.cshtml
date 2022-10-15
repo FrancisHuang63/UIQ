@@ -102,7 +102,7 @@
                                 ? "running"
                                 : string.Empty;
                         var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
-                        var logViewPath = baseUrl + Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account });
+                        var logViewPath = baseUrl + Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account });
 
                         <tr class="@(trClass)" id="@($"{item.Model_Name}_{item.Member_Name}_{item.Nickname}")">
                             <td class="left">
@@ -112,7 +112,7 @@
                                         <img alt="Edit" src="~/images/edit.png" width="12"/>
                                     </a>
                                 }
-                                <a style="text-decoration:none; font-weight:bold" href="@(Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
+                                <a style="text-decoration:none; font-weight:bold" href="@(Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
                                      @($"{item.Model_Name}_{item.Member_Name} ({item.Nickname})")
                                 </a>
                             </td>

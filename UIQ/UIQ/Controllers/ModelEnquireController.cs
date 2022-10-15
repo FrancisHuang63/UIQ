@@ -93,7 +93,7 @@ namespace UIQ.Controllers
             if (string.IsNullOrWhiteSpace(modelName) || string.IsNullOrWhiteSpace(memberName)) return new JsonResult(new ApiResponse<IEnumerable<string>>(new string[] { }));
 
             var datas = _uiqService.GetModelLogFileViewModels();
-            var nickNames = datas.Where(x => x.Model_Name == modelName && x.Member_Name == memberName).Select(x => x.Member_Name).Distinct();
+            var nickNames = datas.Where(x => x.Model_Name == modelName && x.Member_Name == memberName).Select(x => x.Nickname).Distinct();
             return new JsonResult(new ApiResponse<IEnumerable<string>>(nickNames) { Success = true });
         }
 

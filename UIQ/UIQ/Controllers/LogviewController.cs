@@ -14,7 +14,7 @@ namespace UIQ.Controllers
             _readLogFileService = readLogFileService;
         }
 
-        public async Task<IActionResult> Index(string modelName, string memberName, string account)
+        public async Task<ContentResult> Index(string modelName, string memberName, string account)
         {
             var baseUrl = _httpContextAccessor.HttpContext.Request.Scheme + "://" + _httpContextAccessor.HttpContext.Request.Host;
             var logUrl = $"{baseUrl}/log/{modelName}/{account}/{memberName}.log";
@@ -39,7 +39,11 @@ namespace UIQ.Controllers
 
             returnContent += "</pre>";
 
-            return Content(returnContent);
+            return new ContentResult
+            {
+                ContentType = "text/html",
+                Content = returnContent
+            };
         }
     }
 }
