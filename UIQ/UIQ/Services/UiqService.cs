@@ -15,6 +15,7 @@ namespace UIQ.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private string _HpcCtl { get; set; }
         private string _SystemName { get; set; }
+        private string _SystemDirectoryName { get; set; }
         private string _RshAccount { get; set; }
 
         public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration, IUploadFileService uploadFileService)
@@ -26,6 +27,7 @@ namespace UIQ.Services
             _httpContextAccessor = httpContextAccessor;
             _HpcCtl = configuration.GetValue<string>("HpcCTL");
             _SystemName = configuration.GetValue<string>("SystemName");
+            _SystemDirectoryName = configuration.GetValue<string>("SystemDirectoryName");
             _RshAccount = configuration.GetValue<string>("RshAccount");
         }
 
@@ -91,7 +93,7 @@ namespace UIQ.Services
             var nodes = (selNode ?? string.Empty).Split(',');
             foreach (var node in nodes)
             {
-                var command = $"rsh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/shell/ps.ksh";
+                var command = $"rsh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/{_SystemDirectoryName}/wwwroot/shell/ps.ksh";
 
                 resultHtml += "<pre>";
                 resultHtml += $"<h3>{node}</h3>";

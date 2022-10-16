@@ -11,6 +11,7 @@ namespace UIQ.Controllers
         private readonly IReadLogFileService _readLogFileService;
         private readonly string _hpcCtl;
         private readonly string _systemName;
+        private readonly string _systemDirectoryName;
         private readonly string _rshAccount;
         private readonly string _loginIp;
         private readonly string _prefix;
@@ -22,6 +23,7 @@ namespace UIQ.Controllers
             _readLogFileService = readLogFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _systemName = configuration.GetValue<string>("SystemName");
+            _systemName = configuration.GetValue<string>("SystemDirectoryName");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
             var hostName = System.Net.Dns.GetHostName();
@@ -240,7 +242,7 @@ namespace UIQ.Controllers
 
             var command = account == $"{_prefix}weps"
                 ? $"rsh -l {account} {_loginIp} {fullPath}{shellName} {fullPath}"
-                : $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {account} {fullPath}{shellName} {jobId} {fullPath}";
+                : $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/cancel_job.ksh {account} {fullPath}{shellName} {jobId} {fullPath}";
 
             var result = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + $"Kill Model of {modelName} {memberName} {nickname}\n";
             result += await _uiqService.RunCommandAsync(command);
@@ -295,7 +297,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
                 html += $"{command} <br><br>";
                 html += await _uiqService.RunCommandAsync(command);
 
@@ -336,7 +338,7 @@ namespace UIQ.Controllers
             var account = configData?.Account;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
-            var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {account} {fullPath} {lid}";
+            var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/set_Lid.ksh {account} {fullPath} {lid}";
             html += command;
             html += await _uiqService.RunCommandAsync(command);
 
@@ -398,7 +400,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {account}{fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
+                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/re_run.ksh {account}{fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
                 message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Rerun the {modelName} {memberName} {nickname} with {dtg} in {batch} run \r\n";
                 html += message;
                 html += await _uiqService.RunCommandAsync(command);
@@ -512,7 +514,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
+                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
                 if (string.IsNullOrWhiteSpace(parameter) == false)
                     command += $@" '""\""{parameter}\""""'";
 
