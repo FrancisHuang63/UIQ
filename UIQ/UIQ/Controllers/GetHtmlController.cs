@@ -34,9 +34,9 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<string> ModelLogEnquire(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> ModelLogEnquire(string modelName, string memberName, string nickname)
         {
-            if (modelName == null || memberName == null || nickname == null) return string.Empty;
+            if (modelName == null || memberName == null || nickname == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"Date:<select id=""node"" class=""form""><option>-----</option>";
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
@@ -50,13 +50,13 @@ namespace UIQ.Controllers
             html += $@"</select>
                       <input type=""submit"" value=enquire"" class=""form"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.ModelLogResult))}', 'result')"";>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> ModelLogResult(string modelName, string memberName, string nickname, string node)
+        public async Task<ContentResult> ModelLogResult(string modelName, string memberName, string nickname, string node)
         {
-            if (modelName == null || memberName == null || nickname == null || node == null) return string.Empty;
+            if (modelName == null || memberName == null || nickname == null || node == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"<pre>";
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
@@ -78,13 +78,13 @@ namespace UIQ.Controllers
             }
             html += $@"</pre>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> RunningEnquire(string modelName, string memberName, string nickname, string keyword)
+        public async Task<ContentResult> RunningEnquire(string modelName, string memberName, string nickname, string keyword)
         {
-            if (modelName == null || memberName == null || nickname == null) return string.Empty;
+            if (modelName == null || memberName == null || nickname == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"LogFile:<select id=""node"" class=""form"" ><option>-----</option>";
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
@@ -98,13 +98,13 @@ namespace UIQ.Controllers
             html += $@"</select>
                       <input type=""submit"" value=""enquire"" class=""form"" OnClick=""sendAJAXRequest('post', {Url.Action(nameof(GetHtmlController.RunningMember))}', 'show')"">";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> RunningMember(string modelName, string memberName, string nickname, string node)
+        public async Task<ContentResult> RunningMember(string modelName, string memberName, string nickname, string node)
         {
-            if (modelName == null || memberName == null || nickname == null) return string.Empty;
+            if (modelName == null || memberName == null || nickname == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"<pre>";
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
@@ -128,13 +128,13 @@ namespace UIQ.Controllers
             }
             html += "</pre>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> RunningSms(string modelName, string memberName)
+        public async Task<ContentResult> RunningSms(string modelName, string memberName)
         {
-            if (modelName == null || memberName == null) return string.Empty;
+            if (modelName == null || memberName == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"<pre>";
             var command = $"{_readLogFileService.RootPath}/shell/sms_enquire.ksh {modelName} {memberName} | grep -v 'Goodbye \\| Welcome \\|logged \\|logout'";
@@ -142,11 +142,11 @@ namespace UIQ.Controllers
             var result = await _uiqService.RunCommandAsync(command);
             html += $"{result}</pre>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> DailyResult(string node)
+        public async Task<ContentResult> DailyResult(string node)
         {
             var html = "<pre>";
             var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/daily_log/{node}";
@@ -157,11 +157,11 @@ namespace UIQ.Controllers
             }
 
             html += "</pre>";
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> ResetModelShow(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> ResetModelShow(string modelName, string memberName, string nickname)
         {
             var configList = _uiqService.GetModelLogFileViewModels();
             var account = configList.FirstOrDefault(x => x.Model_Name == modelName
@@ -224,11 +224,11 @@ namespace UIQ.Controllers
                         <input type=""button"" class=""form"" value=""kill"" OnClick=""if(confirm('Do you want to submit?'))  {{sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.ResetModelResult))}', 'result');}} "">
                         <div id=""result"" class=""short"">result...</div>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> ResetModelResult(string modelName, string memberName, string nickname, string jobId)
+        public async Task<ContentResult> ResetModelResult(string modelName, string memberName, string nickname, string jobId)
         {
             var configList = _uiqService.GetModelLogFileViewModels();
             var account = configList.FirstOrDefault(x => x.Model_Name == modelName
@@ -238,7 +238,7 @@ namespace UIQ.Controllers
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var shellName = member?.Reset_Model;
             if (string.IsNullOrWhiteSpace(shellName))
-                return "Cancel running job function is not available for this member.";
+                return new ContentResult { Content = "Cancel running job function is not available for this member.", ContentType = "text/html" };
 
             var command = account == $"{_prefix}weps"
                 ? $"rsh -l {account} {_loginIp} {fullPath}{shellName} {fullPath}"
@@ -247,11 +247,11 @@ namespace UIQ.Controllers
             var result = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + $"Kill Model of {modelName} {memberName} {nickname}\n";
             result += await _uiqService.RunCommandAsync(command);
 
-            return result;
+            return new ContentResult { Content = result, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> DtgShow(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> DtgShow(string modelName, string memberName, string nickname)
         {
             var configList = _uiqService.GetModelLogFileViewModels();
             var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
@@ -275,11 +275,11 @@ namespace UIQ.Controllers
                             <input type=""button"" class=""form"" value=""Submit"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.DtgResult))}', 'result'); "">
                         </form>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> DtgResult(string modelName, string memberName, string nickname, string dtg)
+        public async Task<ContentResult> DtgResult(string modelName, string memberName, string nickname, string dtg)
         {
             var html = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
@@ -308,11 +308,11 @@ namespace UIQ.Controllers
             }
 
             await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> LidShow(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> LidShow(string modelName, string memberName, string nickname)
         {
             var configList = _uiqService.GetModelLogFileViewModels();
             var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
@@ -324,11 +324,11 @@ namespace UIQ.Controllers
             var lid = await _uiqService.RunCommandAsync(command);
             var html = $@"[Model]={modelName}, [Member]={memberName}, [Nickname]={nickname}<br><br>LID={lid}";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> LidResult(string modelName, string memberName, string nickname, string lid)
+        public async Task<ContentResult> LidResult(string modelName, string memberName, string nickname, string lid)
         {
             var html = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
@@ -344,11 +344,11 @@ namespace UIQ.Controllers
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
             await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> SubmitShow(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> SubmitShow(string modelName, string memberName, string nickname)
         {
             var html = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
@@ -378,11 +378,11 @@ namespace UIQ.Controllers
                     </div>
                     <input type=""hidden"" id=""dtg"" value=""{dtg}"">
                     <input type=""button"" {(lid == "1" ? "disabled" : string.Empty)} class=""form"" value=""Submit"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(SubmitResult))}', 'result');"">";
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> SubmitResult(string modelName, string memberName, string nickname, string dtg, string batch)
+        public async Task<ContentResult> SubmitResult(string modelName, string memberName, string nickname, string dtg, string batch)
         {
             var html = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
@@ -407,11 +407,11 @@ namespace UIQ.Controllers
             }
 
             await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> ArchiveShow(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> ArchiveShow(string modelName, string memberName, string nickname)
         {
             var dataTypes = _uiqService.GetArchiveDataTypes(modelName, memberName, nickname);
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
@@ -427,33 +427,33 @@ namespace UIQ.Controllers
             }
             html += "</select>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> ArchiveShowForEnquire()
+        public async Task<ContentResult> ArchiveShowForEnquire()
         {
-            return "Enquire completed";
+            return new ContentResult { Content = "Enquire completed", ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> ArchiveResult()
+        public async Task<ContentResult> ArchiveResult()
         {
-            return "Sumbit completed";
+            return new ContentResult { Content = "Sumbit completed", ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> FixShow(string modelName, string memberName, string nickname)
+        public async Task<ContentResult> FixShow(string modelName, string memberName, string nickname)
         {
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
             var html = $@"Current DTG<input id=""dtg"" type=""text"" class=""form"" cols=""70"" value=""{dtg}""> (the DTG format is yymmddhh)";
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> FixShowForEnquire(string modelName, string memberName, string nickname, string dtg)
+        public async Task<ContentResult> FixShowForEnquire(string modelName, string memberName, string nickname, string dtg)
         {
             var html = "<pre>";
             var configList = _uiqService.GetModelLogFileViewModels();
@@ -490,11 +490,11 @@ namespace UIQ.Controllers
             }
 
             html += "</pre>";
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> FixResult(string modelName, string memberName, string nickname, string dtg, string parameter, string method)
+        public async Task<ContentResult> FixResult(string modelName, string memberName, string nickname, string dtg, string parameter, string method)
         {
             var html = string.Empty;
             var message = string.Empty;
@@ -527,11 +527,11 @@ namespace UIQ.Controllers
             }
 
             await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> TyphoonShow(string dtg, int adjust)
+        public async Task<ContentResult> TyphoonShow(string dtg, int adjust)
         {
             var typhoonEntry = new string[] { "Name", "Lat.", "Long.", "6-hr ago Lat.", "6-hr ago Long.", "Center Pressure", "15M/S Radius", "Maximum Speed", "25M/S Radius" };
             var requiredEntry = new string[] { "Name", "Lat.", "Long.", };
@@ -595,18 +595,18 @@ namespace UIQ.Controllers
                   </table>
                </form>";
 
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> TyphoonPreview(string dtg, int num, TyphoonSetDataViewModel[] typhoonSetDatas)
+        public async Task<ContentResult> TyphoonPreview(string dtg, int num, TyphoonSetDataViewModel[] typhoonSetDatas)
         {
             if (typhoonSetDatas == null || typhoonSetDatas.Any(x =>
                                              string.IsNullOrWhiteSpace(x.Name)
                                              || x.Lat.HasValue == false
                                              || x.Lng.HasValue == false))
             {
-                return "*欄位必填";
+                return new ContentResult { Content = "*欄位必填" };
             }
 
             var dirNameParameters = new[]
@@ -635,7 +635,7 @@ namespace UIQ.Controllers
             }
 
             html += @$"<br><input type=""button"" class=""form"" value=""Submit"" OnClick=""sendTyphoonDataRequest('post', '{Url.Action(nameof(MaintainToolsController.SaveTyphoonData), "MaintainTools")}', 'file_created_result', '9')"">";
-            return html;
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
     }
 }
