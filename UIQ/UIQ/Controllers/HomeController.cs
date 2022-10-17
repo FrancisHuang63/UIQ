@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
+using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
@@ -13,11 +15,15 @@ namespace UIQ.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUiqService _uiqService;
         private readonly ILogger<HomeController> _logger;
+        private readonly IndexSideEnum _indexSide;
 
-        public HomeController(IHttpContextAccessor httpContextAccessor, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment, IUiqService uiqService, ILogger<HomeController> logger)
+        public HomeController(IHttpContextAccessor httpContextAccessor, Microsoft.AspNetCore.Hosting.IHostingEnvironment hostingEnvironment, IUiqService uiqService, IOptions<RunningJobInfoOption> runningJobInfoOption, ILogger<HomeController> logger)
         {
             _httpContextAccessor = httpContextAccessor;
             _uiqService = uiqService;
+            var hostName = System.Net.Dns.GetHostName();
+            var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
+            _indexSide = runningJobInfo == null ? IndexSideEnum.Default : runningJobInfo.IndexSide;
             _logger = logger;
         }
 
@@ -29,6 +35,7 @@ namespace UIQ.Controllers
 
             ViewBag.Menu = menus;
             ViewBag.RefreshTimeSeconds = refreshSeconds;
+            ViewBag.IndexSide = _indexSide;
             return View(models);
         }
 
@@ -40,6 +47,7 @@ namespace UIQ.Controllers
 
             ViewBag.Menu = menus;
             ViewBag.RefreshTimeSeconds = refreshSeconds;
+            ViewBag.IndexSide = _indexSide;
             return View(models);
         }
 

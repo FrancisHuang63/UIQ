@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Hosting.Server
 @using Microsoft.AspNetCore.Hosting.Server.Features
 @using UIQ.Controllers
+@using UIQ.Enums
 @using UIQ.ViewModels
 @inject IHttpContextAccessor httpContextAccessor
 @inject IServer server;
@@ -10,6 +11,14 @@
     var user = httpContextAccessor.HttpContext?.User;
     IEnumerable<MenuViewModel> menus = ViewBag.Menu;
     int refreshTimeSeconds = ViewBag.RefreshTimeSeconds == 0 ? 60000 : ((int)ViewBag.RefreshTimeSeconds) * 1000;
+    IndexSideEnum indexSide = ViewBag.IndexSide;
+    var indexSideImageUrl = string.Empty;
+    switch (indexSide)
+    {
+        case IndexSideEnum.Inside: indexSideImageUrl = Href("~/images/index_inside_01.jpg"); break;
+        case IndexSideEnum.Outside: indexSideImageUrl = Href("~/images/index_outside_01.jpg"); break;
+        default: indexSideImageUrl = Href("~/images/index_01.jpg"); break;
+    }
     ViewData["Title"] = "Home Page";
 }
 
@@ -65,7 +74,7 @@
             <table aria-describedby="top">
                 <tr style="display:none;"><th scope="col"></th></tr>
                 <tr>
-                    <td height="107" valign="bottom" background="@Href("~/images/index_inside_01.jpg")">
+                    <td height="107" valign="bottom" background="@indexSideImageUrl">
                         <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
                             <ul>
@@ -93,7 +102,7 @@
             <table id="status_table" class="tablesorter" cellspacing="1" aria-labelledby="status_table">
                 <thead>
                     <tr>
-                        <th scope="col">STATUS TABLE
+                        <th scope="col" colspan="9">STATUS TABLE
                             <a href="@Url.Action("DetailedStatus")" target="_blank" class="btn"><span class="glyphicon glyphicon-th-list"></span></a>
                         </th>
                     </tr>
@@ -145,7 +154,7 @@
                         var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
                         var upperStatus = (item.Status ?? string.Empty).ToUpper();
                         var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
-                        var logViewPath = baseUrl + Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account });
+                        var logViewPath = baseUrl + Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account, isGetLastLine = true });
 
                         <tr class="@(trClass)">
                             <td class="left">

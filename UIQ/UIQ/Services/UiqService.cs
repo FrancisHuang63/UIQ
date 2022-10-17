@@ -512,13 +512,15 @@ namespace UIQ.Services
         {
             var sql = @$"SELECT SQL_CALC_FOUND_ROWS *
                          FROM `upload_file`
-                         WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE role_id IN @RoleIds)
+                         WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE `role_id` IN (SELECT `role_id` 
+                                                                                                          FROM `role_user` 
+                                                                                                          WHERE `user_id` = @UserId))
                          ORDER BY `create_datetime` DESC
                          LIMIT {pageSize} OFFSET {startIndex}";
 
-            var roleIds = (_httpContextAccessor?.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "RoleIds").Value ?? string.Empty).Split(',').Select(x => int.Parse(x));
+            var userId = _httpContextAccessor?.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value ?? string.Empty;
 
-            var result = _dataBaseNcsUiService.QueryAsync<UploadFile>(sql, new { RoleIds = roleIds }).GetAwaiter().GetResult();
+            var result = _dataBaseNcsUiService.QueryAsync<UploadFile>(sql, new { UserId = userId }).GetAwaiter().GetResult();
             totalCount = _dataBaseNcsUiService.QueryAsync<int>("SELECT FOUND_ROWS() as total").GetAwaiter().GetResult().FirstOrDefault();
             return result;
         }

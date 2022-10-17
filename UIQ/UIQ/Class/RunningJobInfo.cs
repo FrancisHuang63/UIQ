@@ -1,4 +1,6 @@
-﻿namespace UIQ
+﻿using UIQ.Enums;
+
+namespace UIQ
 {
     public class RunningJobInfoOption
     {
@@ -10,6 +12,8 @@
     public class RunningJobInfo
     {
         public string BaseUrl { get; set; }
+
+        public IndexSideEnum IndexSide { get; set; }
 
         public IEnumerable<RunningJobInfoItem> Items { get; set; }
     }

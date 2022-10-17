@@ -36,6 +36,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Home\Test.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="wwwroot\packages\jtable\2.4.0\custom.css" />
     <Content Include="wwwroot\packages\jtable\2.4.0\themes\basic\close.png" />
     <Content Include="wwwroot\packages\jtable\2.4.0\themes\basic\column-asc.png" />
@@ -123,7 +127,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.8" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.9" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.10" />
     <PackageReference Include="MySqlConnector" Version="2.1.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SSH.NET" Version="2020.0.2" />

@@ -22,6 +22,12 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<IActionResult> Verify(string account, string password)
         {
+            if(account == null || password == null)
+            {
+                ViewData["Message"] = Common.NEED_LOGIN_FAILED_MESSAGE;
+                return View(nameof(Index));
+            }
+
             var loginResult = await _userService.Login(account, password);
             if (loginResult == false)
             {

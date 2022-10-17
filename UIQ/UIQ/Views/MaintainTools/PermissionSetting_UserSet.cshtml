@@ -43,7 +43,7 @@
                         <tr>
                             <td>User</td>
                             <td>
-                                <input type="checkbox" id="allUser" @(Model.All(x => x.Is_Selected) ? "checked" : string.Empty) /> <label for="ALL"> ALL</label>
+                                <input type="checkbox" id="allUser" @(Model.All(x => x.Is_Selected) ? "checked" : string.Empty) /> <label for="allUser"> ALL</label>
                                 
                                 @foreach (var user in Model)
                                 {

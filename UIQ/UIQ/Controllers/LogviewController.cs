@@ -14,7 +14,7 @@ namespace UIQ.Controllers
             _readLogFileService = readLogFileService;
         }
 
-        public async Task<ContentResult> Index(string modelName, string memberName, string account)
+        public async Task<ContentResult> Index(string modelName, string memberName, string account, bool isGetLastLine = false)
         {
             var baseUrl = _httpContextAccessor.HttpContext.Request.Scheme + "://" + _httpContextAccessor.HttpContext.Request.Host;
             var logUrl = $"{baseUrl}/log/{modelName}/{account}/{memberName}.log";
@@ -25,17 +25,21 @@ namespace UIQ.Controllers
 
             var returnContent = $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">
 									<pre>";
-            var logLineData = logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x));
-            if (System.Text.RegularExpressions.Regex.IsMatch(logLineData, @"^[A-Z]+$")
+            
+            var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');
+            foreach (var logLineData in logLineDatas)
+            {
+                if (System.Text.RegularExpressions.Regex.IsMatch(logLineData, @"^[A-Z]+$")
                     || logLineData.Contains("Finish"))
-            {
-                returnContent += $@"<span class=""c4"">Finish</span>";
+                {
+                    returnContent += $@"<span class=""c4"">{(isGetLastLine ? "Finish" : logLineData)}</span>";
+                }
+                else if (logLineData.Contains("fail") || logLineData.Contains("cancel"))
+                {
+                    returnContent += $@"<span class=""c3"">{logLineData}</span>";
+                }
+                else returnContent += logLineData + "\n";
             }
-            else if (logLineData.Contains("fail") || logLineData.Contains("cancel"))
-            {
-                returnContent += $@"<span class=""c3"">{logLineData}</span>";
-            }
-            else returnContent += logLineData + "\n";
 
             returnContent += "</pre>";
 

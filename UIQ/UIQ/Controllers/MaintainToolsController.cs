@@ -217,7 +217,6 @@ namespace UIQ.Controllers
         [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
         public IActionResult UploadFile()
         {
-            var p = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
             ViewBag.Roles = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
             return View();
         }
@@ -257,6 +256,12 @@ namespace UIQ.Controllers
 
             var result = await _uiqService.DeleteUploadFile(fileId.Value);
             return new ApiResponse<string>("") { Success = result, Message = $"File delete {(result ? "success" : "error")}" };
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.DownloadFile)]
+        public IActionResult DownloadFile()
+        {
+            return View();
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ParameterSetting)]

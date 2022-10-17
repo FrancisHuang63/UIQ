@@ -24,5 +24,6 @@
         UploadFile = 24,
         PermissionSetting = 25,
         ParameterSetting = 26,
+        DownloadFile = 28,
     }
 }
