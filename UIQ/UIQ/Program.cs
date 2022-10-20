@@ -1,13 +1,17 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using UIQ;
+using UIQ.Filters;
 using UIQ.Services;
 using UIQ.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddMvc();
+builder.Services.AddMvc(config =>
+{
+    config.Filters.Add(new ExceptionFilter());
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddControllersWithViews();
@@ -16,7 +20,7 @@ builder.Services.AddScoped<IDataBaseService, MySqlDataBaseNcsLogService>();
 builder.Services.AddScoped<IUserService, UserForDataBaseLoginService>();
 builder.Services.AddScoped<IUiqService, UiqService>();
 builder.Services.AddScoped<ISshCommandService, SshCommandService>();
-builder.Services.AddScoped<IReadLogFileService, ReadLogFileService>();
+builder.Services.AddScoped<ILogFileService, LogFileService>();
 builder.Services.AddScoped<IUploadFileService, UploadFileService>();
 
 //Login

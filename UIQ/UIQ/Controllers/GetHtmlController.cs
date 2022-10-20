@@ -8,29 +8,27 @@ namespace UIQ.Controllers
     public class GetHtmlController : Controller
     {
         private readonly IUiqService _uiqService;
-        private readonly IReadLogFileService _readLogFileService;
+        private readonly ILogFileService _logFileService;
         private readonly string _hpcCtl;
         private readonly string _systemName;
         private readonly string _systemDirectoryName;
         private readonly string _rshAccount;
         private readonly string _loginIp;
         private readonly string _prefix;
-        private readonly string _logDirectoryPath;
 
-        public GetHtmlController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, IReadLogFileService readLogFileService)
+        public GetHtmlController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, ILogFileService logFileService)
         {
             _uiqService = uiqService;
-            _readLogFileService = readLogFileService;
+            _logFileService = logFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _systemName = configuration.GetValue<string>("SystemName");
-            _systemName = configuration.GetValue<string>("SystemDirectoryName");
+            _systemDirectoryName = configuration.GetValue<string>("SystemDirectoryName");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
             var hostName = System.Net.Dns.GetHostName();
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
             _prefix = runningJobInfo?.Items?.FirstOrDefault()?.Datas?.FirstOrDefault()?.Prefix;
-            _logDirectoryPath = $"{_readLogFileService.RootPath}/log";
         }
 
         [HttpPost]
@@ -137,7 +135,7 @@ namespace UIQ.Controllers
             if (modelName == null || memberName == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"<pre>";
-            var command = $"{_readLogFileService.RootPath}/shell/sms_enquire.ksh {modelName} {memberName} | grep -v 'Goodbye \\| Welcome \\|logged \\|logout'";
+            var command = $"{_logFileService.RootPath}/shell/sms_enquire.ksh {modelName} {memberName} | grep -v 'Goodbye \\| Welcome \\|logged \\|logout'";
 
             var result = await _uiqService.RunCommandAsync(command);
             html += $"{result}</pre>";
@@ -236,17 +234,22 @@ namespace UIQ.Controllers
                                                       && x.Nickname == nickname)?.Account;
             var member = await _uiqService.GetMemberItemAsync(modelName, memberName, nickname);
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var shellName = member?.Reset_Model;
-            if (string.IsNullOrWhiteSpace(shellName))
-                return new ContentResult { Content = "Cancel running job function is not available for this member.", ContentType = "text/html" };
+            var resetModel = member?.Reset_Model;
+            var message = "Cancel running job function is not available for this member.";
+            if (string.IsNullOrWhiteSpace(resetModel))
+            {
+                _logFileService.WriteUiActionLogFileAsync(message);
+                return new ContentResult { Content = message, ContentType = "text/html" };
+            }
 
             var command = account == $"{_prefix}weps"
-                ? $"rsh -l {account} {_loginIp} {fullPath}{shellName} {fullPath}"
-                : $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/cancel_job.ksh {account} {fullPath}{shellName} {jobId} {fullPath}";
+                ? $"rsh -l {account} {_loginIp} {fullPath}{resetModel} {fullPath}"
+                : $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {account} {fullPath}{resetModel} {jobId} {fullPath}";
 
-            var result = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + $"Kill Model of {modelName} {memberName} {nickname}\n";
-            result += await _uiqService.RunCommandAsync(command);
+            message = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + $"Kill Model of {modelName} {memberName} {nickname}\n";
+            var result = message + await _uiqService.RunCommandAsync(command);
 
+            _logFileService.WriteUiActionLogFileAsync(message);
             return new ContentResult { Content = result, ContentType = "text/html" };
         }
 
@@ -297,7 +300,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
                 html += $"{command} <br><br>";
                 html += await _uiqService.RunCommandAsync(command);
 
@@ -307,7 +310,7 @@ namespace UIQ.Controllers
                 html += message;
             }
 
-            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
+            await _logFileService.WriteUiActionLogFileAsync(message);
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
@@ -338,12 +341,12 @@ namespace UIQ.Controllers
             var account = configData?.Account;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
-            var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/set_Lid.ksh {account} {fullPath} {lid}";
+            var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {account} {fullPath} {lid}";
             html += command;
             html += await _uiqService.RunCommandAsync(command);
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
-            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
+            await _logFileService.WriteUiActionLogFileAsync(message);
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
@@ -362,11 +365,58 @@ namespace UIQ.Controllers
             command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/Lid";
             var lid = await _uiqService.RunCommandAsync(command);
 
-            var batchs = _uiqService.GetMemberRelay(modelName, memberName, nickname);
+            var batchs = _uiqService.GetMemberRelay(modelName, memberName, nickname).ToList();
             var batchSelectHtml = @"<select id=""batch"" class=""form""><option value="""">---</option>";
-            foreach (var item in batchs)
+            for (var i = 0; i < batchs?.Count; i++)
             {
-                // TODO: add batchSelectHtml <option>
+                var item = batchs[i];
+                var dataList_R = string.Empty;
+                var tmpCommand = $"ls /{_systemName}/{account}/{modelName}/{memberName}/etc/{i}*";
+                var output = (await _uiqService.RunCommandAsync(command))?.Split("\n");
+                foreach (var tmpFile in output)
+                {
+                    var aList = tmpFile.Split("/");
+                    var tmp = aList[tmpFile.Count() - 1];
+                    var isStatus = false;
+                    if (tmp.Substring(tmp.Length - 2) != "_R")
+                    {
+                        var tmp1 = (tmp + "_R");
+                        isStatus = output.Any(x => x == tmp1);
+                        if (isStatus)
+                        {
+                            dataList_R = dataList_R == string.Empty ? tmp1 : $"{dataList_R}|{tmp1}";
+                        }
+
+                        var optionText = tmp;
+                        if (tmp.Substring(tmp.Length - 2) == "_M")
+                        {
+                            optionText = $"{tmp}ajor";
+                        }
+                        else if (tmp.Substring(tmp.Length - 2) == "_P")
+                        {
+                            optionText = $"{tmp}ost";
+                        }
+                        else if (tmp.Substring(tmp.Length - 3) == "_P2")
+                        {
+                            optionText = isStatus ? $"{tmp.Substring(0, tmp.Length - 2)}ost2" : $"{tmp}ost";
+                        }
+                        else if (tmp.Substring(tmp.Length - 3) == "_MC")
+                        {
+                            optionText = $"{tmp.Substring(0, tmp.Length - 2)}ajorC";
+                        }
+
+                        batchSelectHtml += isStatus
+                                ? $@"<option value=""{tmp1}"">{tmp}ajor</option>"
+                                : $@"<option value=""{tmp}"">{tmp}ajor</option>";
+                    }
+
+                    if (tmp.Substring(tmp.Length - 3) == "_R")
+                    {
+                        isStatus = dataList_R.Split("|").Any(x => x == tmp);
+                        if (isStatus == false)
+                            batchSelectHtml += $@"<option value=""{tmp}"">{tmp}</option>";
+                    }
+                }
             }
             batchSelectHtml += "</select>";
 
@@ -400,13 +450,13 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/re_run.ksh {account}{fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
+                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {account}{fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
                 message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Rerun the {modelName} {memberName} {nickname} with {dtg} in {batch} run \r\n";
                 html += message;
                 html += await _uiqService.RunCommandAsync(command);
             }
 
-            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
+            await _logFileService.WriteUiActionLogFileAsync(message);
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
@@ -514,7 +564,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/{_systemDirectoryName}/wwwroot/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
+                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
                 if (string.IsNullOrWhiteSpace(parameter) == false)
                     command += $@" '""\""{parameter}\""""'";
 
@@ -526,7 +576,7 @@ namespace UIQ.Controllers
                 html += $"<br>{result}";
             }
 
-            await _readLogFileService.WriteDataIntoLogFileAsync(_logDirectoryPath, $"{_logDirectoryPath}/UI_actions.log", message);
+            await _logFileService.WriteUiActionLogFileAsync(message);
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
 

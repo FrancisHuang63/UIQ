@@ -6,9 +6,9 @@ namespace UIQ.Controllers
     public class LogviewController : Controller
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IReadLogFileService _readLogFileService;
+        private readonly ILogFileService _readLogFileService;
 
-        public LogviewController(IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService)
+        public LogviewController(IHttpContextAccessor httpContextAccessor, ILogFileService readLogFileService)
         {
             _httpContextAccessor = httpContextAccessor;
             _readLogFileService = readLogFileService;
@@ -21,11 +21,11 @@ namespace UIQ.Controllers
             var logPath = Path.Combine(_readLogFileService.RootPath, "log", modelName, account, $"{memberName}.log");
             var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
-            if(logContent == null) return Content($"<pre> There is no log file of {modelName}_{memberName}.");
+            if (logContent == null) return Content($"<pre> There is no log file of {modelName}_{memberName}.");
 
             var returnContent = $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">
 									<pre>";
-            
+
             var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');
             foreach (var logLineData in logLineDatas)
             {

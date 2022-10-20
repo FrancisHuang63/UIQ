@@ -14,27 +14,33 @@ namespace UIQ.Controllers
     {
         private readonly IUiqService _uiqService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IReadLogFileService _readLogFileService;
+        private readonly ILogFileService _logFileService;
         private readonly IUploadFileService _uploadFileService;
         private readonly string _hpcCtl;
         private readonly string _systemName;
         private readonly string _rshAccount;
         private readonly string _loginIp;
+        private readonly string _cronIp;
+        private readonly string _uiPath;
+        private readonly string _typhoonAccount;
 
         public MaintainToolsController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService
-            , IHttpContextAccessor httpContextAccessor, IReadLogFileService readLogFileService, IUploadFileService uploadFileService)
+            , IHttpContextAccessor httpContextAccessor, ILogFileService logFileService, IUploadFileService uploadFileService)
         {
             _uiqService = uiqService;
             _httpContextAccessor = httpContextAccessor;
-            _readLogFileService = readLogFileService;
+            _logFileService = logFileService;
             _uploadFileService = uploadFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _systemName = configuration.GetValue<string>("SystemName");
             _rshAccount = configuration.GetValue<string>("RshAccount");
+            _uiPath = configuration.GetValue<string>("UiPath");
+            _typhoonAccount = configuration.GetValue<string>("TyphoonAccount");
 
             var hostName = System.Net.Dns.GetHostName();
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
+            _cronIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.CronIp;
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.SetTyphoonData)]
@@ -44,8 +50,9 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<string> SaveTyphoonData(string dtg, TyphoonSetDataViewModel[] typhoonSetDatas)
+        public async Task<ContentResult> SaveTyphoonData(string dtg, TyphoonSetDataViewModel[] typhoonSetDatas)
         {
+            var html = string.Empty;
             var dirNameParameters = new[]
             {
                 new{ DirName = "ty", FilePrefix = "dat" },
@@ -64,15 +71,37 @@ namespace UIQ.Controllers
 
             foreach (var dirNameParameter in dirNameParameters)
             {
-                var directoryPath = Path.Combine(_readLogFileService.RootPath, "temp", dirNameParameter.DirName);
-                var fileName = $"typhoon.{dirNameParameter.FilePrefix}";
-                var fullFilePath = Path.Combine(directoryPath, fileName);
+                var command = string.Empty;
+                var currentTime = DateTime.Now.ToString("yyyyMMddHHmmss");
+                var tmpPath = $"{_uiPath}temp/{dirNameParameter.DirName}";
+                var tmpFilePath = $"{tmpPath}/typhoon.{dirNameParameter.FilePrefix}";
+                var realDirectory = $"/{_systemName}/{_typhoonAccount}/TYP/M00/dtg/{dirNameParameter.DirName}/";
+                var realFileName = $"typhoon{dtg}.{dirNameParameter.FilePrefix}";
+                var realFilePath = realDirectory + realFileName;
 
                 var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents) : string.Join("\n\n", txtContents));
-                await _readLogFileService.WriteDataIntoLogFileAsync(directoryPath, fullFilePath, newDataContent);
+                //寫入暫存檔
+                await _logFileService.WriteDataIntoLogFileAsync(tmpPath, tmpFilePath, newDataContent);
+                html += $"Write {tmpFilePath}...<br>";
+
+                //檢查同 DTG 檔案是否已存在，存在則變更檔名
+                if (System.IO.File.Exists(realFilePath))
+                {
+                    command = $"rsh -l {_typhoonAccount} {_loginIp} mv {realFilePath} {realFilePath}{currentTime}";
+                    await _uiqService.RunCommandAsync(command);
+                    html += $"Rename {realFilePath} to {realFileName}{currentTime}...<br>";
+                }
+
+                //將檔案傳回HPC主機
+                command = $"rsh -l {_typhoonAccount} ${_loginIp} cp {tmpFilePath} {realFilePath}";
+                await _uiqService.RunCommandAsync(command);
+                html += $"Copy to ${realFilePath}...<br><br>";
             }
 
-            return "Success";
+            var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Edit the typhoon{dtg}.dat and typhoon{dtg}.txt\r\n";
+            await _logFileService.WriteUiActionLogFileAsync(message);
+
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.Command)]
@@ -122,17 +151,17 @@ namespace UIQ.Controllers
             {
                 case "Normal":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /{_systemName}/${_hpcCtl}/shfun/shbin/Change_mode.ksh Normal");
+                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Normal");
                     break;
 
                 case "Backup":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Backup");
+                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Backup");
                     break;
 
                 case "Typhoon":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_httpContextAccessor.HttpContext.Request.Host} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Typhoon");
+                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Typhoon");
                     break;
 
                 default:
@@ -223,7 +252,7 @@ namespace UIQ.Controllers
 
         [MenuPageAuthorize(Enums.MenuEnum.UploadFile)]
         [HttpPost]
-        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles, int[] roleIds)
+        public async Task<IActionResult> UploadFile(IFormFile[] postedFiles, int[] roleIds, bool isAllRole)
         {
             ViewBag.Roles = _uiqService.GetRoleItemsAsync().GetAwaiter().GetResult();
             if (postedFiles == null || postedFiles.Any() == false)
@@ -243,7 +272,7 @@ namespace UIQ.Controllers
                 uploadFileDatas.Add(new UploadFile(fileName, filePath));
             }
 
-            await _uiqService.SetUploadFileItems(uploadFileDatas, roleIds);
+            await _uiqService.SetUploadFileItems(uploadFileDatas, isAllRole ? new int[] { Common.ALL_ROLE_PERMISSON_ID } : roleIds);
             ViewBag.Message = "Upload success!!";
             return View();
         }

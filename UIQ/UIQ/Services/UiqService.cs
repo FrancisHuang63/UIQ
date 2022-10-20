@@ -13,18 +13,22 @@ namespace UIQ.Services
         private readonly IUploadFileService _uploadFileService;
         private readonly ISshCommandService _sshCommandService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogFileService _logFileService;
         private string _HpcCtl { get; set; }
         private string _SystemName { get; set; }
         private string _SystemDirectoryName { get; set; }
         private string _RshAccount { get; set; }
 
-        public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices, ISshCommandService sshCommandService, IConfiguration configuration, IUploadFileService uploadFileService)
+        public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices
+            , ISshCommandService sshCommandService, IConfiguration configuration
+            , IUploadFileService uploadFileService, ILogFileService logFileService)
         {
             _dataBaseNcsUiService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsUi);
             _dataBaseNcsLogService = dataBaseServices.Single(x => x.DataBase == Enums.DataBaseEnum.NcsLog);
             _uploadFileService = uploadFileService;
             _sshCommandService = sshCommandService;
             _httpContextAccessor = httpContextAccessor;
+            _logFileService = logFileService;
             _HpcCtl = configuration.GetValue<string>("HpcCTL");
             _SystemName = configuration.GetValue<string>("SystemName");
             _SystemDirectoryName = configuration.GetValue<string>("SystemDirectoryName");
@@ -93,7 +97,7 @@ namespace UIQ.Services
             var nodes = (selNode ?? string.Empty).Split(',');
             foreach (var node in nodes)
             {
-                var command = $"rsh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/{_SystemDirectoryName}/wwwroot/shell/ps.ksh";
+                var command = $"rsh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/shell/ps.ksh";
 
                 resultHtml += "<pre>";
                 resultHtml += $"<h3>{node}</h3>";
@@ -512,9 +516,10 @@ namespace UIQ.Services
         {
             var sql = @$"SELECT SQL_CALC_FOUND_ROWS *
                          FROM `upload_file`
-                         WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE `role_id` IN (SELECT `role_id` 
-                                                                                                          FROM `role_user` 
-                                                                                                          WHERE `user_id` = @UserId))
+                         WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE `role_id` IN (SELECT `role_id`
+                                                                                                          FROM `role_user`
+                                                                                                          WHERE `user_id` = @UserId)
+                                                                                      OR `role_id` = -1)
                          ORDER BY `create_datetime` DESC
                          LIMIT {pageSize} OFFSET {startIndex}";
 
@@ -935,6 +940,11 @@ namespace UIQ.Services
             }
         }
 
+        private void WriteDebugMessage(string message)
+        {
+            _logFileService.WriteUiErrorLogFileAsync(message);
+        }
+
         private void UpdateDelayCheckPoint(CheckPointViewModelSearch modelExeInfo, IEnumerable<CheckPointViewModel> unRunCheckPoints, DateTime modelStartTime)
         {
             var delayInfos = new List<CheckPointDelay>();
@@ -1168,11 +1178,6 @@ namespace UIQ.Services
                         ORDER BY `model_position` ASC, `member_position` ASC";
 
             return _dataBaseNcsUiService.QueryAsync<ModelConfigViewModel>(sql).Result;
-        }
-
-        private void WriteDebugMessage(string message)
-        {
-            //TODO
         }
 
         private int GetPreTime(string modelName, string memberName, string nickname)

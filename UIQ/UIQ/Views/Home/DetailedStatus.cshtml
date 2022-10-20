@@ -28,18 +28,18 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>NWP monitor system</title>
         
-        <link rel="stylesheet" href="~/packages/bootstrap/3.3.1/css/bootstrap.min.css">
-        <link rel="stylesheet" href="~/packages/bootstrap/3.3.1/css/bootstrap-theme.min.css">
-        <link href="~/packages/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
-        <link href="~/css/jqueryslidemenu.css" rel="stylesheet" type="text/css" />
-        <link href="~/css/style.css" rel="stylesheet" type="text/css" />
-        <link href="~/css/white.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="~/css/bootstrap/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="~/css/jquery-ui.min.css" type="text/css" />
+        <link rel="stylesheet" href="~/css/jqueryslidemenu.css" type="text/css" />
+        <link rel="stylesheet" href="~/css/style.css" type="text/css" />
+        <link rel="stylesheet" href="~/css/white.css" type="text/css" />
 
         <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
         <script type="text/javascript" src="~/js/jqueryslidemenu.js"></script>
         <script type="text/javascript" src="~/js/jquery.tablesorter.min.js"></script>
         <script type="text/javascript" src="~/js/selectivizr.js"></script>
-        <script type="text/javascript" src="~/packages/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="~/js/jquery-ui-dialog-enhancement/2017-07-25/build/jquery.dialogextend.min.js"></script>
         <script type="text/javascript" src="~/js/tool.js"></script>
         <script type="text/javascript" src="~/js/detailed_status.js"></script>
@@ -111,7 +111,7 @@
                                 ? "running"
                                 : string.Empty;
                         var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
-                        var logViewPath = baseUrl + Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account });
+                        var logViewPath = baseUrl + Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account, isGetLastLine = true });
 
                         <tr class="@(trClass)" id="@($"{item.Model_Name}_{item.Member_Name}_{item.Nickname}")">
                             <td class="left">

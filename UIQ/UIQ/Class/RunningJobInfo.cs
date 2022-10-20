@@ -29,7 +29,11 @@ namespace UIQ
     {
         public string LoginIp { get; set; }
 
+        public string DataMvIp { get; set; }
+
         public string Name { get; set; }
+
+        public string CronIp { get; set; }
 
         public string Prefix { get; set; }
     }

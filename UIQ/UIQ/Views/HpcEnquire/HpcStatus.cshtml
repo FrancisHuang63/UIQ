@@ -33,11 +33,13 @@
 			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
 			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} /users/xa09/bin/chknode";
 			var pjshowrsc_sarr = pjshowrsc_s.Split("/\n/");
-			foreach (var item in pjshowrsc_sarr)
-			{
-				<p>@(item)</p>
-			}
-
+			
+			<p>
+				@foreach (var item in pjshowrsc_sarr)
+				{
+					@(uiqService.RunCommandAsync(item).GetAwaiter().GetResult())
+				}
+			</p>
 			<p>Enquiring data completely!</p>
 		}
 	</pre>
@@ -66,10 +68,12 @@
 			}
 
 			// Print pjshowrsc_s result
-			foreach(var item in pjshowrsc_sarr)
-			{
-				<p>@(item)</p>
-			}
+			<p>
+				@foreach(var item in pjshowrsc_sarr)
+				{
+					@(uiqService.RunCommandAsync(item).GetAwaiter().GetResult())
+				}
+			</p>
 
 			<p>Enquiring data completely!</p>
 
@@ -81,7 +85,7 @@
 			var pjshowrsc_d = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
 			var pjshowrsc_darr = pjshowrsc_d.Split("/\n/");
 			
-			<p>@($"{hpcCtl} {loginIp}")</p>
+			<p>@(uiqService.RunCommandAsync($"{hpcCtl} {loginIp}").GetAwaiter().GetResult())</p>
 
 			//Check if pjshowrsc_darr has all nodes.
 			//If so, display pjshowrsc_darr. If not, display the node name and make it red.
@@ -89,7 +93,7 @@
 			{
 				for(var i = 0; i < 5; i++)
 				{
-					<p>@(pjshowrsc_darr[i])</p>
+					<p>@(uiqService.RunCommandAsync(pjshowrsc_darr[i]).GetAwaiter().GetResult())</p>
 				}
 
 				foreach(var node in nodelistArray)
@@ -97,7 +101,7 @@
 					var marr =  pjshowrsc_darr.Where(x => x.Contains($"/{node}/"));
 					if(marr.Count() == 1)
 					{
-						<p>@($"{marr.FirstOrDefault()}")</p>
+						<p>@(uiqService.RunCommandAsync($"{marr.FirstOrDefault()}").GetAwaiter().GetResult())</p>
 					}
 					else if(marr.Count() == 0)
 					{

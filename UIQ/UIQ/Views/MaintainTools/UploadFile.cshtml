@@ -18,16 +18,16 @@
         <link rel="stylesheet" href="~/css/jquery-ui.min.css" type="text/css" />
         <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" type="text/css" />
         <link rel="stylesheet" href="~/css/bootstrap/custom.css" type="text/css" />
-        <link rel="stylesheet" href="~/packages/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
-        <link rel="stylesheet" href="~/packages/jtable/2.4.0/custom.css" type="text/css">
+        <link rel="stylesheet" href="~/js/jtable/2.4.0/themes/lightcolor/gray/jtable.min.css" type="text/css">
+        <link rel="stylesheet" href="~/js/jtable/2.4.0/custom.css" type="text/css">
 
         <script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
         <script type="text/javascript" src="~/js/jquery-ui.min.js"></script>
         <script type="text/javascript" src="~/js/bootstrap/bootstrap.min.js"></script>
         <script type="text/javascript" src="~/js/bootstrap/custom.min.js"></script>
         <script type="text/javascript" src="~/js/lib.min.js"></script>
-        <script type="text/javascript" src="~/packages/jtable/2.4.0/jquery.jtable.js"></script>
-        <script type="text/javascript" src="~/packages/jtable/2.4.0/custom.js"></script>
+        <script type="text/javascript" src="~/js/jtable/2.4.0/jquery.jtable.js"></script>
+        <script type="text/javascript" src="~/js/jtable/2.4.0/custom.js"></script>
 
         <title>Upload File</title>
     </head>
@@ -39,8 +39,8 @@
                 <input type="file" name="postedFiles" multiple="multiple" />
                 <div style="margin-right: 10px">
                     <span>Select file role permissoin</span>
-
-                    <input type="checkbox" id="allRole" @(roles.All(x => roleIds.Contains(x.Role_Id.ToString())) ? "checked" : string.Empty) />
+                    
+                    <input type="checkbox" id="allRole" name="isAllRole" value="true" />
                     <label for="allRole">ALL</label>
 
                     @foreach (var role in roles)
@@ -151,12 +151,7 @@
             }
 
             $('#allRole').change(function(){
-                $(`input.role-check`).prop('checked', $(this).prop('checked'));
-            });
-
-            $('input.role-check').change(function(){
-                let isAllRoleChecked = $(`input.role-check:checked`).length == $(`input.role-check`).length;
-                $(`#allRole`).prop('checked', isAllRoleChecked);
+                $(`input.role-check`).prop('disabled', $(this).prop('checked'));
             });
 
 		</script>

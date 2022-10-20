@@ -3,8 +3,10 @@ using UIQ.Services.Interfaces;
 
 namespace UIQ.Services
 {
-    public class ReadLogFileService : IReadLogFileService
+    public class LogFileService : ILogFileService
     {
+        private string _LogDirectoryPath => $"{RootPath}/log";
+
         public string RootPath
         {
             get
@@ -41,6 +43,20 @@ namespace UIQ.Services
             var logContnet = await ReadLogFileAsync(fullFilePath);
             logContnet += newData;
             System.IO.File.WriteAllText(fullFilePath, logContnet);
+        }
+
+        public async Task WriteUiActionLogFileAsync(string message)
+        {
+            var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_actions_{DateTime.Now.ToString("yyyyMMdd")}.log");
+            message = $"\n\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}]\n{message}";
+            await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, message);
+        }
+
+        public async Task WriteUiErrorLogFileAsync(string message)
+        {
+            var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_error_{DateTime.Now.ToString("yyyyMMdd")}.log");
+            message = $"\n\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}]\n{message}";
+            await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, message);
         }
     }
 }
