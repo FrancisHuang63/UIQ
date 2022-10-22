@@ -1,4 +1,0 @@
-#!/bin/ksh
-. /nwp/npcactl/shell/SV_PATH.cfg
-
-rsh ${LOGIN_IP} -l $1 $2 $3 $4 $5

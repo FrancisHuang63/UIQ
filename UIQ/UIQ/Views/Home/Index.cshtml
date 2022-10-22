@@ -5,6 +5,8 @@
 @using UIQ.ViewModels
 @inject IHttpContextAccessor httpContextAccessor
 @inject IServer server;
+@inject IConfiguration configuration
+
 @model IEnumerable<HomeTableViewModel>
 @{
     Layout = null;
@@ -19,6 +21,8 @@
         case IndexSideEnum.Outside: indexSideImageUrl = Href("~/images/index_outside_01.jpg"); break;
         default: indexSideImageUrl = Href("~/images/index_01.jpg"); break;
     }
+    var perColumnMemberAmount = configuration.GetValue<int>("PerColumnMemberAmount");
+
     ViewData["Title"] = "Home Page";
 }
 
@@ -114,7 +118,7 @@
                         //依照MemberName分組
                         var memberGroups = groupModel.GroupBy(x => x.Member_Name);
                         //將每個Model的資料切成8個一組
-                        var datasFor8Diplay = memberGroups.Select((x, idx) => new { Index = idx, Value = x }).GroupBy(x => x.Index / 8).Select(x => x.Select(v => v.Value));
+                        var datasFor8Diplay = memberGroups.Select((x, idx) => new { Index = idx, Value = x }).GroupBy(x => x.Index / perColumnMemberAmount).Select(x => x.Select(v => v.Value));
                         @for (int i = 0; i < datasFor8Diplay.Count(); i++)
                         {
                             var setMember = datasFor8Diplay.ElementAt(i);

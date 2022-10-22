@@ -33,7 +33,7 @@
 
                 foreach (var runningJobInfoData in runningJobInfoItem.Datas)
                 {
-                    var command = $"rsh -l {hpcCtl} {runningJobInfoData.LoginIp} 'sh {uiPath}hpc_enquire/pjstat_wrapper.sh' | grep {runningJobInfoData.Prefix} | sort -k 5 | cat -n | sed 's/\t/ /'";
+                    var command = $"rsh -l {hpcCtl} {runningJobInfoData.LoginIp} 'sh {uiPath}wwwroot/shell/pjstat_wrapper.sh' | grep {runningJobInfoData.Prefix} | sort -k 5 | cat -n | sed 's/\t/ /'";
 
                     <p>@runningJobInfoData.Name</p>
                     <p>@($"{"No.".PadRight(6)}{"JOB_ID".PadRight(11)}{"JOB_NAME".PadRight(30)}{"MD".PadRight(6)}{"ST".PadRight(6)}{"USER".PadRight(20)}{"START_DATE".PadRight(15)}{"ELAPSE_LIM".PadRight(10)}{"NODE_REQUIRE".PadRight(12)}")</p>

@@ -11,6 +11,7 @@
     var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
     var hpcCtl = configuration.GetValue<string>("HpcCTL");
     var rshAccount = configuration.GetValue<string>("RshAccount");
+    var uiPath = configuration.GetValue<string>("UiPath");
 }
 
 <link rel="stylesheet" href="~/css/style.css" type="text/css">
@@ -59,7 +60,7 @@
 			var dataArray = pjshowrsc_sarr.Count() >= 5 ? pjshowrsc_sarr[4].Split("/\\s+/") : new string[] { };
 
 			//Get #line of nodelist.txt
-			var nodeNum = "cat nodelist.txt | wc -l";
+			var nodeNum = $"cat {uiPath}wwwroot/shell/nodelist.txt | wc -l";
 
 			//Comapare pjshowrsc_s result and #line of nodelist.txt 
 			if(dataArray.Count() >= 2 && dataArray[1] != nodeNum)
@@ -78,7 +79,7 @@
 			<p>Enquiring data completely!</p>
 
 			//Read node list and make it an array
-			var nodeList = "cat nodelist.txt";
+			var nodeList = $"cat {uiPath}wwwroot/shell/nodelist.txt";
 			var nodelistArray =  nodeList.Split("/\n/");
 
 			//Execute pjshowrsc command and make it an array

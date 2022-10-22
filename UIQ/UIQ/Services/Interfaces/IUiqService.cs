@@ -96,5 +96,7 @@ namespace UIQ.Services.Interfaces
         public Task<bool> UpdateParameterAsync(Parameter data);
 
         public Task<bool> DeleteUploadFile(int fileId);
+
+        public Task SqlSync();
     }
 }

@@ -7,6 +7,7 @@ namespace UIQ.Services.Interfaces
     {
         DataBaseEnum DataBase { get; }
         string ConnectionString { get; set; }
+        string DataBaseName { get; set; }
 
         public Task<int> DeleteAsync(string tableName, object parameter = null);
 

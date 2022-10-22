@@ -21,6 +21,7 @@ namespace UIQ.Controllers
         private readonly string _rshAccount;
         private readonly string _loginIp;
         private readonly string _cronIp;
+        private readonly string _dataMvIp;
         private readonly string _uiPath;
         private readonly string _typhoonAccount;
 
@@ -41,6 +42,7 @@ namespace UIQ.Controllers
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
             _cronIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.CronIp;
+            _dataMvIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.DataMvIp;
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.SetTyphoonData)]
@@ -73,7 +75,7 @@ namespace UIQ.Controllers
             {
                 var command = string.Empty;
                 var currentTime = DateTime.Now.ToString("yyyyMMddHHmmss");
-                var tmpPath = $"{_uiPath}temp/{dirNameParameter.DirName}";
+                var tmpPath = $"{_uiPath}wwwroot/temp/{dirNameParameter.DirName}";
                 var tmpFilePath = $"{tmpPath}/typhoon.{dirNameParameter.FilePrefix}";
                 var realDirectory = $"/{_systemName}/{_typhoonAccount}/TYP/M00/dtg/{dirNameParameter.DirName}/";
                 var realFileName = $"typhoon{dtg}.{dirNameParameter.FilePrefix}";
@@ -146,7 +148,8 @@ namespace UIQ.Controllers
             _uiqService.UpdateCrontabMasterGroup(cronMode);
             _uiqService.UpdateGroupValidationWhoHasCronMode(cronMode);
             _uiqService.UpdateGroupValidationWhoNotHasCronMode(cronMode);
-
+            
+            _uiqService.SqlSync();
             switch (cronMode)
             {
                 case "Normal":
@@ -194,6 +197,7 @@ namespace UIQ.Controllers
             if (data == null) return View("Error");
 
             _uiqService.SaveModelMemberSetData(data);
+            _uiqService.SqlSync();
 
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
         }
@@ -316,6 +320,7 @@ namespace UIQ.Controllers
             if (model_Id.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
 
             _uiqService.DeleteModelAsync(model_Id.Value);
+            _uiqService.SqlSync();
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
         }
 
@@ -325,6 +330,7 @@ namespace UIQ.Controllers
             if (memberId.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
 
             _uiqService.DeleteMemberAsync(memberId.Value);
+            _uiqService.SqlSync();
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
         }
 
