@@ -65,7 +65,7 @@ function showParameterModal(command_id, group){
     }
 
     $.ajax({
-        url: '/MaintainTools/getCommandInfo',
+        url: '/MaintainTools/GetCommandInfo',
         type: 'POST',
         data:{
             commandId: command_id
@@ -96,7 +96,7 @@ function excuteCmdWithParameters(){
         };
     }else{
         var ajax_data = {
-            command_id: command_id,
+            commandId: command_id,
             parameters: parameters,
             passwd: pwd,
             command: ''

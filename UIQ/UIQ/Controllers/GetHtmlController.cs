@@ -11,6 +11,7 @@ namespace UIQ.Controllers
         private readonly ILogFileService _logFileService;
         private readonly string _hpcCtl;
         private readonly string _systemName;
+        private readonly string _uiPath;
         private readonly string _systemDirectoryName;
         private readonly string _rshAccount;
         private readonly string _loginIp;
@@ -22,6 +23,7 @@ namespace UIQ.Controllers
             _logFileService = logFileService;
             _hpcCtl = configuration.GetValue<string>("HpcCTL");
             _systemName = configuration.GetValue<string>("SystemName");
+            _uiPath = configuration.GetValue<string>("UiPath");
             _systemDirectoryName = configuration.GetValue<string>("SystemDirectoryName");
             _rshAccount = configuration.GetValue<string>("RshAccount");
 
@@ -135,7 +137,7 @@ namespace UIQ.Controllers
             if (modelName == null || memberName == null) return new ContentResult { Content = string.Empty, ContentType = "text/html" };
 
             var html = @"<pre>";
-            var command = $"{_logFileService.RootPath}/shell/sms_enquire.ksh {modelName} {memberName} | grep -v 'Goodbye \\| Welcome \\|logged \\|logout'";
+            var command = $"{_uiPath}wwwroot/shell/sms_enquire.ksh {modelName} {memberName} | grep -v 'Goodbye \\| Welcome \\|logged \\|logout'";
 
             var result = await _uiqService.RunCommandAsync(command);
             html += $"{result}</pre>";
@@ -568,7 +570,7 @@ namespace UIQ.Controllers
                 if (string.IsNullOrWhiteSpace(parameter) == false)
                     command += $@" '""\""{parameter}\""""'";
 
-                html += $"<br>{command}";
+                html += $"<br>{_uiqService.RunCommandAsync(command).GetAwaiter().GetResult()}";
                 message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Fixed failed model on {modelName} {memberName} in {method} with {dtg}\r\n";
 
                 var result = await _uiqService.RunCommandAsync(command);
