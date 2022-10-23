@@ -1,10 +1,13 @@
 ﻿using System.Reflection;
+using System.Security.Claims;
 using UIQ.Services.Interfaces;
 
 namespace UIQ.Services
 {
     public class LogFileService : ILogFileService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private ClaimsPrincipal _currentUser;
         private string _LogDirectoryPath => $"{RootPath}/log";
 
         public string RootPath
@@ -16,6 +19,12 @@ namespace UIQ.Services
 #endif
                 return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wwwroot");
             }
+        }
+
+        public LogFileService(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _currentUser = _httpContextAccessor.HttpContext?.User;
         }
 
         public async Task<string> ReadLogFileAsync(string filePath)
@@ -47,15 +56,17 @@ namespace UIQ.Services
 
         public async Task WriteUiActionLogFileAsync(string message)
         {
+            var userAccount = _currentUser?.Identity?.Name ?? string.Empty;
             var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_actions_{DateTime.Now.ToString("yyyyMMdd")}.log");
-            message = $"\n\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}]\n{message}";
+            message = $"\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}][user: {userAccount}] {message}";
             await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, message);
         }
 
         public async Task WriteUiErrorLogFileAsync(string message)
         {
+            var userAccount = _currentUser?.Identity?.Name ?? string.Empty;
             var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_error_{DateTime.Now.ToString("yyyyMMdd")}.log");
-            message = $"\n\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}]\n{message}";
+            message = $"\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}][user: {userAccount}] {message}";
             await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, message);
         }
     }

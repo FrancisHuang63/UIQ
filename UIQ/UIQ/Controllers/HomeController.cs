@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Diagnostics;
+using System.Security.Claims;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -49,6 +50,35 @@ namespace UIQ.Controllers
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
             return View(models);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetShellDelayData()
+        {
+            var userGroupName = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value;
+            var datas = await _uiqService.GetDelayDatasAsync(userGroupName);
+            return Json(datas);
+        }
+
+        [HttpPost]
+        public async Task<ContentResult> DeleteShellDelayData(int id)
+        {
+            var resultCnt = await _uiqService.DeleteDelayDataAsync(id);
+            return new ContentResult { Content = resultCnt > 0 ? "Delete Success" : "Delete Fail", ContentType = "text/html" };
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> LoadRejectLog()
+        {
+            var result = await _uiqService.CheckRejectStatusAsync();
+            return Json(result);
+        }
+
+        [HttpPost]
+        public async Task<ContentResult> DeleteRejectLog()
+        {
+            var result = await _uiqService.DeleteRejectLogAsync();
+            return new ContentResult { Content = result, ContentType = "text/html" };
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

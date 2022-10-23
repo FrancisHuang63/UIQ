@@ -29,7 +29,7 @@
             for (var i = 0; i < runningJobInfo.Items.Count(); i++)
             {
                 var runningJobInfoItem = runningJobInfo.Items.ElementAt(i);
-                <p>@i</p>
+                <p>@runningJobInfoItem.Key</p>
 
                 foreach (var runningJobInfoData in runningJobInfoItem.Datas)
                 {

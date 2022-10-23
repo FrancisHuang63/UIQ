@@ -158,7 +158,7 @@
                         var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
                         var upperStatus = (item.Status ?? string.Empty).ToUpper();
                         var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
-                        var logViewPath = baseUrl + Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account, isGetLastLine = true });
+                        var logViewPath = baseUrl + Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account, isGetLastLine = true });
 
                         <tr class="@(trClass)">
                             <td class="left">

@@ -10,9 +10,9 @@ $(document).ready(function () {
             scrollTop: $(target_tr).offset().top
         }, 200);
     }
-
-    show_delay_dialog("detailed_status/get_shell_delay_data", "detailed_status/delete_shell_delay_data");
-    show_reject_log_dialog("detailed_status/load_reject_log", "detailed_status/delete_reject_log");
+    
+    show_delay_dialog("/Home/GetShellDelayData", "/Home/DeleteShellDelayData");
+    show_reject_log_dialog("/Home/LoadRejectLog", "/Home/DeleteRejectLog");
 });
 
 

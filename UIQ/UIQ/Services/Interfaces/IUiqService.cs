@@ -61,17 +61,25 @@ namespace UIQ.Services.Interfaces
 
         public Task<IEnumerable<Work>> GetWorkItemsAsync();
 
+        public Task<IEnumerable<GetShellDelayDataViewModel>> GetDelayDatasAsync(string userGroupName);
+
         public Task<Member> GetMemberItemAsync(int memberId);
 
         public Task<Member> GetMemberItemAsync(string modelName, string memberName, string nickname);
+
+        public Task<int> DeleteDelayDataAsync(int id);
 
         public Task<bool> DeleteModelAsync(int modelId);
 
         public Task<bool> DeleteMemberAsync(int memberId);
 
+        public Task<string> CheckRejectStatusAsync();
+
         public Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
 
         public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount);
+
+        public Task<string> DeleteRejectLogAsync();
 
         public Task<IEnumerable<Role>> GetRoleItemsAsync();
 
@@ -98,5 +106,7 @@ namespace UIQ.Services.Interfaces
         public Task<bool> DeleteUploadFile(int fileId);
 
         public Task SqlSync();
+
+        public Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, int method);
     }
 }

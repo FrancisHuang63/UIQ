@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 using UIQ.Services.Interfaces;
 using UIQ.ViewModels;
 
@@ -16,6 +17,7 @@ namespace UIQ.Controllers
         private readonly string _rshAccount;
         private readonly string _loginIp;
         private readonly string _prefix;
+        private readonly string _dataMvIp;
 
         public GetHtmlController(IConfiguration configuration, IOptions<RunningJobInfoOption> runningJobInfoOption, IUiqService uiqService, ILogFileService logFileService)
         {
@@ -31,6 +33,7 @@ namespace UIQ.Controllers
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
             _loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
             _prefix = runningJobInfo?.Items?.FirstOrDefault()?.Datas?.FirstOrDefault()?.Prefix;
+            _dataMvIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.DataMvIp;
         }
 
         [HttpPost]
@@ -167,15 +170,14 @@ namespace UIQ.Controllers
             var account = configList.FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname)?.Account;
-            var html = @"<div id=""show"" class=""enquire"">
+            var html = @$"Account: ${_rshAccount} Server: ${_loginIp}
+                         <div id=""show"" class=""enquire"">
                             <pre>======================current Job status======================
                         ";
 
-            var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -A -s | sed '1,4d'";
+            var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -s ";
             var data = await _uiqService.RunCommandAsync(command);
-            data = data.Replace("#fx100#", string.Empty).Replace("#fx10#", string.Empty);
-            var dataArray = data.Split("Statistical Information");
-            html += dataArray.Count() > 2 ? dataArray[1] : string.Empty;
+            var dataArray = Regex.Split(data, "/\\[Job\\s+Statistical\\s+Information\\]/");
 
             var isWeps = modelName == "WEPS" && memberName == "CEN01";
             html += $"<h3>{modelName}_{memberName}(User: {account}, Nickname: {nickname})</h3>";
@@ -230,6 +232,8 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<ContentResult> ResetModelResult(string modelName, string memberName, string nickname, string jobId)
         {
+            var result = string.Empty;
+            var command = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
             var account = configList.FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
@@ -240,18 +244,31 @@ namespace UIQ.Controllers
             var message = "Cancel running job function is not available for this member.";
             if (string.IsNullOrWhiteSpace(resetModel))
             {
-                _logFileService.WriteUiActionLogFileAsync(message);
-                return new ContentResult { Content = message, ContentType = "text/html" };
+                await _logFileService.WriteUiActionLogFileAsync(message);
+                command = $"echo {message}";
+            }
+            else
+            {
+                command = $"rsh -l {account} {_loginIp} {fullPath}{resetModel} {fullPath}";
+                if (account != $"{_prefix}weps")
+                {
+                    command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {account} {fullPath}{resetModel} {jobId} {fullPath}";
+                    result += await _uiqService.RunCommandAsync(command);
+                }
             }
 
-            var command = account == $"{_prefix}weps"
-                ? $"rsh -l {account} {_loginIp} {fullPath}{resetModel} {fullPath}"
-                : $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {account} {fullPath}{resetModel} {jobId} {fullPath}";
+            await _logFileService.WriteUiActionLogFileAsync("kill start");
+            await _logFileService.WriteUiActionLogFileAsync(command);
 
             message = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + $"Kill Model of {modelName} {memberName} {nickname}\n";
-            var result = message + await _uiqService.RunCommandAsync(command);
+            var commandResult = await _uiqService.RunCommandAsync(command);
+            result = (message + commandResult);
 
-            _logFileService.WriteUiActionLogFileAsync(message);
+            await _logFileService.WriteUiActionLogFileAsync(commandResult);
+            await _logFileService.WriteUiActionLogFileAsync("kill end");
+
+            result = "<br>" + Regex.Replace(result, "/\n/", "\n<br>");
+            await _logFileService.WriteUiActionLogFileAsync(message);
             return new ContentResult { Content = result, ContentType = "text/html" };
         }
 
@@ -489,9 +506,23 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<ContentResult> ArchiveResult()
+        public async Task<ContentResult> ArchiveResult(string modelName, string memberName, string nickname, int method, string dtg, string node)
         {
-            return new ContentResult { Content = "Sumbit completed", ContentType = "text/html" };
+            var content = string.Empty;
+            var configs = _uiqService.GetArchiveViewModels();
+            var data = configs.FirstOrDefault(x => x.Model_Name == modelName
+                                && x.Member_Name == memberName
+                                && x.Nickname == nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var shell = await _uiqService.GetArchiveExecuteShellAsync(modelName, memberName, nickname, method);
+
+            var command = $"rsh -l {_rshAccount} {_dataMvIp} /ncs/{_hpcCtl}/web/shell/run_Archive.ksh {_rshAccount} {fullPath}{shell} {dtg} {node} {modelName} {memberName} {fullPath}";
+            var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
+            result.Split("\n").ToList().ForEach(x => content += $"{x}<br>");
+
+            var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}  Archive redo with {dtg} \r\n";
+            await _logFileService.WriteUiActionLogFileAsync(message);
+            return new ContentResult { Content = content, ContentType = "text/html" };
         }
 
         [HttpPost]

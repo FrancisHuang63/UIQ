@@ -32,7 +32,9 @@ namespace UIQ.Controllers
                 if (System.Text.RegularExpressions.Regex.IsMatch(logLineData, @"^[A-Z]+$")
                     || logLineData.Contains("Finish"))
                 {
-                    returnContent += $@"<span class=""c4"">{(isGetLastLine ? "Finish" : logLineData)}</span>";
+                    returnContent += isGetLastLine 
+                        ? "Finish"
+                        : $@"<span class=""c4"">{logLineData}</span>";
                 }
                 else if (logLineData.Contains("fail") || logLineData.Contains("cancel"))
                 {
