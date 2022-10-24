@@ -51,7 +51,8 @@ namespace UIQ.Controllers
         public IActionResult DailyReport()
         {
             var command = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{_hpcCtl}/daily_log/ | grep -v old_log";
-            ViewBag.Data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
+            var data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
+            ViewBag.Data = (data ?? string.Empty).Split("\n\t");
             return View();
         }
 

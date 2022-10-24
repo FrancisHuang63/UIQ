@@ -71,7 +71,6 @@ namespace UIQ.Services
 
         public async Task<string> RunCommandAsync(string command)
         {
-            return string.Empty;
             return await _sshCommandService.RunCommandAsync(command);
         }
 
@@ -103,7 +102,7 @@ namespace UIQ.Services
 
         public async Task<string> GetExecuteNwpRunningNodesCommandHtmlAsync(string selNode)
         {
-            if (!string.IsNullOrWhiteSpace(selNode)) return string.Empty;
+            if (string.IsNullOrWhiteSpace(selNode)) return string.Empty;
 
             var resultHtml = string.Empty;
             var nodes = (selNode ?? string.Empty).Split(',');
@@ -491,7 +490,7 @@ namespace UIQ.Services
 
         public async Task<string> CheckRejectStatusAsync()
         {
-            var filePath = $"${_UiPath}wwwroot/log/SMS/sms_start_reject.log";
+            var filePath = $"{_UiPath}wwwroot/log/SMS/sms_start_reject.log";
             if (File.Exists(filePath) == false) return "status : normal";
 
             var content = await _logFileService.ReadLogFileAsync(filePath);

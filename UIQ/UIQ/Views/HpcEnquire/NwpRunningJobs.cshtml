@@ -1,4 +1,5 @@
 ﻿@using Microsoft.Extensions.Options
+@using UIQ.Controllers
 @using UIQ.Services.Interfaces
 @inject IOptions<RunningJobInfoOption> runningJobInfoOption
 @inject IConfiguration configuration
@@ -48,13 +49,13 @@
 <br>
 
 <h1>Show processes of accounts on DATAMOVER:
-    <select id="node" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action("NwpRunningNodes"))', 'show');">
+    <select id="node" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(HpcEnquireController.NwpRunningNodes)))', 'show');">
         <option value="0">-----</option>
         @switch (hostName) 
         {
             case "datamv03":
             case "datamv04":
-	            <option value="datamv01">datamv01></option>
+	            <option value="datamv01">datamv01</option>
 	            <option value="datamv02">datamv02</option>
 	            <option value="datamv03">datamv03</option>
 	            <option value="datamv04">datamv04</option>

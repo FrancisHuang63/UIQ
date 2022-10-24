@@ -148,7 +148,7 @@ namespace UIQ.Controllers
             _uiqService.UpdateCrontabMasterGroup(cronMode);
             _uiqService.UpdateGroupValidationWhoHasCronMode(cronMode);
             _uiqService.UpdateGroupValidationWhoNotHasCronMode(cronMode);
-            
+
             _uiqService.SqlSync();
             switch (cronMode)
             {
@@ -339,40 +339,43 @@ namespace UIQ.Controllers
         {
             if (commandId.HasValue == false) return Json(null);
             var command = await _uiqService.GetCommandItemAsync(commandId.Value);
-
             return Json(command);
         }
 
         [HttpPost]
-        public async Task<string> CommandExecute(int commandId, string parameters, string passwd, string command, string execTime)
+        public async Task<ContentResult> CommandExecute(int commandId, string parameters, string passwd, string command, string execTime)
         {
             var commandItem = await _uiqService.GetCommandItemAsync(commandId);
-            if (commandItem == null) return null;
+            if (commandItem == null) return new ContentResult { Content = "Error", ContentType = "text/html" };
 
             command = string.IsNullOrWhiteSpace(command) ? commandItem.Command_Content : command;
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + " '\\\"$parameters\\\"'";
-            command = $"rsh -l {_hpcCtl} {_loginIp} \"{commandItem.Command_Content}\" 2>&1";
+            command = $"rsh -l {_hpcCtl} {_loginIp} \"{command}\" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);
-            return string.IsNullOrWhiteSpace(result) ? "No Result" : result;
+            return new ContentResult { Content = string.IsNullOrWhiteSpace(result) ? "No Result" : result, ContentType = "text/html" };
         }
 
         [HttpPost]
-        public async Task<string> CalculateCommandExecuteTime(int commandId, string parameters, string passwd, string command, int execTime)
+        public async Task<ContentResult> CalculateCommandExecuteTime(int commandId, string parameters, string passwd, string command, int execTime)
         {
             var commandItem = await _uiqService.GetCommandItemAsync(commandId);
-            if (commandItem == null) return null;
+            if (commandItem == null) return new ContentResult { Content = "Error", ContentType = "text/html" };
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
                 && passwd != commandItem.Command_Pwd)
             {
-                return "Your password is Wrong!!!!";
+                return new ContentResult { Content = "Your password is Wrong!!!!", ContentType = "text/html" };
             }
 
-            command = string.IsNullOrWhiteSpace(parameters) ? command : command + " '\\\"$parameters\\\"'";
-            var html = $@"rsh -l {_hpcCtl} {_loginIp} ""{command}"" 2>&1<br><br>";
+            command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
+            command = $@"rsh -l {_hpcCtl} {_loginIp} ""{(command ?? string.Empty).Split("\n").FirstOrDefault()}"" 2>&1";
+            var result = await _uiqService.RunCommandAsync(command);
+            var html = result + "<br<br>";
+            html += $@"Start Time: {DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}<br>";
+
             html += $@"Estimated Completion Time: <mark>{DateTime.Now.AddMinutes(execTime).ToString("yyyy/MM/dd HH:mm:ss")}</mark><br>
-                      <mark>Please wait...</mark>\n<br>\n<br>";
-            return html;
+                      <mark>Please wait...</mark><br><br>";
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
         [HttpPost]

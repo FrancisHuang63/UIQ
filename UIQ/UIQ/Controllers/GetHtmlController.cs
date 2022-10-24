@@ -51,7 +51,7 @@ namespace UIQ.Controllers
                 html += $"<option>{item}</option>";
             }
             html += $@"</select>
-                      <input type=""submit"" value=enquire"" class=""form"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.ModelLogResult))}', 'result')"";>";
+                      <input type=""submit"" value=""enquire"" class=""form"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.ModelLogResult))}', 'result')"";>";
 
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
@@ -303,6 +303,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<ContentResult> DtgResult(string modelName, string memberName, string nickname, string dtg)
         {
+            dtg = dtg ?? string.Empty;
             var html = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
             var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
@@ -315,18 +316,24 @@ namespace UIQ.Controllers
             var message = "DTG adjust function is not available for this member.\r\n";
             if (string.IsNullOrWhiteSpace(dtgAdjust))
             {
-                html += "DTG adjust function is not available for this member.\r\n";
+                html += message;
             }
             else
             {
                 var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
-                html += $"{command} <br><br>";
                 html += await _uiqService.RunCommandAsync(command);
+                html += " <br><br>";
+
+                var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
+                foreach (var item in (result ?? string.Empty).Split("\n\t"))
+                {
+                    html += $"{item}<br>";
+                }
 
                 //輸出結果
-                message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.";
-                message = message.Replace("/\n/", "<br>");
-                html += message;
+                message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.\r\n{result}\r\n";
+                message = Regex.Replace(message, "/\n/", "<br>");
+                html += $"<br>{message}";
             }
 
             await _logFileService.WriteUiActionLogFileAsync(message);
@@ -352,6 +359,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<ContentResult> LidResult(string modelName, string memberName, string nickname, string lid)
         {
+            lid = lid ?? string.Empty;
             var html = string.Empty;
             var configList = _uiqService.GetModelLogFileViewModels();
             var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
@@ -361,7 +369,7 @@ namespace UIQ.Controllers
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
             var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {account} {fullPath} {lid}";
-            html += command;
+            html += await _uiqService.RunCommandAsync(command);
             html += await _uiqService.RunCommandAsync(command);
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";

@@ -82,7 +82,7 @@
 										<th scope="col"></th>
 									</tr>
 									<tr>
-										<td><input type="radio" name="IsNewModelName" value="False" @(isNew ? "checked" : string.Empty)>Old Model Name<span color="red">*</span>：</td>
+										<td><input type="radio" name="IsNewModelName" value="False">Old Model Name<span color="red">*</span>：</td>
 										<td>
 											<select id="model_select" name="Model.Model_Id">
 												@foreach (var item in modelItems)
@@ -340,7 +340,7 @@
 						<tr>
 							<td>maintainer Setting</td>
 							<td>
-								<input id="maintainer_status" type="radio" name="maintainer_status" value="0" @(Model?.Maintainer_Status == 0 ? "checked" : string.Empty) >on
+								<input id="maintainer_status" type="radio" name="maintainer_status" value="0" @(Model?.Maintainer_Status == 0 || Model?.Maintainer_Status == null ? "checked" : string.Empty) >on
 								<input id="maintainer_status" type="radio" name="maintainer_status" value="2" @(Model?.Maintainer_Status == 2 ? "checked" : string.Empty) >maintainer
 							</td>
 						</tr>

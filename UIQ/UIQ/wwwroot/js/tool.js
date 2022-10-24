@@ -319,7 +319,7 @@ function play_alert_audio() {
         return;
     }
 
-    var html = "<audio id='reject_alert' src='./media/alert2.mp3' preload='auto'></audio>";
+    var html = "<audio id='reject_alert' src='../wwwroot/media/alert2.mp3' preload='auto'></audio>";
     $("body").append(html);
     document.getElementById('reject_alert').play();
 }

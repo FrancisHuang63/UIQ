@@ -79,7 +79,7 @@
                 <tr style="display:none;"><th scope="col"></th></tr>
                 <tr>
                     <td height="107" valign="bottom" background="@indexSideImageUrl">
-                        <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href='@Url.Action("LogOut", "Login")'>logout</a></div>
+                        <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href='@Url.Action(nameof(LoginController.Logout), "Login")'>logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
                             <ul>
                             @foreach(var menu in menus.OrderBy(x => x.Sort))
@@ -107,7 +107,7 @@
                 <thead>
                     <tr>
                         <th scope="col" colspan="9">STATUS TABLE
-                            <a href="@Url.Action("DetailedStatus")" target="_blank" class="btn"><span class="glyphicon glyphicon-th-list"></span></a>
+                            <a href="@Url.Action(nameof(HomeController.DetailedStatus))" target="_blank" class="btn"><span class="glyphicon glyphicon-th-list"></span></a>
                         </th>
                     </tr>
                 </thead>
@@ -124,13 +124,21 @@
                             var setMember = datasFor8Diplay.ElementAt(i);
                             <tr>
                                 <td class="@(i == 0 ? "model_name" : string.Empty)">@(i == 0 ? groupModel.Key : string.Empty)</td>
-                                @foreach (var memberDatas in setMember)
+                                @for(int dataIdx = 0; dataIdx < perColumnMemberAmount; dataIdx ++)
                                 {
-                                    var data = memberDatas.FirstOrDefault();
-                                    <td class="member_name @(data.TdClass)">
-                                        <a href="@(data.Href)" title="@(data.TdGroupMember)" target="_blank">@(data.TdText)</a>
-                                        <br>@($"{data.Dtg} {data.Run_Type}")
-                                    </td>
+                                    if(dataIdx < setMember.Count())
+                                    {
+                                        var memberDatas = setMember.ElementAt(dataIdx);
+                                        var data = memberDatas.FirstOrDefault();
+                                        <td class="member_name @(data.TdClass)">
+                                            <a href="@(data.Href)" title="@(data.TdGroupMember)" target="_blank">@(data.TdText)</a>
+                                            <br>@($"{data.Dtg} {data.Run_Type}")
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td></td>
+                                    }
                                 }
                             </tr>
                         }
@@ -168,7 +176,7 @@
                                         <img alt="Edit" src="~/images/edit.png" width="12"/>
                                     </a>
                                 }
-                                <a style="text-decoration:none; font-weight:bold" href="@(Url.Action("Index", "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
+                                <a style="text-decoration:none; font-weight:bold" href="@(Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
                                      @($"{item.Model_Name}_{item.Member_Name} ({item.Nickname})")
                                 </a>
                             </td>

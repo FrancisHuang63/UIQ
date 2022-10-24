@@ -40,6 +40,7 @@
     <Compile Remove="Controllers\SettingController.cs" />
     <Compile Remove="Extensions\HttpContextExtensions.cs" />
     <Compile Remove="Services\Interfaces\ILoginService.cs" />
+    <Compile Remove="Services\Interfaces\SshCommandService.cs" />
     <Compile Remove="Services\LoginService.cs" />
     <Compile Remove="ViewModels\ModelViewModel.cs" />
   </ItemGroup>

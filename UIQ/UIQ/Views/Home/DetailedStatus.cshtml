@@ -65,7 +65,7 @@
             </tr>
                 <tr>
                     <td height="107" valign="bottom" background="@indexSideImageUrl">
-                        <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href="@(Url.Action("LogOut", "Login"))">logout</a></div>
+                        <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href="@(Url.Action(nameof(LoginController.Logout), "Login"))">logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
                             <ul>
                             @foreach(var menu in menus.OrderBy(x => x.Sort))

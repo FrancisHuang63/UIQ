@@ -1,4 +1,5 @@
-﻿@using UIQ.ViewModels
+﻿@using UIQ.Controllers
+@using UIQ.ViewModels
 @model IEnumerable<CronSettingViewModel>
 @{
     Layout = null;
@@ -33,7 +34,7 @@
             }
         </table>
         <br>
-        <form id="cron_setting" name="cron_setting" action="@Url.Action("CronSetting")" method="post" onSubmit="return check()">
+        <form id="cron_setting" name="cron_setting" action="@Url.Action(nameof(MaintainToolsController.CronSetting))" method="post" onSubmit="return check()">
             <input type=submit value="Switch" style="width:100px">
             <input type=hidden id=cronmode name=cronMode>
         </form>
