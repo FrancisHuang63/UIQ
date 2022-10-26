@@ -1,4 +1,5 @@
-﻿@using UIQ.Services.Interfaces
+﻿@using System.Text.RegularExpressions
+@using UIQ.Services.Interfaces
 @using Microsoft.Extensions.Options
 @inject IConfiguration configuration
 @inject IOptions<RunningJobInfoOption> runningJobInfoOption
@@ -33,13 +34,14 @@
 		{
 			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
 			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} /users/xa09/bin/chknode";
-			var pjshowrsc_sarr = pjshowrsc_s.Split("/\n/");
+			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
+			var pjshowrsc_sarr = Regex.Split(commandResult, "/\n/");
 			
 			<p>
 				@foreach (var item in pjshowrsc_sarr)
 				{
 					if(item.Trim() != "")
-						@(uiqService.RunCommandAsync(item).GetAwaiter().GetResult())
+						@(item)<br>
 				}
 			</p>
 			<p>Enquiring data completely!</p>
@@ -55,13 +57,15 @@
 			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
 			//Execute pjshowrsc command and make it an array
 			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc'";
-			var pjshowrsc_sarr = pjshowrsc_s.Split("/\n/");
+			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
+			var pjshowrsc_sarr = Regex.Split(commandResult, "/\n/");
 
 			//Make 5th line of pjshowrsc_s delimited by space
-			var dataArray = pjshowrsc_sarr.Count() >= 5 ? pjshowrsc_sarr[4].Split("/\\s+/") : new string[] { };
+			var dataArray = pjshowrsc_sarr.Count() >= 5 ? Regex.Split(pjshowrsc_sarr[4], "/\\s+/") : new string[] { };
 
 			//Get #line of nodelist.txt
 			var nodeNum = $"cat {uiPath}wwwroot/shell/nodelist.txt | wc -l";
+			nodeNum = (await uiqService.RunCommandAsync(nodeNum)).TrimEnd();
 
 			//Comapare pjshowrsc_s result and #line of nodelist.txt 
 			if(dataArray.Count() >= 2 && dataArray[1] != nodeNum)
@@ -81,13 +85,15 @@
 
 			//Read node list and make it an array
 			var nodeList = $"cat {uiPath}wwwroot/shell/nodelist.txt";
-			var nodelistArray =  nodeList.Split("/\n/");
+			commandResult = await uiqService.RunCommandAsync(nodeList);
+			var nodelistArray =  Regex.Split(commandResult, "/\n/");
 
 			//Execute pjshowrsc command and make it an array
 			var pjshowrsc_d = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
-			var pjshowrsc_darr = pjshowrsc_d.Split("/\n/");
+			commandResult = await uiqService.RunCommandAsync(pjshowrsc_d);
+			var pjshowrsc_darr = Regex.Split(commandResult, "/\n/");
 			
-			<p>@(uiqService.RunCommandAsync($"{hpcCtl} {loginIp}").GetAwaiter().GetResult())</p>
+			<p>@($"{hpcCtl} {loginIp}")</p>
 
 			//Check if pjshowrsc_darr has all nodes.
 			//If so, display pjshowrsc_darr. If not, display the node name and make it red.

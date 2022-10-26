@@ -161,7 +161,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.Where(x => x.Comment.Contains("on time") == false))
                     {
                         var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
                         var upperStatus = (item.Status ?? string.Empty).ToUpper();

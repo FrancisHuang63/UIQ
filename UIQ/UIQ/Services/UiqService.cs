@@ -515,6 +515,8 @@ namespace UIQ.Services
             if (isMemberExist) result += await _dataBaseNcsUiService.UpdateAsync("member", data.Member, new { Member_Id = data.Member.Member_Id });
             else memberId = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("member", data.Member);
 
+            data.Member.Member_Id = memberId;
+
             //CronTab
             foreach (var cronTab in data.CronTabs)
             {

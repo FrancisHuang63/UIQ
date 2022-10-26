@@ -82,12 +82,13 @@
 										<th scope="col"></th>
 									</tr>
 									<tr>
-										<td><input type="radio" name="IsNewModelName" value="False">Old Model Name<span color="red">*</span>：</td>
+										<td><input type="radio" name="IsNewModelName" @(isNew ? string.Empty : "checked") value="False">Old Model Name<span color="red">*</span>：</td>
 										<td>
 											<select id="model_select" name="Model.Model_Id">
 												@foreach (var item in modelItems)
 												{
-													<option value="@item.Model_Id" data-position="@item.Model_Position">@item.Model_Name</option>
+													var sel = item.Model_Id == Model?.Model_Id ? "selected" : string.Empty;
+													<!option value="@item.Model_Id" data-position="@item.Model_Position" @(sel) >@item.Model_Name</!option>
 												}
 											</select>
 											<input type="button" value="DelModel" onclick="deleteModelCheck()">
@@ -393,9 +394,8 @@
 				document.getElementById("crontabRowNum").value = parseInt(idx) + 1;
 			}
 
-			function deleteSatnamingCrontab(tbl, str){
-				let td = document.getElementById(str).parentNode.rowIndex;
-				document.getElementById(tbl).deleteRow(td);
+			function deleteSatnamingCrontab(id){
+				$(`#${id}`).remove();
 				$('#crontabRowNum').val(parseInt($('#crontabRowNum').val()) - 1);
 			}
 
@@ -524,6 +524,31 @@
 					setting.submit();
 				}
 			}
+
+			$('#setting').on('submit', function(e){
+				let form = $(this);
+				let url = form.attr('action');
+								
+				$.ajax({
+					url: url,
+					type: 'POST',
+					dataType: 'json',
+					data: form.serialize(),
+					success: function(response){
+						if(response.success){
+							alert('Save success!');
+						}
+						else{
+							alert('Save error!');
+						}
+					},
+					error: function(error){
+						alert('Save error!');
+					}
+				});
+
+				e.preventDefault();
+			})
 		</script>
 	</body>
 </html>

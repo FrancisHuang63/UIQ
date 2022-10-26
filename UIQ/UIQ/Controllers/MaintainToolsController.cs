@@ -120,11 +120,11 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public IActionResult CommandEdit(Command data)
+        public async Task<IActionResult> CommandEdit(Command data)
         {
             if (data == null) return RedirectToAction(nameof(Command));
 
-            _uiqService.UpsertCommandAsync(data);
+            var result = await _uiqService.UpsertCommandAsync(data);
             return RedirectToAction(nameof(Command));
         }
 
@@ -192,14 +192,16 @@ namespace UIQ.Controllers
 
         [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
         [HttpPost]
-        public IActionResult ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
+        public async Task<JsonResult> ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
         {
-            if (data == null) return View("Error");
+            var result = new ApiResponse<string>("Error");
+            if (data == null) return Json(result);
 
-            _uiqService.SaveModelMemberSetData(data);
-            _uiqService.SqlSync();
+            var saveResult = await _uiqService.SaveModelMemberSetData(data);
+            await _uiqService.SqlSync();
 
-            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+            result.Success = saveResult;
+            return Json(result);
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
