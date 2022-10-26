@@ -22,8 +22,9 @@ namespace UIQ.Controllers
             var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
             if (logContent == null) return Content($"<pre> There is no log file of {modelName}_{memberName}.");
-
-            var returnContent = $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">
+            var returnContent = "";
+            if (!isGetLastLine)
+            returnContent += $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">
 									<pre>";
 
             var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');

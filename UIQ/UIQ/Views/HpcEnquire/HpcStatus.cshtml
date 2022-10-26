@@ -38,7 +38,8 @@
 			<p>
 				@foreach (var item in pjshowrsc_sarr)
 				{
-					@(uiqService.RunCommandAsync(item).GetAwaiter().GetResult())
+					if(item.Trim() != "")
+						@(uiqService.RunCommandAsync(item).GetAwaiter().GetResult())
 				}
 			</p>
 			<p>Enquiring data completely!</p>

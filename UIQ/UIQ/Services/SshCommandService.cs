@@ -50,7 +50,7 @@ namespace UIQ.Services.Interfaces
             }
             catch
             {
-                return "Error";
+                return string.Empty;
             }
         }
     }

@@ -128,7 +128,7 @@
                             <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
                             <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
                             <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({item.Sms_Time.ToString("HH:mm")} -> {item.Pre_End.ToString("HH:mm")})")</td>
-                            <td class="left">@Html.Raw(new System.Net.WebClient().DownloadString(logViewPath))</td>
+                            <td class="center">@Html.Raw(new System.Net.WebClient().DownloadString(logViewPath))</td>
                             <td class="@item.TdClass">@item.Comment</td>
                             <td>@item.NextRun</td>
                         </tr>

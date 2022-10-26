@@ -172,15 +172,15 @@ namespace UIQ.Services
 	                        etr.`cron_mode`,
 	                        etr.`typhoon_mode`,
 	                        etr.`round`,
-                            (SELECT SUM(bt.`batch_time`) FROM `db_ncsui`.`batch` bt
+                            (SELECT SUM(bt.`batch_time`) FROM `db_ncsUI`.`batch` bt
 	                         WHERE bt.`member_id` = mb.`member_id`
                              AND (bt.`batch_type` = '' OR bt.`batch_type` = SUBSTRING_INDEX(etr.`run_type`, '_', 1))
                              AND (bt.`batch_dtg` = '' OR bt.`batch_dtg` = etr.`round`)
                              GROUP BY(bt.`member_id`)
 	                        ) AS `batch_time`
                         FROM `db_ncs_log`.`execution_time_result` etr
-                        JOIN `db_ncsui`.`member` mb ON mb.`member_name` = etr.`member` AND mb.`account` = etr.`account`
-                        JOIN `db_ncsui`.`model` md ON md.`model_name` = etr.`model` AND md.`model_id` = mb.`model_id`
+                        JOIN `db_ncsUI`.`member` mb ON mb.`member_name` = etr.`member` AND mb.`account` = etr.`account`
+                        JOIN `db_ncsUI`.`model` md ON md.`model_name` = etr.`model` AND md.`model_id` = mb.`model_id`
                         WHERE etr.`account` = mb.`account`
                         AND md.`model_id` = mb.`model_id`
                         AND etr.`batch_name` = @BatchName
@@ -227,8 +227,8 @@ namespace UIQ.Services
                     WHERE `model` = @ModelName
                     AND `member` = @MemberName
                     AND `account` = (SELECT mb.`account`
-                                        FROM `db_ncsui`.`member` mb
-                                        JOIN `db_ncsui`.`model` md ON md.`model_id` = mb.`model_id`
+                                        FROM `db_ncsUI`.`member` mb
+                                        JOIN `db_ncsUI`.`model` md ON md.`model_id` = mb.`model_id`
                                         WHERE md.`model_name` = @ModelName
                                         AND mb.`member_name` = @MemberName
                                         AND mb.`nickname` = @Nickname)
@@ -263,8 +263,8 @@ namespace UIQ.Services
                         WHERE `model` = @ModelName
                         AND `member` = @MemberName
                         AND `account` = (SELECT mb.`account`
-                                        FROM `db_ncsui`.`member` mb
-                                        JOIN `db_ncsui`.`model` md ON md.`model_id` = mb.`model_id`
+                                        FROM `db_ncsUI`.`member` mb
+                                        JOIN `db_ncsUI`.`model` md ON md.`model_id` = mb.`model_id`
                                         WHERE md.`model_name` = @ModelName
                                         AND mb.`member_name` = @MemberName
                                         AND mb.`nickname` = @Nickname)

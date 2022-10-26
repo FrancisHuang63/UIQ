@@ -46,9 +46,10 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} ls {fullPath}/log | grep job | grep -v job1 | grep -v OP_";
 
             var listData = await _uiqService.RunCommandAsync(command);
-            foreach (var item in listData.Split("\n\t"))
+            foreach (var item in listData.Split("\n"))
             {
-                html += $"<option>{item}</option>";
+                if(item.Trim() != "")
+                    html += $"<option>{item}</option>";
             }
             html += $@"</select>
                       <input type=""submit"" value=""enquire"" class=""form"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.ModelLogResult))}', 'result')"";>";
@@ -94,12 +95,13 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} ls {fullPath}/log {(!string.IsNullOrWhiteSpace(keyword) ? $"| grep -i {keyword}" : string.Empty)}";
 
             var listData = await _uiqService.RunCommandAsync(command);
-            foreach (var item in listData.Split("\n\t"))
+            foreach (var item in listData.Split("\n"))
             {
-                html += $"<option>{item}</option>";
+                if(item.Trim() != "")
+                    html += $"<option>{item}</option>";
             }
             html += $@"</select>
-                      <input type=""submit"" value=""enquire"" class=""form"" OnClick=""sendAJAXRequest('post', {Url.Action(nameof(GetHtmlController.RunningMember))}', 'show')"">";
+                      <input type=""submit"" value=""enquire"" class=""form"" OnClick=""sendAJAXRequest('post', '{Url.Action(nameof(GetHtmlController.RunningMember))}', 'show')"">";
 
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
@@ -325,9 +327,9 @@ namespace UIQ.Controllers
                 html += " <br><br>";
 
                 var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
-                foreach (var item in (result ?? string.Empty).Split("\n\t"))
+                foreach (var item in (result ?? string.Empty).Split("\n"))
                 {
-                    html += $"{item}<br>";
+                    html += item + "<br>";
                 }
 
                 //輸出結果
@@ -370,7 +372,7 @@ namespace UIQ.Controllers
 
             var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {account} {fullPath} {lid}";
             html += await _uiqService.RunCommandAsync(command);
-            html += await _uiqService.RunCommandAsync(command);
+            //html += await _uiqService.RunCommandAsync(command);
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
             await _logFileService.WriteUiActionLogFileAsync(message);
@@ -571,7 +573,7 @@ namespace UIQ.Controllers
                     var data = await _uiqService.RunCommandAsync(command);
                     html += "<table><tr>";
                     var idx = 0;
-                    foreach (var item in data.Split("\n\t"))
+                    foreach (var item in data.Split("\n"))
                     {
                         html += $"<td{item}</td>{((idx % 9 == 8) ? "</td></tr><tr>" : string.Empty)}";
                         idx++;
