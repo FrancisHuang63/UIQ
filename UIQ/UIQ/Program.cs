@@ -22,6 +22,7 @@ builder.Services.AddScoped<IUiqService, UiqService>();
 builder.Services.AddScoped<ISshCommandService, SshCommandService>();
 builder.Services.AddScoped<ILogFileService, LogFileService>();
 builder.Services.AddScoped<IUploadFileService, UploadFileService>();
+builder.Services.AddScoped<IEncodeService, EncodeService>();
 
 //Login
 if (builder.Configuration.GetValue<bool>("IsLoginByOauth"))

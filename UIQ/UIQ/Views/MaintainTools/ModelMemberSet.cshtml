@@ -276,34 +276,34 @@
 						<tr>
 							<td>Archive<img src="~/images/add_icons.png" onclick="addSatnamingArchive()" alt="新增"/></td>
 							<td>
-								@for (var idx = 0; idx < archiveItems.Count(); idx ++)
-								{
-									var item = archiveItems.ElementAt(idx);
+								<table id="archiveTable">
+									<tbody>
+									@for (var idx = 0; idx < archiveItems.Count(); idx ++)
+									{
+										var item = archiveItems.ElementAt(idx);
 
-									<table id="archiveTable">
-										<tbody>
-											<tr>
-												<td id="archive_@(idx)">Target Directory：
-													<input class="archive_directory" id="archive_directory_@(idx)" type="text" name="Archives[@(idx)].Target_Directory" value="@item?.Target_Directory">
-												</td>
-											</tr>
-											<tr></tr>
-											<tr>
-												<td id="archive_@(idx)">
-													<select name="Archives[@(idx)].Data_Id">
-														@foreach (var data in dataItems)
-														{
-															<option value="@(data.Data_Id)">@data.Data_Name</option>
-														}
-													</select>
-													<input id="archiveInput_@(idx)" name="Archives[@(idx)].Archive_Redo" type="text" value="@item?.Archive_Redo">(Ex: bin/Rarchive<font color="red">xxx</font>.ksh)
-													<img src="~/images/delete_icons.png" onclick="deleteSatnamingArchive('archive_@(idx)')" alt="移除">
-												</td>
-											</tr>
-											<tr></tr>
-										</tbody>
-									</table>
-								}
+										<tr>
+											<td id="archive_@(idx)">Target Directory：
+												<input class="archive_directory" id="archive_directory_@(idx)" type="text" name="Archives[@(idx)].Target_Directory" value="@item?.Target_Directory">
+											</td>
+										</tr>
+										<tr></tr>
+										<tr>
+											<td id="archive_@(idx)">
+												<select name="Archives[@(idx)].Data_Id">
+													@foreach (var data in dataItems)
+													{
+														<option value="@(data.Data_Id)">@data.Data_Name</option>
+													}
+												</select>
+												<input id="archiveInput_@(idx)" name="Archives[@(idx)].Archive_Redo" type="text" value="@item?.Archive_Redo">(Ex: bin/Rarchive<font color="red">xxx</font>.ksh)
+												<img src="~/images/delete_icons.png" onclick="deleteSatnamingArchive('archive_@(idx)')" alt="移除">
+											</td>
+										</tr>
+										<tr></tr>
+									}
+									</tbody>
+								</table>
 							</td>
 							<input id="archiveRowNum" type="hidden" name="archiveRowNum" value="@archiveItems.Count()"></td>
 						</tr>
@@ -312,12 +312,12 @@
 						<tr>
 							<td>Output<img src="~/images/add_icons.png" onclick="addSatnamingOutput()" alt="新增"/></td>
 							<td>
-								@for (var idx = 0; idx < outputItems.Count(); idx ++)
-								{
-									var item = outputItems.ElementAt(idx);
+								<table id="outputTable">
+									<tbody>
+										@for (var idx = 0; idx < outputItems.Count(); idx ++)
+										{
+											var item = outputItems.ElementAt(idx);
 
-									<table id="outputTable">
-										<tbody>
 											<tr>
 												<td id="output_@(idx)">
 													<select name="Outputs[@(idx)].Work_Id">
@@ -330,9 +330,9 @@
 													<img src="~/images/delete_icons.png" onclick="deleteSatnamingOutput('output_@(idx)')" alt="移除">
 												</td>
 											</tr>
-										</tbody>
-									</table>
-								}
+										}
+									</tbody>
+								</table>
 								<input id="outputRowNum" type="hidden" name="outputRowNum" value="@outputItems.Count()">
 							</td>
 						</tr>
@@ -483,6 +483,7 @@
 			}
 
 			function addSatnamingOutput(){
+				debugger;
 				var table = 'output';
 				var idx = document.getElementById("outputRowNum").value;
 				var otr = document.getElementById("outputTable").insertRow(-1);
@@ -491,7 +492,7 @@
 				otd.innerHTML = `<select name="Outputs[${idx}].Work_Id">
 									@foreach (var work in workItems)
 									{
-										@Html.Raw($@"<option value=""{work.Work_Id}"">{work.Work_Name}</option>")
+										<option value="@(work.Work_Id)">@(work.Work_Name)</option>
 									}
 								</select>
 								<input id="outputInput_${idx}" name="Outputs[${idx}].Model_Output" type="text" value="">

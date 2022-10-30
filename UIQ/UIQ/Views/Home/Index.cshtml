@@ -2,10 +2,12 @@
 @using Microsoft.AspNetCore.Hosting.Server.Features
 @using UIQ.Controllers
 @using UIQ.Enums
+@using UIQ.Services.Interfaces
 @using UIQ.ViewModels
 @inject IHttpContextAccessor httpContextAccessor
 @inject IServer server;
 @inject IConfiguration configuration
+@inject IEncodeService encodeService;
 
 @model IEnumerable<HomeTableViewModel>
 @{
@@ -167,6 +169,7 @@
                         var upperStatus = (item.Status ?? string.Empty).ToUpper();
                         var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
                         var logViewPath = baseUrl + Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account, isGetLastLine = true });
+                        var logViewData = encodeService.HtmlEncode(new System.Net.WebClient().DownloadString(logViewPath));
 
                         <tr class="@(trClass)">
                             <td class="left">
@@ -184,7 +187,7 @@
                             <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
                             <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
                             <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({item.Sms_Time.ToString("HH:mm")} -> {item.Pre_End.ToString("HH:mm")})")</td>
-                            <td class="center">@Html.Raw(new System.Net.WebClient().DownloadString(logViewPath))</td>
+                            <td class="center">@Html.Raw(logViewData)</td>
                             <td class="@item.TdClass">@item.Comment</td>
                             <td>@item.NextRun</td>
                         </tr>

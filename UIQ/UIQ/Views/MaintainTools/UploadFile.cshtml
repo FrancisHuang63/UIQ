@@ -144,7 +144,7 @@
                     success: function(resp){
                         alert(resp.message);
                         if(resp.success == true){
-                            location.href = location.href;
+                            location.href = encodeURI(location.href);
                         }
                     }
                 });
