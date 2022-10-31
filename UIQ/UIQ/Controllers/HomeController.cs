@@ -57,28 +57,34 @@ namespace UIQ.Controllers
         {
             var userGroupName = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value;
             var datas = await _uiqService.GetDelayDatasAsync(userGroupName);
-            return Json(datas);
+
+            var response = new ApiResponse<IEnumerable<GetShellDelayDataViewModel>>(datas);
+            return Json(response);
         }
 
         [HttpPost]
-        public async Task<ContentResult> DeleteShellDelayData(int id)
+        public async Task<JsonResult> DeleteShellDelayData(int id)
         {
             var resultCnt = await _uiqService.DeleteDelayDataAsync(id);
-            return new ContentResult { Content = resultCnt > 0 ? "Delete Success" : "Delete Fail", ContentType = "text/html" };
+            var response = new ApiResponse<string>(data: resultCnt > 0 ? "Delete Success" : "Delete Fail");
+            return Json(response);
         }
 
         [HttpPost]
         public async Task<JsonResult> LoadRejectLog()
         {
             var result = await _uiqService.CheckRejectStatusAsync();
-            return Json(result);
+
+            var response = new ApiResponse<string>(data: result);
+            return Json(response);
         }
 
         [HttpPost]
-        public async Task<ContentResult> DeleteRejectLog()
+        public async Task<JsonResult> DeleteRejectLog()
         {
             var result = await _uiqService.DeleteRejectLogAsync();
-            return new ContentResult { Content = result, ContentType = "text/html" };
+            var response = new ApiResponse<string>(data: result);
+            return Json(response);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

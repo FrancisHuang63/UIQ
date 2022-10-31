@@ -19,7 +19,7 @@
         <form Name="myForm" class="form">
             Model:
             <select id="model" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
                 @foreach(var item in configList.GroupBy(x => x.Model_Name))
                 {
                     <option value="@item.Key">@item.Key</option>
@@ -28,25 +28,58 @@
 
             Member:
             <select id="member" class="form" OnChange="build_nickname_options();">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
     
             Nickname:
             <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitShow), "GetHtml"))', 'show');$('#result').html('');">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
         </form>
 
         <div id="show" >
-            <div class="short">Current DTG and Lid</div>
-            <input type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitResult), "GetHtml"))', 'result');">
+            <div id="divShowTitle" class="short">Current DTG and Lid</div>
+            <input type="hidden" id="dtg" value="">
+            <input id="btnSubmit" type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitResult), "GetHtml"))', 'result');">
         </div>
         <br>
         <div id="result" class="enquire">result...</div>
 
         <script type="text/JavaScript">
-            function clearSelectOption(elementId){
-                $(`#${elementId}`).html('<option>-----</option>')
+            function setShowData(response){
+                if(response.success){
+                    let modelName = $('#model').val();
+                    let memberName = $('#member').val();
+                    let nickname = $('#nickname').val();
+                    let batchSelectOptionsHtml = ''
+                        response.data.batchDatas.forEach(item => batchSelectOptionsHtml += `<option value="${htmlEncode(item.key)}">${htmlEncode(item.value)}</option>`)
+                    $('#divShowTitle').html(`[Model] =${modelName}, [Member]=${memberName}, [Nickname]=${nickname}<br><br>
+                        DTG =${htmlEncode(response.data.dtg)} ;
+                        Lid =${htmlEncode(response.data.lid)} ;
+                        batch:<select id="batch" class="form">
+                                ${batchSelectOptionsHtml}
+                              </select>`);
+                    
+                    if(htmlEncode(response.data.lid) === '1'){
+                        $('#btnSubmit').prop('disabled', true);
+                    }
+                    $('#dtg').val(htmlEncode(response.data.dtg));
+                    $('#result').html('');
+                }
+                else{
+                    alert(htmlEncode(response.message))
+                }
+            }
+
+            function setResultData(response){
+	            if(response.success){
+                    let dataHtml = '';
+                    response.data.forEach(item => dataHtml += `${htmlEncode(item)}<br>`);
+		            $('#result').html(dataHtml);
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
             }
 
             $('#model').change(function(){
@@ -69,6 +102,32 @@
                         clearSelectOption('nickName');
                     }
                 });
+            });
+
+            $('#nickname').change(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitShow), "GetHtml"))', setShowData);
+            });
+
+            $('#btnSubmit').click(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitResult), "GetHtml"))', setResultData);
             });
         </script>
     </body>

@@ -44,7 +44,7 @@
 			<form Name="myForm" action="javascript:;" class="form">
 				Model:
 				<select id="model" class="form">
-					<option>-----</option>
+					<option value="">-----</option>
 					@foreach(var item in configList.GroupBy(x => x.Model_Name))
 					{
 						<option value="@item.Key">@item.Key</option>
@@ -53,23 +53,23 @@
 
 				Member:
 				<select id="member" class="form" OnChange="build_nickname_options();">
-					<option>-----</option>
+					<option value="">-----</option>
 				</select>
 
 				 Nickname:
-				<select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.RunningEnquire), "GetHtml"))', 'LogShow'); sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.RunningSms), "GetHtml"))', 'sms');">
-					<option>-----</option>
+				<select id="nickname" class="form">
+					<option value="">-----</option>
 				</select>
 
 				KeyWord:
-				<input id="keyw" class="form" value="job" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.RunningEnquire), "GetHtml"))', 'LogShow');">
+				<input id="keyw" class="form" value="job">
 
 				<div id="LogShow" class="form">
 					LogFile:
-					<select class="form">
-						<option>-----</option>
+					<select id="node" class="form">
+						<option value="">-----</option>
 					</select>
-					<input type="submit" value="enquire" class="form" >
+					<input id="enquire" type="submit" value="enquire" class="form" />
 				</div>
 				<br>
 				<h1>show the log file of the member</h1>
@@ -77,9 +77,47 @@
 			</form>
 
 			<script type="text/JavaScript">
-				function clearSelectOption(elementId){
-					$(`#${elementId}`).html('<option>-----</option>')
+				function setNodeOptionData(response){
+					if(response.success){
+						clearSelectOption('node');
+						response.data.forEach(item => $('#node').append(`<option value="${htmlEncode(item)}">${htmlEncode(item)}</option>`));
+
+						$('#result').html('');
+					}
+					else{
+						alert(htmlEncode(response.message));
+					}
 				}
+
+				function setResultData(response){
+					if(response.success){
+						let dataHtml = `File size: ${htmlEncode(response.data.fileSize)}<br>
+										File time: ${htmlEncode(response.data.fileTime)}<br>`;
+						response.data.files.forEach(item => { dataHtml += `${htmlEncode(item)}<br>`; });
+
+						$('#show').html(`<pre>${dataHtml}</pre>`);
+					}
+					else{
+						alert(htmlEncode(response.message));
+					}
+				}
+
+				function nicknameChange(e){
+					let modelValue = $('#model').val();
+					let memberValue = $('#member').val();
+					let nicknameValue = $('#nickname').val();
+
+					if(!modelValue || !memberValue || ! nicknameValue){
+						e.preventDefault();
+						e.stopPropagation();
+						return false;
+					}
+
+					sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.RunningEnquire), "GetHtml"))', setNodeOptionData);
+					if($(this).attr('id') === 'nickname'){
+						sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.RunningSms), "GetHtml"))');
+					}
+				};
 
 				$('#model').change(function(){
 					let selValue = $(this).val();
@@ -102,6 +140,24 @@
 						}
 					});
 				});
+
+				$('#nickname').change(nicknameChange);
+				$('#keyw').change(nicknameChange);
+
+				$('#enquire').click(function(e){
+					let modelValue = $('#model').val();
+					let memberValue = $('#member').val();
+					let nicknameValue = $('#nickname').val();
+					let nodeValue = $('#node').val();
+					if(!modelValue || !memberValue || ! nicknameValue || !nodeValue){
+						e.preventDefault();
+						e.stopPropagation();
+						return false;
+					}
+
+					sendAJAXRequest('post', '@Url.Action(nameof(GetHtmlController.RunningMember), "GetHtml")', setResultData);
+				});
+
 			</script>
 	</body>
 </html>

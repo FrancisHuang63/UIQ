@@ -19,7 +19,7 @@
         <form Name="myForm" class="form">
             Model:
             <select id="model" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
                 @foreach(var item in configList.GroupBy(x => x.Model_Name))
                 {
                     <option value="@item.Key">@item.Key</option>
@@ -28,30 +28,53 @@
 
             Member:
             <select id="member" class="form" OnChange="build_nickname_options();">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
 
             Nickname:
-            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.DtgShow), "GetHtml"))', 'show');$('#result').html('');">
-                <option>-----</option>
+            <select id="nickname" class="form">
+                <option value="">-----</option>
             </select>
         </form>
 
         <div id="show">
-            <div class="short">show current status...</div><br>
+            <div id="divShowTitle" class="short">show current status...</div><br>
             <form class="form">Adjust value
                 <select id="dtg" class="form">
                     <option value="">+</option>
                     <option value="-">-</option>
                 </select> 
-                <input type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.DtgResult), "GetHtml"))', 'result');">
+                <input id="btnSubmit" type="button" class="form" value="Submit">
             </form>
         </div>
         <div id="result" class="enquire">result...</div>
         
         <script type="text/JavaScript">
-            function clearSelectOption(elementId){
-                $(`#${elementId}`).html('<option>-----</option>')
+            function setShowData(response){
+                if(response.success){
+                    let modelName = $('#model').val();
+                    let memberName = $('#member').val();
+                    let nickname = $('#nickname').val();
+                    $('#divShowTitle').html(`[Model]=${modelName}, [Member]=${memberName}, [Nickname]=${nickname}<br><br>DTG=${htmlEncode(response.data.dtg)}`);
+                    
+                    $('#dtg option').val(htmlEncode(response.data.dtgValue));
+                    $('#dtg').after(htmlEncode(response.data.dtgValue))
+                    $('#result').html('');
+                }
+                else{
+                    alert(htmlEncode(response.message))
+                }
+            }
+
+            function setResultData(response){
+	            if(response.success){
+                    let dataHtml = '';
+                    response.data.forEach(item => dataHtml += `${htmlEncode(item)}<br>`);
+		            $('#result').html(dataHtml);
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
             }
 
             $('#model').change(function(){
@@ -74,6 +97,32 @@
                         clearSelectOption('nickName');
                     }
                 });
+            });
+
+            $('#nickname').change(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.DtgShow), "GetHtml"))', setShowData);
+            });
+
+            $('#btnSubmit').click(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.DtgResult), "GetHtml"))', setResultData);
             });
         </script>
     </body>

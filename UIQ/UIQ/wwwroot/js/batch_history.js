@@ -14,7 +14,7 @@ $(function () {
                 var html = '<option>-----</optin>';
                 if (model_name !== '-----') {
                     $.each(respones.data, function (key, value) {
-                        html += "<option value='" + value + "'>" + value + "</optin>";
+                        html += "<option value='" + htmlEncode(value) + "'>" + htmlEncode(value) + "</optin>";
                     });
                 }
                 $('#member').html(html);
@@ -38,7 +38,7 @@ $(function () {
                 var html = '<option>-----</optin>';
                 if (member_name !== '-----') {
                     $.each(respones.data, function (key, value) {
-                        html += "<option value='" + value + "'>" + value + "</optin>";
+                        html += "<option value='" + htmlEncode(value) + "'>" + htmlEncode(value) + "</optin>";
                     });
                 }
                 $('#nickname').html(html);
@@ -69,7 +69,7 @@ $(function () {
             success: function (respones) {
                 var html = '';
                 $.each(respones.data, function (key, value) {
-                    html += "<option value='" + value + "'>" + value+ "</optin>";
+                    html += "<option value='" + htmlEncode(value) + "'>" + htmlEncode(value) + "</optin>";
                 });
                 $('#model').append(html);
             }

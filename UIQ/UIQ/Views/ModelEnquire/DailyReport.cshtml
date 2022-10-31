@@ -26,7 +26,28 @@
                 }
             </select>
             <br><br>
-            <input type="submit" value="enquire" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.DailyResult), "GetHtml"))', 'result')";>
+            <input id="enquire" type="submit" value="enquire">
         <div id="result" class="huge"></div>
+
+        <script>
+            function setResultData(response){
+				if(response.success){
+					let dataHtml = ``;
+					response.data.forEach(item => {
+                        let data = htmlEncode(item);
+                        dataHtml += `<span class="${(data.includes('fail') ? 'c3' : '')}">${data}</span><br>`; 
+                    });
+
+					$('#result').html(`<pre>${dataHtml}</pre>`);
+				}
+				else{
+					alert(htmlEncode(response.message));
+				}
+			}
+
+            $('#enquire').click(function(e){
+				sendAJAXRequest('post', '@Url.Action(nameof(GetHtmlController.DailyResult), "GetHtml")', setResultData);
+			});
+        </script>
     </body>
 </html>

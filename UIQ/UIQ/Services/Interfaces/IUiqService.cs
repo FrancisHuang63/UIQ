@@ -11,7 +11,7 @@ namespace UIQ.Services.Interfaces
 
         public void UpdateCrontabMasterGroup(string cronMode);
 
-        public Task<string> GetExecuteNwpRunningNodesCommandHtmlAsync(string selNode);
+        public Task<ApiResponse<List<KeyValuePair<string, string>>>> GetExecuteNwpRunningNodesCommandResponseAsync(string selNode);
 
         public IEnumerable<ModelLogFileViewModel> GetModelLogFileViewModels();
 
@@ -108,5 +108,9 @@ namespace UIQ.Services.Interfaces
         public Task SqlSync();
 
         public Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, int method);
+
+        public Task<string> GetArchiveResultPathAsync(string modelName, string memberName, string nickname, string method);
+
+        public Task<int> GetDataIdAsync(string method);
     }
 }

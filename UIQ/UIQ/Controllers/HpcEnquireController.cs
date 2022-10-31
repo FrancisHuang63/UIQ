@@ -36,13 +36,11 @@ namespace UIQ.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ContentResult> NwpRunningNodes(string node)
+		public async Task<JsonResult> NwpRunningNodes(string node)
 		{
 			node = _encodeService.HtmlEncode(node);
-
-			if (node == "0") return new ContentResult { Content = string.Empty, ContentType = "text/html" };
-			var html = await _uiqService.GetExecuteNwpRunningNodesCommandHtmlAsync(node);
-			return new ContentResult { Content = html, ContentType = "text/html" };
+			var response = await _uiqService.GetExecuteNwpRunningNodesCommandResponseAsync(node);
+			return Json(response);
 		}
 	}
 }

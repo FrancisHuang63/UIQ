@@ -11,8 +11,8 @@
 <div class="topic">Maintain tools > Set typhoon data</div>
 <h1>Edit the typhoon initial data</h1>
 <strong>Total Typhoon number<span style="color:red;">* </span></strong>
-<input type="txt" id="adjust">
-<input type="submit" value="input" Onclick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.TyphoonShow), "GetHtml"))', 'form_content')">
+<input type="text" id="adjust">
+<input id="btnSubmit" type="submit" value="input">
 <p class="input_description"> (請輸入目前TD+TY 總數量)</p>
 <br>
 <hr>
@@ -27,3 +27,162 @@
 	<div id="file_created_result"></div>
 </div>
 
+<script>
+	function getTyphoonSetDatas(){
+		$.ajax({
+			url: '@Url.Action(nameof(GetHtmlController.GetTyphoonSetDatas), "GetHtml")',
+			type: 'POST',
+			dataType: 'json',
+			data: $('#typhoonSetDataFrom').serialize(),
+			error: function () {
+				alert("Syntax error on " + uri);
+			},
+			success: function (response) {
+				if(response.success){
+					setFileContent(response.data)
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
+				
+			}
+
+		});
+	}
+
+	function setFileContent(typhoonSetDatas) {
+		let dtg = $('#dtg').val();
+		if(typhoonSetDatas.some(item => (!item.name) || (!item.lat) || (!item.lng) || (!dtg) )){
+			alert('*欄位必填');
+			return false;
+		}
+
+		let dirNameParameters = [
+			{ DirName : "ty", FilePrefix : "dat" },
+            { DirName : "ty", FilePrefix : "txt" },
+            { DirName : "tdty", FilePrefix : "dat" },
+            { DirName : "tdty", FilePrefix : "txt" }
+		];
+		
+        let html = `<font size="1">
+						<table class="xdebug-error xe-notice" dir="ltr" border="1" cellspacing="0" cellpadding="1"></table>
+					</font>`;
+
+		typhoonSetDatas.forEach(data => {
+			dirNameParameters.forEach(dirNameParam => {
+				let isDatType = dirNameParam.FilePrefix == 'dat';
+                let content = `${(isDatType ? '' : `20${dtg}<br>`)}
+									${typhoonSetDatas.length}<br>${padRight(htmlEncode(data.name), (isDatType ? 9 : 16), ' ')} ${htmlEncode(data.lat)} N   ${htmlEncode(data.lng)} E  ${htmlEncode(data.latBefore6Hours)} N   ${htmlEncode(data.lngBefore6Hours)} E    ${htmlEncode(data.centerPressure)} MB   ${htmlEncode(data.radius15MPerS)} KM  ${htmlEncode(data.maximumSpeed)} M/S   ${htmlEncode(data.radius25MPerS)} KM`;
+                html += `<h4 class="typhoon_file_name">${dirNameParam.DirName}/typhoon${dtg}.dat</h4>
+						<div id='${dirNameParam.DirName}_${dirNameParam.FilePrefix}_content'>
+							<pre>${content}</pre>
+						</div>`;
+			})
+		});
+
+        html += `<br><input id="btnSubmit" type="button" class="form" value="Submit" onclick="saveTyphoonSetDatas();">`;
+
+		$('#file_content').html(html);
+	}
+
+	function saveTyphoonSetDatas(){
+		$.ajax({
+			url: '@Url.Action(nameof(MaintainToolsController.SaveTyphoonData), "MaintainTools")',
+			type: 'POST',
+			dataType: 'json',
+			data: $('#typhoonSetDataFrom').serialize(),
+			error: function () {
+				alert("Syntax error on " + uri);
+			},
+			success: function (response) {
+				if(response.success){
+					let dataHtml = '';
+					response.data.forEach(item => dataHtml += `${htmlEncode(item)}<br>`);
+					$('#file_created_result').html(dataHtml);
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
+				
+			}
+
+		});
+	}
+
+	$('#btnSubmit').click(function(e){
+		let generateCount = $('#adjust').val();
+		if(!generateCount || generateCount == 0){
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		}
+		
+		let typhoonEntry = ["Name", "Lat.", "Long.", "6-hr ago Lat.", "6-hr ago Long.", "Center Pressure", "15M/S Radius", "Maximum Speed", "25M/S Radius"];
+        let requiredEntry = ["Name", "Lat.", "Long."];
+		let typhoonEntryNames = [
+            'Name',
+            'Lat',
+            'Lng',
+            'LatBefore6Hours',
+            'LngBefore6Hours',
+            'CenterPressure',
+            'Radius15MPerS',
+            'MaximumSpeed',
+            'Radius25MPerS'
+        ];
+		let formatDescription = [
+			"(颱風/TD 名稱：PHANFONE/TD201905)",
+            "(緯度：13.9) (填寫範圍: 0.0~90.0)",
+            "(經度：117.7) (填寫範圍: 0.0~180.0)",
+            "(6hr 前緯度：13.4) (填寫範圍: 0.0~90.0)",
+            "(6hr 前經度：118.0) (填寫範圍: 0.0~180.0)",
+            "(中心氣壓：965)",
+            "(七級風暴風半徑：180)",
+            "(最大風速：35)",
+            "(十級風暴風半徑：50)"
+		];
+
+		let newDataHtml = '';
+		for(let i = 0; i < generateCount; i++){
+			for (let colIdx = 0; colIdx < typhoonEntry.length; colIdx++)
+            {
+                newDataHtml += `<tr>
+							<td>${typhoonEntry[colIdx]} ${(requiredEntry.includes(typhoonEntry[colIdx]) ? '<font color="red">*</font>:</td>' : '')}
+							<td><input type="text" value="" name="TyphoonSetDatas[${i}].${typhoonEntryNames[colIdx]}"></td>
+							<td class=""input_description"">${formatDescription[colIdx]}</td>
+						</tr>`;
+            }
+
+            newDataHtml += "<tr><td><hr></td><td><hr></td></tr>";
+		}
+
+		let generateHtmlBase = `<form id="typhoonSetDataFrom">
+									<table>
+									<tr>
+										<td>DTG<font color="red"><font>*</font>:</td>
+										<td><input id="dtg" type="text" value="" name="dtg"></td>
+										<td class="input_description">(DTG:19122612)<br></td>
+									</tr>
+									<tr style="display:none;">
+										<td>Typhoon number:</td>
+										<td><input id="num" type="text" value="${generateCount}" name="num" disabled></td>
+									</tr>
+									<tr>
+										<td><hr></td>
+										<td><hr></td>
+									</tr>
+									${newDataHtml}
+									<tr>
+										<td></td>
+											<td>
+												<input id="btnView" type="button" class="form" value="View">
+											</td>
+									</tr>
+									</table>
+								</form>`;
+
+		$('#form_content').html(generateHtmlBase);
+
+		$('#btnView').click(getTyphoonSetDatas);
+	});
+</script>

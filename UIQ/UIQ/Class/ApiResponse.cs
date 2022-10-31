@@ -16,6 +16,13 @@
         public ApiResponse(T data)
         {
             Data = data;
+            Success = true;
+        }
+
+        public ApiResponse(string message)
+        {
+            Message = message;
+            Success = false;
         }
     }
 }

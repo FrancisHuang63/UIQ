@@ -48,7 +48,7 @@
 <br>
 
 <h1>Show processes of accounts on DATAMOVER:
-    <select id="node" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(HpcEnquireController.NwpRunningNodes)))', 'show');">
+    <select id="node" class="form">
         <option value="0">-----</option>
         @switch (hostName) 
         {
@@ -114,4 +114,29 @@
 </h1>
 <div id="show" class="enquire"></div>
 
+<script>
+    $('#node').change(function(e){
+        if($(this).val() === '0'){
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        sendAJAXRequest('post', '@(Url.Action(nameof(HpcEnquireController.NwpRunningNodes)))', setResultData);
+    });
 
+    function setResultData(response){
+        if(response.success){
+            $('#show').html('');
+            response.data.forEach(item => $('#show').append(
+                `<pre>
+                    <h3>${htmlEncode(item.key)}</h3>
+                    ---------------------------------------------------------------------------------------<br>
+                    ${htmlEncode(item.value)}
+                    ---------------------------------------------------------------------------------------<br><br>
+                </pre>`));
+        }
+        else{
+            alert(htmlEncode(response.message));
+        }
+    }
+</script>

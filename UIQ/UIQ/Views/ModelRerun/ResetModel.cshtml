@@ -1,9 +1,16 @@
 ﻿@using UIQ.Controllers
 @using UIQ.ViewModels
+@using Microsoft.Extensions.Options
+@inject IConfiguration configuration
+@inject IOptions<RunningJobInfoOption> runningJobInfoOption
 
 @{
     Layout = null;
     IEnumerable<ModelLogFileViewModel> configList = ViewBag.ConfigList;
+    var rshAccount = configuration.GetValue<string>("RshAccount");
+    var hostName = System.Net.Dns.GetHostName();
+    var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
+    var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
 }
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,7 +26,7 @@
         <form Name="myForm" class="form">
             Model:
             <select id="model" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
                 @foreach(var item in configList.GroupBy(x => x.Model_Name))
                 {
                     <option value="@item.Key">@item.Key</option>
@@ -28,27 +35,65 @@
 
             Member:
             <select id="member" class="form" OnChange="build_nickname_options();">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
 
             Nickname:
             <select id="nickname" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
 
-            <input class='form' type='button' value='enquire' onclick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ResetModelShow), "GetHtml"))', 'all');">
+            <input id="enquire" class='form' type='button' value='enquire' onclick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ResetModelShow), "GetHtml"))', 'all');">
         </form>
 
         <h1>show the current status</h1>
         <div id="all">
+            <span>Account: @rshAccount Server: @loginIp</span>
             <div id="show" class="enquire"></div>
-            <input type="button" class="form" value="kill">
+            <input id="node" type="hidden" value="">
+            <input id="account" type="hidden" value="">
+            <input id="adjust" type="hidden" value="">
+            <select id="jobid" class="form">
+                <option value="">-----</option>
+            </select>
+            <input id="btnKill" type="button" class="form" value="kill">
             <div id="result" class="short">result...</div>
         </div>
 
         <script type="text/JavaScript">
-            function clearSelectOption(elementId){
-                $(`#${elementId}`).html('<option>-----</option>')
+            function setShowData(response){
+				if(response.success){
+                    clearSelectOption('jobid');
+                    let modelName = $('#model').val();
+                    let memberName = $('#member').val();
+                    let nickName = $('#nickname').val();
+
+					let showDataHtml = response.data.showDatas.length > 0 ? '' : 'There is no job!<br>';
+					response.data.showDatas.forEach(item => { showDataHtml += `${htmlEncode(item)}<br>
+                             -----------------------------------------------------------------<br>`; });
+
+					$('#show').html(`<pre>
+                                        ======================current Job status======================
+                                        <h3>${modelName}_${memberName}(User: ${htmlEncode(response.data.account)}, Nickname: ${nickName})</h3>
+                                        ${showDataHtml}
+                                    </pre>`);
+
+                    response.data.jobDatas.forEach(item => { $('#jobid').append(`<option value="${htmlEncode(item.key)}">${htmlEncode(item.value)}</option>`); });
+
+                    $('#account').val(htmlEncode(response.data.account));
+				}
+				else{
+					alert(htmlEncode(response.message));
+				}
+			}
+
+            function setResultData(response){
+                if(response.success){
+                    $('#result').text(htmlEncode(response.data));
+				}
+				else{
+					alert(htmlEncode(response.message));
+				}
             }
 
             $('#model').change(function(){
@@ -71,6 +116,35 @@
                         clearSelectOption('nickName');
                     }
                 });
+            });
+
+            $('#enquire').click(function(e){
+				let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+				sendAJAXRequest('post', '@Url.Action(nameof(GetHtmlController.ResetModelShow), "GetHtml")', setShowData);
+			});
+
+            $('#btnKill').click(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+                let jobidValue = $('#jobid').val();
+				if(!modelValue || !memberValue || ! nicknameValue || !jobidValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                if(confirm('Do you want to submit?')){
+                    sendAJAXRequest('post', '@Url.Action(nameof(GetHtmlController.ResetModelResult), "GetHtml")', setResultData);
+                }
             });
         </script>
     </body>

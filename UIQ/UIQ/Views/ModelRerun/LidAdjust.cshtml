@@ -19,7 +19,7 @@
         <form Name="myForm" class="form">
             Model:
             <select id="model" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
                 @foreach(var item in configList.GroupBy(x => x.Model_Name))
                 {
                     <option value="@item.Key">@item.Key</option>
@@ -28,12 +28,12 @@
 
             Member:
             <select id="member" class="form" OnChange="build_nickname_options();">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
     
             Nickname:
-            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.LidShow), "GetHtml"))', 'show');$('#result').html('');">
-                <option>-----</option>
+            <select id="nickname" class="form">
+                <option value="">-----</option>
             </select>
         </form>
         <div id="show" class="short">show the LID value</div>
@@ -43,13 +43,31 @@
                 <option value="1">1(啟動)</option>
                 <option value="2">2(異常)</option>
             </select>
-            <input type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.LidResult), "GetHtml"))', 'result');">
+            <input id="btnSubmit" type="button" class="form" value="Submit">
         </form>
         <div id="result" class="enquire">show the result after adjusting</div>
 
         <script type="text/JavaScript">
-            function clearSelectOption(elementId){
-                $(`#${elementId}`).html('<option>-----</option>')
+            function setShowData(response){
+                if(response.success){
+                    let modelName = $('#model').val();
+                    let memberName = $('#member').val();
+                    let nickname = $('#nickname').val();
+                    $('#show').html(`[Model]=${modelName}, [Member]=${memberName}, [Nickname]=${nickname}<br><br>LID=${htmlEncode(response.data)}`);
+                    $('#result').html('');
+                }
+                else{
+                    alert(htmlEncode(response.message))
+                }
+            }
+
+            function setResultData(response){
+	            if(response.success){
+		            $('#result').html(htmlEncode(response.data));
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
             }
 
             $('#model').change(function(){
@@ -72,6 +90,32 @@
                         clearSelectOption('nickName');
                     }
                 });
+            });
+
+            $('#nickname').change(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.LidShow), "GetHtml"))', setShowData);
+            });
+
+            $('#btnSubmit').click(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.LidResult), "GetHtml"))', setResultData);
             });
         </script>
     </body>

@@ -19,7 +19,7 @@
         <form name="myForm" class="form">
             Model:
             <select id="model" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
                 @foreach(var item in configList.GroupBy(x => x.Model_Name))
                 {
                     <option value="@item.Key">@item.Key</option>
@@ -28,12 +28,12 @@
 
             Member:
             <select id="member" class="form" OnChange="build_nickname_options();">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
 
             Nickname:
-            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveShow), "GetHtml"))', 'show');$('#result').html('');">
-                <option>-----</option>
+            <select id="nickname" class="form">
+                <option value="">-----</option>
             </select>
         </form>
 
@@ -42,7 +42,7 @@
             <input id="dtg" type="text" class="form" cols="70" value=""> (the DTG format is yymmddhh) <br><br>
             Data type
             <select  id="method" class="form">
-                <option>-----</option>
+                <option value="">-----</option>
             </select>
         </div>
         <br>
@@ -54,18 +54,66 @@
         </select>
         <br>
 
-        <input type="button" class="form" value="Enquire" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveShowForEnquire), "GetHtml"))', 'ShowLog');">
+        <input id="btnEnquire" type="button" class="form" value="Enquire">
         <br>
 
         <div id="ShowLog" class="short">result...</div>
         <br>
-        <input type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveResult), "GetHtml"))', 'result');">
+        <input id="btnSubmit" type="button" class="form" value="Submit">
         <br><br>
         <div id="result" class="enquire">result...</div>
 
         <script type="text/JavaScript">
-            function clearSelectOption(elementId){
-                $(`#${elementId}`).html('<option>-----</option>')
+            function setShowData(response){
+                if(response.success){
+                    clearSelectOption('method');
+
+                    response.data.methodDatas.forEach(item => $('#method').append(`<option value="${htmlEncode(item.key)}">${htmlEncode(item.value)}</option>`));
+                    $('#dtg').val(htmlEncode(response.data.dtg))
+                    $('#result').html('');
+                }
+                else{
+                    alert(htmlEncode(response.message))
+                }
+            }
+
+            function setShowLogData(response){
+	            if(response.success){
+                    let displayDataHtml = '';
+                    response.data.displayDatas.forEach(item => displayDataHtml += `${htmlEncode(item)}<br>`);
+                    
+                    let tableDataHtml = '';
+                    if(response.data.tableDatas.length == 0){
+                        tableDataHtml = 'No data!!';
+                    }
+                    else{
+                        tableDataHtml = '<table><tr>';
+                        response.data.tableDatas.forEach((item, idx) => {
+                            tableDataHtml += `<td>${htmlEncode(item)}</td><tr>`;
+                            if(idx % 9 == 8){
+                                tableDataHtml += '</td></tr><tr>'
+                            }
+                            
+                        });
+                        tableDataHtml += '</table><br><br>';
+                    }
+                    
+		            $('#ShowLog').html(`<pre>${displayDataHtml}<br>${tableDataHtml}</pre>`);
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
+            }
+
+            function setResultData(response){
+	            if(response.success){
+                    let dataHtml = '';
+                    response.data.forEach(item => dataHtml += `${htmlEncode(item)}<br>`);
+		            $('#result').html(dataHtml);
+	            }
+	            else{
+		            alert(htmlEncode(response.message))
+	            }
             }
 
             $('#model').change(function(){
@@ -88,6 +136,45 @@
                         clearSelectOption('nickName');
                     }
                 });
+            });
+
+            $('#nickname').change(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveShow), "GetHtml"))', setShowData);
+            });
+
+            $('#btnEnquire').click(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveShowForEnquire), "GetHtml"))', setShowLogData);
+            });
+
+            $('#btnSubmit').click(function(e){
+                let modelValue = $('#model').val();
+				let memberValue = $('#member').val();
+				let nicknameValue = $('#nickname').val();
+				if(!modelValue || !memberValue || ! nicknameValue){
+					e.preventDefault();
+					e.stopPropagation();
+					return false;
+				}
+
+                sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ArchiveResult), "GetHtml"))', setResultData);
             });
         </script>
     </body>

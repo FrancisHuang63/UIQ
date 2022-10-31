@@ -59,7 +59,7 @@ function showParameterModal(command_id, group){
 
     if(match_result != null){
         var parameter_example = $('#example').val();
-        $('label[for="parameters"]').html('Parameter (ex. ' + parameter_example + ')');
+        $('label[for="parameters"]').html('Parameter (ex. ' + htmlEncode(parameter_example) + ')');
 
         return;
     }
@@ -72,7 +72,7 @@ function showParameterModal(command_id, group){
         },
         dataType: 'json',
         success: function(cmd_data){
-            $('label[for="parameters"]').html('Parameter (ex.' + cmd_data.command_example + ')');
+            $('label[for="parameters"]').html('Parameter (ex.' + htmlEncode(cmd_data.command_example) + ')');
         }
     });
 }
@@ -133,15 +133,25 @@ function showCommandInfo(exe_url, time_url, ajax_data){
         url: time_url,
         type: 'POST',
         data: ajax_data,
-        dataType: 'html',
+        dataType: 'json',
         error: function () {
-            alert("Syntax error on command/calculate_time");
+            alert(`Syntax error on ${time_url}`);
         },
         success: function (response) {
-            var html =  $('<div/>').html(response).text();
+            if (response.success) {
+                var html = `<div>
+                            ${htmlEncode(response.data.result)}<br>
+                            Start Time: ${htmlEncode(response.data.startTime)}<br>
+                            Estimated Completion Time: <mark>${htmlEncode(response.data.estimatedCompletionTime)}</mark><br>
+                            <mark>Please wait...</mark><br><br>
+                        </div>`
 
-            $('#show').html(html);
-            exeCommand(exe_url, ajax_data);
+                $('#show').html(html);
+                exeCommand(exe_url, ajax_data);
+            }
+            else {
+                alert(htmlEncode(response.message));
+            }
         }
     });
 }
@@ -151,12 +161,17 @@ function exeCommand(exe_url, ajax_data) {
         url: exe_url,
         type: 'POST',
         data: ajax_data,
-        dataType: 'html',
+        dataType: 'json',
         error: function () {
-            alert("Syntax error on command/exe");
+            alert(`Syntax error on ${exe_url}`);
         },
         success: function (response) {
-            $('#show').append(response);
+            if (response.success) {
+                $('#show').append(htmlEncode(response.data));
+            }
+            else {
+                alert(htmlEncode(response.message));
+            }
         }
     });
 }

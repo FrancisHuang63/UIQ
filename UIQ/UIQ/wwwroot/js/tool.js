@@ -11,8 +11,24 @@ $(document).ready(function () {
 
 });
 
+function htmlEncode(str) {
+    let div = document.createElement("div");
+    let text = document.createTextNode(str);
+    div.appendChild(text);
+
+    return div.innerHTML;
+
+}
+
+function htmlDecode(str) {
+    let div = document.createElement("div");
+    div.innerHTML = str;
+
+    return div.innerHTML;
+}
+
 //Ajax function by jQuery
-function sendAJAXRequest(req_type, uri, div) {
+function sendAJAXRequest(req_type, uri, callBackFunction) {
     $('#file_content').empty();
     $('#file_created_result').empty();
 
@@ -34,27 +50,12 @@ function sendAJAXRequest(req_type, uri, div) {
     var keyw = $("#keyw").val();
     var parameter = $("#parameter").val();
 
-    div = '#' + div;
-
-
-    // start Remove this conditional structure or edit its code blocks so that they're not all the same
-
-    //if (req_type == 'post') {
-    //    //target_url = uri + '?timeStamp=' + new Date().getTime();
-    //    target_url = uri;
-    //    // to avoid browsers loading the past data from cache
-    //} else {
-    //    target_url = uri;
-    //}
-
     target_url = uri; 
-
-    // end Remove this conditional structure or edit its code blocks so that they're not all the same
-
+    
     $.ajax({
         url: target_url,
-        type: 'POST',
-        dataType: 'html',
+        type: req_type,
+        dataType: 'json',
         data: {ModelName: model,
             MemberName: member,
             Dtg: dtg,
@@ -75,52 +76,8 @@ function sendAJAXRequest(req_type, uri, div) {
         error: function () {
             alert("Syntax error on " + uri);
         },
-        success: function (response) {
-            $(div).html(response);
-        }
-
+        success: callBackFunction
     });
-
-}
-
-
-//Ajax function by jQuery
-function sendAJAXRequest2(req_type, uri, div, par1, par2, par3) {
-    // Get form values
-    div = '#' + div;
-
-    if (req_type == 'post') {
-        target_url = uri + '?timeStamp=' + new Date().getTime();
-        // to avoid browsers loading the past data from cache
-    } else {
-        target_url = uri;
-    }
-
-    $.ajax({
-        url: target_url,
-        type: 'POST',
-        dataType: 'html',
-        data: {passwd: par2,
-            command_id: par1,
-            command: par3
-        },
-        error: function () {
-            alert("Syntax error on " + uri);
-        },
-        success: function (response) {
-            $(div).html(response);
-        }
-
-    });
-
-}
-
-function executeCmd(id, pwd, cmd) {
-    sendAJAXRequest2('post', './command/Exe', 'show', id, pwd, cmd);
-}
-
-function executeCmd(id, pwd, cmd, path) {
-    sendAJAXRequest2('post', path + 'command/Exe', 'show', id, pwd, cmd);
 }
 
 function senfe(o, a, b, c, d) {
@@ -147,10 +104,8 @@ function senfe(o, a, b, c, d) {
     }
 }
 
-function clear_nickname_options() {
-    var html = '<option>-----</option>';
-    $('#nickname').html(html);
-    return;
+function clearSelectOption(elementId) {
+    $(`#${elementId}`).html('<option value="">-----</option>')
 }
 
 function build_nickname_options() {
@@ -170,9 +125,9 @@ function build_nickname_options() {
             alert("Syntax error on " + target_url);
         },
         success: function (respones) {
-            var html = '<option>-----</option>';
+            var html = '<option value="">-----</option>';
             $.each(respones.data, function (key, item) {
-                html += `<option val="${item}">${item}</option>`;
+                html += `<option val="${htmlEncode(item)}">${htmlEncode(item)}</option>`;
                 $('#nickname').html(html);
             });
 
@@ -192,10 +147,15 @@ function show_delay_dialog(show_url, delete_url) {
         url: show_url,
         type: 'post',
         dataType: 'json',
-        success: function (data) {
-            if(data.length !== 0){
-                build_delay_dialog(data, delete_url);
-                play_alert_audio();
+        success: function (response) {
+            if (response.success) {
+                if (response.data.length !== 0) {
+                    build_delay_dialog(response.data, delete_url);
+                    play_alert_audio();
+                }
+            }
+            else {
+                alert(htmlEncode(response.message));
             }
         }
     });
@@ -252,7 +212,7 @@ function delete_delay_data(delay_id, delete_url) {
         data: {
             "id": delay_id
         },
-        dataType: 'html',
+        dataType: 'json',
         success: function (result) {
         }
     });
@@ -262,12 +222,16 @@ function show_reject_log_dialog(show_url, delete_url) {
     $.ajax({
         url: show_url,
         type: 'post',
-        dataType: 'html',
-        success: function (reject_log_data) {
-            if (reject_log_data !== "status : normal") {
-                var data = reject_log_data.replace(/\n/g, "<br>");
-                build_reject_dialog(data, delete_url);
-                play_alert_audio();
+        dataType: 'json',
+        success: function (response) {
+            if (response.success) {
+                if (response.data !== "status : normal") {
+                    build_reject_dialog(response.data, delete_url);
+                    play_alert_audio();
+                }
+            }
+            else {
+                alert(htmlEncode(response.message));
             }
         }
     });
@@ -301,6 +265,8 @@ function build_reject_dialog(data, delete_url) {
                     "maximize": "ui-icon-circle-plus"
                 }
             });
+    data = htmlEncode(data);
+    data = data.replace(/\n/g, "<br>");
     $('#error_message').html(data);
 }
 
@@ -324,21 +290,20 @@ function play_alert_audio() {
     document.getElementById('reject_alert').play();
 }
 
-function sendTyphoonDataRequest(req_type, uri, div, data_count) {
-    let form = $('#typhoonSetDataFrom');
+function padLeft(str, len, paddingStr) {
+    str = '' + str;
+    if (str.length >= len) {
+        return str;
+    } else {
+        return padLeft(paddingStr + str, len, paddingStr);
+    }
+}
 
-    $.ajax({
-        url: uri,
-        type: 'POST',
-        dataType: 'html',
-        data: form.serialize(),
-        error: function () {
-            alert("Syntax error on " + uri);
-        },
-        success: function (response) {
-            $('#' + div).html(response);
-        }
-
-    });
-
+function padRight(str, len, paddingStr) {
+    str = '' + str;
+    if (str.length >= len) {
+        return str;
+    } else {
+        return padRight(str + paddingStr, len, paddingStr);
+    }
 }
