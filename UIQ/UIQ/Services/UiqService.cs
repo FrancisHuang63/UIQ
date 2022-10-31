@@ -348,6 +348,11 @@ namespace UIQ.Services
 
         public async Task<bool> UpsertCommandAsync(Command data)
         {
+            data.Command_Pwd = data.Command_Pwd ?? string.Empty;
+            data.Command_Desc = data.Command_Desc ?? string.Empty; 
+            data.Command_Content = data.Command_Content ?? string.Empty;
+            data.Command_Example = data.Command_Example ?? string.Empty;
+
             if (data.Command_Id.HasValue)
                 return await _dataBaseNcsUiService.UpdateAsync("command", data, new { Command_Id = data.Command_Id }) > 0;
 

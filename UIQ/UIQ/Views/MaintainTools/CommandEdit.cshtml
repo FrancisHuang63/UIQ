@@ -26,7 +26,7 @@
         <div class=topic>Maintain tools > Special Use command > Edit</div>
 
         <div>
-            <form method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.CommandEdit)))" enctype="multipart/form-data">
+            <form id="formPost" method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.CommandEdit)))" enctype="multipart/form-data">
                 <table width="100%" id="edit_command_table" aria-describedby="edit_command_table">
                      <tr style="display:none;">                
                         <th scope="col"></th>
@@ -104,6 +104,21 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            $('#formPost').on('submit', function(e){
+                let commandName = $('input[name="Command_Name"]').val();
+                if(!commandName){
+                    alert('Name is required!!');
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+
+                $('#formPost').submit();
+            })
+        </script>
     </body>
 </html>
 
