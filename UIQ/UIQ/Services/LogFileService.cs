@@ -8,7 +8,7 @@ namespace UIQ.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private ClaimsPrincipal _currentUser;
-        private string _LogDirectoryPath => $"{RootPath}/log";
+        private string _LogDirectoryPath => $"{RootPath}/logfile";
 
         public string RootPath
         {

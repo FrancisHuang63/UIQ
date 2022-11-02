@@ -44,13 +44,12 @@ namespace UIQ.Services.Interfaces
                 output = await process.StandardOutput.ReadToEndAsync();
                 process.WaitForExit();
 
-                if (string.IsNullOrEmpty(output) == false) return output;
+                return output;
                 
-                return command;
             }
             catch
             {
-                return string.Empty;
+                return command;
             }
         }
     }

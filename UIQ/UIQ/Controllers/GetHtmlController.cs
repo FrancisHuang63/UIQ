@@ -82,6 +82,7 @@ namespace UIQ.Controllers
 
             //File time
             command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $6\" \"$7\" \"$8}'";
+            
             var fileTime = await _uiqService.RunCommandAsync(command);
             //html += $"File time: {fileTime}<br>";
 
@@ -174,7 +175,7 @@ namespace UIQ.Controllers
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname)?.Account;
             var member = await _uiqService.GetMemberItemAsync(modelName, memberName, nickname);
-            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
             var resetModel = member?.Reset_Model;
             var message = "Cancel running job function is not available for this member.";
             if (string.IsNullOrWhiteSpace(resetModel))
@@ -237,7 +238,7 @@ namespace UIQ.Controllers
                                                       && x.Nickname == nickname);
             var account = configData?.Account;
             var dtgAdjust = configData?.Dtg_Adjust;
-            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
 
             var message = "DTG adjust function is not available for this member";
             if (string.IsNullOrWhiteSpace(dtgAdjust))
@@ -247,7 +248,7 @@ namespace UIQ.Controllers
             else
             {
                 var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
-                datas.Add(await _uiqService.RunCommandAsync(command));
+                datas.Add(command);
                 var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
                 foreach (var item in (result ?? string.Empty).Split("\n"))
                 {
@@ -255,7 +256,7 @@ namespace UIQ.Controllers
                 }
 
                 //輸出結果
-                datas.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.\r\n{result}\r\n");
+                datas.Add($"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} {modelName} {memberName} {nickname} adjust DTG value of {dtg} as follows.");
                 message = Regex.Replace(message, "/\n/", "<br>");
             }
 
@@ -321,53 +322,60 @@ namespace UIQ.Controllers
             {
                 var item = batchs[i];
                 var dataList_R = string.Empty;
-                var tmpCommand = $"ls /{_systemName}/{account}/{modelName}/{memberName}/etc/{i}*";
-                var output = (await _uiqService.RunCommandAsync(command))?.Split("\n");
-                foreach (var tmpFile in output)
+                var tmpCommand = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{account}/{modelName}/{memberName}/etc/{item}*";
+                var output = await _uiqService.RunCommandAsync(tmpCommand);
+                if (!string.IsNullOrEmpty(output))
                 {
-                    var aList = tmpFile.Split("/");
-                    var tmp = aList[tmpFile.Count() - 1];
-                    var isStatus = false;
-                    if (tmp.Substring(tmp.Length - 2) != "_R")
+                    foreach (var tmpFile in output.Split("\n"))
                     {
-                        var tmp1 = (tmp + "_R");
-                        isStatus = output.Any(x => x == tmp1);
-                        if (isStatus)
+                        if (tmpFile != null && tmpFile.Trim() != "")
                         {
-                            dataList_R = dataList_R == string.Empty ? tmp1 : $"{dataList_R}|{tmp1}";
-                        }
+                            var aList = tmpFile.Split("/");
+                            var tmp = aList[aList.Count() - 1];
+                            var isStatus = false;
+                            if (tmp.Substring(tmp.Length - 2) != "_R")
+                            {
+                                var optionText = tmp;
+                                var tmp1 = (tmp + "_R");
+                                isStatus = output.Split("\n").Any(x => x == tmp1);
+                                if (isStatus)
+                                {
+                                    dataList_R += dataList_R == string.Empty ? tmp1 : $"{dataList_R}|{tmp1}";
+                                }
 
-                        var optionText = tmp;
-                        if (tmp.Substring(tmp.Length - 2) == "_M")
-                        {
-                            optionText = $"{tmp}ajor";
-                        }
-                        else if (tmp.Substring(tmp.Length - 2) == "_P")
-                        {
-                            optionText = $"{tmp}ost";
-                        }
-                        else if (tmp.Substring(tmp.Length - 3) == "_P2")
-                        {
-                            optionText = isStatus ? $"{tmp.Substring(0, tmp.Length - 2)}ost2" : $"{tmp}ost";
-                        }
-                        else if (tmp.Substring(tmp.Length - 3) == "_MC")
-                        {
-                            optionText = $"{tmp.Substring(0, tmp.Length - 2)}ajorC";
-                        }
+                                if (tmp.Substring(tmp.Length - 2) == "_M")
+                                {
+                                    optionText = $"{tmp}ajor";
+                                }
+                                else if (tmp.Substring(tmp.Length - 2) == "_P")
+                                {
+                                    optionText = $"{tmp}ost";
+                                }
+                                else if (tmp.Substring(tmp.Length - 3) == "_P2")
+                                {
+                                    optionText = isStatus ? $"{tmp.Substring(0, tmp.Length - 1)}ost2" : $"{tmp}ost";
+                                }
+                                else if (tmp.Substring(tmp.Length - 3) == "_MC")
+                                {
+                                    optionText = $"{tmp.Substring(0, tmp.Length - 1)}ajorC";
+                                }
 
-                        batchSelectDatas.Add(isStatus
-                            ? new KeyValuePair<string, string>(tmp1, tmp)
-                            : new KeyValuePair<string, string>(tmp, tmp)
-                        );
-                    }
+                                batchSelectDatas.Add(isStatus
+                                    ? new KeyValuePair<string, string>(tmp1, optionText)
+                                    : new KeyValuePair<string, string>(tmp, optionText)
+                                );
+                            }
 
-                    if (tmp.Substring(tmp.Length - 3) == "_R")
-                    {
-                        isStatus = dataList_R.Split("|").Any(x => x == tmp);
-                        if (isStatus == false)
-                            batchSelectDatas.Add(new KeyValuePair<string, string>(tmp, tmp));
+                            if (tmp.Substring(tmp.Length - 2) == "_R")
+                            {
+                                isStatus = dataList_R.Split("|").Any(x => x == tmp);
+                                if (isStatus == false)
+                                    batchSelectDatas.Add(new KeyValuePair<string, string>(tmp, tmp));
+                            }
+                        }
                     }
                 }
+               
             }
             var response = new ApiResponse<dynamic>(new { Dtg = dtg, Lid = lid, BatchDatas = batchSelectDatas, });
             return Json(response);
@@ -383,7 +391,7 @@ namespace UIQ.Controllers
                                                       && x.Nickname == nickname);
             var account = configData?.Account;
             var submitModel = configData?.Submit_Model;
-            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
 
             var message = "submit model function is not avaliable for this member.\r\n";
             if (string.IsNullOrWhiteSpace(submitModel))
@@ -392,7 +400,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {account}{fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
+                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {account} {fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
                 message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Rerun the {modelName} {memberName} {nickname} with {dtg} in {batch} run \r\n";
                 datas.Add(message);
                 datas.Add(await _uiqService.RunCommandAsync(command));
@@ -477,7 +485,7 @@ namespace UIQ.Controllers
             var data = configs.FirstOrDefault(x => x.Model_Name == modelName
                                 && x.Member_Name == memberName
                                 && x.Nickname == nickname);
-            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
             var shell = await _uiqService.GetArchiveExecuteShellAsync(modelName, memberName, nickname, method);
 
             var command = $"rsh -l {_rshAccount} {_dataMvIp} /ncs/{_hpcCtl}/web/shell/run_Archive.ksh {_rshAccount} {fullPath}{shell} {dtg} {node} {modelName} {memberName} {fullPath}";
@@ -536,7 +544,7 @@ namespace UIQ.Controllers
                                                       && x.Nickname == nickname);
             var account = configData?.Account;
             var fixFailedModel = configData?.Fix_Failed_Model;
-            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
+            var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
 
             if (fixFailedModel == null)
             {

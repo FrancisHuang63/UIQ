@@ -32,7 +32,7 @@
             </select>
     
             Nickname:
-            <select id="nickname" class="form" OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitShow), "GetHtml"))', 'show');$('#result').html('');">
+            <select id="nickname" class="form" > <!--OnChange="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitShow), "GetHtml"))', 'show');$('#result').html('');"> -->
                 <option value="">-----</option>
             </select>
         </form>
@@ -40,7 +40,7 @@
         <div id="show" >
             <div id="divShowTitle" class="short">Current DTG and Lid</div>
             <input type="hidden" id="dtg" value="">
-            <input id="btnSubmit" type="button" class="form" value="Submit" OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitResult), "GetHtml"))', 'result');">
+        <input id="btnSubmit" type="button" class="form" value="Submit" /><!--OnClick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.SubmitResult), "GetHtml"))', 'result');">-->
         </div>
         <br>
         <div id="result" class="enquire">result...</div>

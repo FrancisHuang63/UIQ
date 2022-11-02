@@ -44,6 +44,7 @@
                     <option value="">+</option>
                     <option value="-">-</option>
                 </select> 
+                <b id="dtgshowvalue"></b>
                 <input id="btnSubmit" type="button" class="form" value="Submit">
             </form>
         </div>
@@ -57,8 +58,10 @@
                     let nickname = $('#nickname').val();
                     $('#divShowTitle').html(`[Model]=${modelName}, [Member]=${memberName}, [Nickname]=${nickname}<br><br>DTG=${htmlEncode(response.data.dtg)}`);
                     
-                    $('#dtg option').val(htmlEncode(response.data.dtgValue));
-                    $('#dtg').after(htmlEncode(response.data.dtgValue))
+                    $('#dtg option:eq(0)').val(htmlEncode(response.data.dtgValue));
+                    $('#dtg option:eq(1)').val("-" + htmlEncode(response.data.dtgValue));
+                    //$('#dtg').after(htmlEncode(response.data.dtgValue))
+                    $('#dtgshowvalue').html(htmlEncode(response.data.dtgValue))
                     $('#result').html('');
                 }
                 else{

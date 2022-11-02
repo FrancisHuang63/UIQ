@@ -72,8 +72,7 @@
 					response.data.showDatas.forEach(item => { showDataHtml += `${htmlEncode(item)}<br>
                              -----------------------------------------------------------------<br>`; });
 
-					$('#show').html(`<pre>
-                                        ======================current Job status======================
+					$('#show').html(`<pre>======================current Job status======================
                                         <h3>${modelName}_${memberName}(User: ${htmlEncode(response.data.account)}, Nickname: ${nickName})</h3>
                                         ${showDataHtml}
                                     </pre>`);

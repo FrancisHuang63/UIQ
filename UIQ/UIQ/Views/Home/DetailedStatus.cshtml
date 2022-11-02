@@ -105,7 +105,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @foreach (var item in Model.OrderBy(x =>x.Model_Position))
                     {
                         var trClass = item.Status?.ToUpper() == "FAIL" && item.Lid == UIQ.Enums.LidEnum.Zero
                             ? "failed"

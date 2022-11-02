@@ -115,7 +115,7 @@
                 </thead>
 
                 <tbody>
-                    @foreach(var groupModel in Model.GroupBy(x => x.Model_Name))
+                    @foreach(var groupModel in Model.OrderBy(x =>x.Model_Position).GroupBy(x => x.Model_Name))
                     {
                         //依照MemberName分組
                         var memberGroups = groupModel.GroupBy(x => x.Member_Name);
@@ -163,7 +163,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Where(x => x.Comment.Contains("on time") == false))
+                    @foreach (var item in Model.Where(x => x.Comment.Contains("on time") == false).OrderBy(x => x.Model_Position))
                     {
                         var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
                         var upperStatus = (item.Status ?? string.Empty).ToUpper();
