@@ -35,9 +35,9 @@ $(document).ready(function () {
 });
 
 $(document).on('click', '#showCheckPoint', function () {
-    var batch_row_index = $(this).closest('table').parent('td').prop('id');
-    batch_row_index = batch_row_index.substr(batch_row_index.indexOf("_") + 1);
-    var batch_name = $(this).closest('tbody').children('tr').find('input#batchInputName_' + batch_row_index).val();
+    let batch_row_index = $(this).closest('tr.batchItem').index();
+    //batch_row_index = batch_row_index.substr(batch_row_index.indexOf("_") + 1);
+    let batch_name = $(this).closest('tr.batchItem').find('[name="Batch.Batch_Name"]').val();
 
     if (!batch_name) {
         alert('Batch name is empty! Please set batch_name!');
@@ -125,20 +125,13 @@ function initial_dialog(dialog_id, batch_row_index) {
 
 function add_new_check_point(dialog_id, item, batch_name, batch_index) {
     var model_id = item.parents().find('select#model_select').val();
-    var member_name = item.parents().find('input[name="member_name"]').val();
-    var member_account = item.parents().find('input[name="member_account"]').val();
-    var run_type = item.parents().find('#batchInputType_' + batch_index).val();
-    var round = item.parents().find('#batchInputDtg_' + batch_index).val();
-
-    var address = document.location.pathname.split("/");
-    if (address[4]) {
-        var ajax_url = '../get_shell';
-    } else {
-        var ajax_url = 'get_shell';
-    }
+    var member_name = item.parents().find('input[name="Member.Member_Name"]').val();
+    var member_account = item.parents().find('input[name="Member.Account"]').val();
+    var run_type = item.parents().find('[name="Batch.Batch_Type"]').val();
+    var round = item.parents().find('[name="Batch.Batch_Dtg"]').val();
 
     $.ajax({
-        url: ajax_url,
+        url: '/MaintainTools/GetShell',
         type: 'post',
         data: {
             "model_id": model_id,
@@ -226,8 +219,8 @@ function set_old_check_dialog(batch_type, batch_dtg, item, batch_name, batch_row
 function add_old_check_point(batch_type, batch_dtg, item, batch_row_index, dialog_id, check_row_index, check_point_info) {
     var id_prefix = "batch_" + batch_row_index + '_';
     var model_id = item.parents().find('select#model_select').val();
-    var member_name = item.parents().find('input[name="member_name"]').val();
-    var member_account = item.parents().find('input[name="member_account"]').val();
+    var member_name = item.parents().find('input[name="Member.Member_Name"]').val();
+    var member_account = item.parents().find('input[name="Member.Account"]').val();
     var batch_name = item.val();
     var run_type = batch_type.val();
     var round = batch_dtg.val();

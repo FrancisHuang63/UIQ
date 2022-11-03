@@ -43,7 +43,8 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} ls {fullPath}/log | grep job | grep -v job1 | grep -v OP_";
             var listData = await _uiqService.RunCommandAsync(command);
 
-            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n").ToList());
+            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
+                .Where(x => string.IsNullOrWhiteSpace(x) == false).ToList());
             return Json(response);
         }
 
@@ -54,7 +55,8 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
 
-            var response = new ApiResponse<IEnumerable<string>>(listData.Split("/\n/").ToList());
+            var response = new ApiResponse<IEnumerable<string>>(listData.Split("/\n/")
+                .Where(x => string.IsNullOrWhiteSpace(x) == false).ToList());
             return Json(response);
         }
 
@@ -65,7 +67,8 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} ls {fullPath}/log {(!string.IsNullOrWhiteSpace(keyword) ? $"| grep -i {keyword}" : string.Empty)}";
             var listData = await _uiqService.RunCommandAsync(command);
 
-            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n").ToList());
+            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
+                .Where(x => string.IsNullOrWhiteSpace(x) == false).ToList());
             return Json(response);
         }
 
@@ -89,7 +92,7 @@ namespace UIQ.Controllers
             //Get last 30 lines of the file
             command = $"rsh -l {_rshAccount} {_loginIp} tail -n 30 {fullPath}/log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
-            var files = listData.Split("/\n/");
+            var files = listData.Split("/\n/").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
 
             var data = new
             {
@@ -117,7 +120,8 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/daily_log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
 
-            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n").ToList());
+            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
+                .Where(x => string.IsNullOrWhiteSpace(x) == false).ToList());
             return Json(response);
         }
 
@@ -137,7 +141,7 @@ namespace UIQ.Controllers
             {
                 foreach (var item in showDatas)
                 {
-                    var dataLines = item.Split("\n");
+                    var dataLines = item.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToArray();
                     if (dataLines.Length > 1)
                     {
                         var jobId = dataLines[1];
@@ -326,7 +330,7 @@ namespace UIQ.Controllers
                 var output = await _uiqService.RunCommandAsync(tmpCommand);
                 if (!string.IsNullOrEmpty(output))
                 {
-                    foreach (var tmpFile in output.Split("\n"))
+                    foreach (var tmpFile in output.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false))
                     {
                         if (tmpFile != null && tmpFile.Trim() != "")
                         {
@@ -479,7 +483,7 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> ArchiveResult(string modelName, string memberName, string nickname, int method, string dtg, string node)
+        public async Task<JsonResult> ArchiveResult(string modelName, string memberName, string nickname, string method, string dtg, string node)
         {
             var configs = _uiqService.GetArchiveViewModels();
             var data = configs.FirstOrDefault(x => x.Model_Name == modelName
@@ -524,7 +528,7 @@ namespace UIQ.Controllers
                 {
                     var command = $"rsh -l {_rshAccount} {_loginIp} ls -ald {path}/*{dtg}* " + " | sed 's%\\/.\\+\\/%%'";
                     var data = await _uiqService.RunCommandAsync(command);
-                    tableDatas = data.Split("\n").ToList();
+                    tableDatas = data.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
                 }
             }
 

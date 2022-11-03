@@ -107,10 +107,12 @@ namespace UIQ.Services.Interfaces
 
         public Task SqlSync();
 
-        public Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, int method);
+        public Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method);
 
         public Task<string> GetArchiveResultPathAsync(string modelName, string memberName, string nickname, string method);
 
         public Task<int> GetDataIdAsync(string method);
+
+        public Task<IEnumerable<CheckPointInfoResultViewModel>> GetShell(CheckPointInfoViewModel data);
     }
 }

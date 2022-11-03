@@ -349,7 +349,7 @@ namespace UIQ.Services
         public async Task<bool> UpsertCommandAsync(Command data)
         {
             data.Command_Pwd = data.Command_Pwd ?? string.Empty;
-            data.Command_Desc = data.Command_Desc ?? string.Empty; 
+            data.Command_Desc = data.Command_Desc ?? string.Empty;
             data.Command_Content = data.Command_Content ?? string.Empty;
             data.Command_Example = data.Command_Example ?? string.Empty;
 
@@ -508,10 +508,11 @@ namespace UIQ.Services
             if (data.IsNewModelName)
             {
                 data.Model = new Model { Model_Name = data.New_Model_Name ?? string.Empty, Model_Position = data.New_Model_Position, };
-                data.Member.Model_Id = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("model", data.Model);
+                data.Model.Model_Id = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("model", data.Model);
             }
 
             //Member
+            data.Member.Model_Id = data.Model.Model_Id;
             data.Member.Member_Name = data.Member.Member_Name ?? string.Empty;
             data.Member.Nickname = data.Member.Nickname ?? string.Empty;
             data.Member.Account = data.Member.Account ?? string.Empty;
@@ -523,7 +524,7 @@ namespace UIQ.Services
             data.Member.Member_Id = memberId;
 
             //CronTab
-            if (data.CronTabs.Any())
+            if (data.CronTabs?.Any() ?? false)
             {
                 foreach (var cronTab in data.CronTabs)
                 {
@@ -549,7 +550,7 @@ namespace UIQ.Services
             }
 
             //Batch
-            if (data.Batchs.Any())
+            if (data.Batchs?.Any() ?? false)
             {
                 foreach (var batch in data.Batchs)
                 {
@@ -570,7 +571,7 @@ namespace UIQ.Services
             }
 
             //Archive
-            if (data.Archives.Any())
+            if (data.Archives?.Any() ?? false)
             {
                 foreach (var archive in data.Archives)
                 {
@@ -587,7 +588,7 @@ namespace UIQ.Services
             }
 
             //Output
-            if (data.Outputs.Any())
+            if (data.Outputs?.Any() ?? false)
             {
                 foreach (var output in data.Outputs)
                 {
@@ -838,7 +839,7 @@ namespace UIQ.Services
             await RunCommandAsync($"rsh -l {_HpcCtl} {toHost} mysql -uncsadm -pAdm@ncs99 {hpcSql} --default-character-set=utf8 < {filename}");
         }
 
-        public async Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, int method)
+        public async Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
         {
             var sql = @"SELECT `archive_redo`
 						FROM `archive_view`
@@ -868,6 +869,29 @@ namespace UIQ.Services
             var param = new { DataName = method };
             var result = await _dataBaseNcsUiService.QueryAsync<int>(sql, param);
             return result.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<CheckPointInfoResultViewModel>> GetShell(CheckPointInfoViewModel data)
+        {
+            var sql = "SELECT `model_name` FROM `model` WHERE `model_id` = @Model_Id";
+            data.Model_Name = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Model_Id })).FirstOrDefault();
+
+            sql = @"SELECT `shell_name`, `round`, `typhoon_mode`, `avg_execution_time` 
+                    FROM `execution_time_result`
+                    WHERE `member` = @Member_Name
+                    AND `account` = @Member_Account
+                    AND `batch_name` = @Batch_Name
+                    AND `model` = @Model_Name
+                    AND `cron_mode` = @Cron_Mode
+                    AND `shell_name` != 'unknown'";
+            
+            var whereSql = new List<string>();
+            if (string.IsNullOrWhiteSpace(data.Run_Type) == false) whereSql.Add("`run_type` LIKE @Run_Type + '%'");
+            if (string.IsNullOrWhiteSpace(data.Round) == false) whereSql.Add("`round` = @Round");
+
+            sql += whereSql.Any() ? string.Join(" AND ", whereSql) : string.Empty;
+            var result = await _dataBaseNcsLogService.QueryAsync<CheckPointInfoResultViewModel>(sql, data);
+            return result;
         }
 
         #region Private Methods

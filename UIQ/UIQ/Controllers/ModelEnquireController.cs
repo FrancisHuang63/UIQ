@@ -55,7 +55,7 @@ namespace UIQ.Controllers
 		{
 			var command = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{_hpcCtl}/daily_log/ | grep -v old_log";
 			var data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
-			ViewBag.Data = (data ?? string.Empty).Split("\n");
+			ViewBag.Data = (data ?? string.Empty).Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToArray();
 			return View();
 		}
 

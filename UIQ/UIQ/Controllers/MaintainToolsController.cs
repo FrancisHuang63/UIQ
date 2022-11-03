@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 using UIQ.Attributes;
 using UIQ.Enums;
 using UIQ.Models;
@@ -320,13 +321,13 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public IActionResult DeleteModel(int? memberId, int? model_Id)
+        public JsonResult DeleteModel(int? memberId, int? model_Id)
         {
-            if (model_Id.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+            if (model_Id.HasValue == false) return Json(new ApiResponse<string>("Model id is null"));
 
             _uiqService.DeleteModelAsync(model_Id.Value);
             _uiqService.SqlSync();
-            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+            return Json(new ApiResponse<string>(data: "success"));
         }
 
         [HttpPost]
@@ -337,6 +338,17 @@ namespace UIQ.Controllers
             _uiqService.DeleteMemberAsync(memberId.Value);
             _uiqService.SqlSync();
             return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetShell(CheckPointInfoViewModel data)
+        {
+            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/shfun/shetc/setMode | awk '{{print $1}}'";
+            var cron_mode = await _uiqService.RunCommandAsync(command);
+            data.Cron_Mode = Regex.Replace(cron_mode, "/\\s\\s+/", "").Trim();
+
+            var result = await _uiqService.GetShell(data);
+            return Json(new ApiResponse<IEnumerable<CheckPointInfoResultViewModel>>(result));
         }
 
         [HttpPost]

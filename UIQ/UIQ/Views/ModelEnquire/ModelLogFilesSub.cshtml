@@ -70,8 +70,8 @@
 					let regex = new RegExp(/^[A-Z]+/);
 					if(regex.test(data) || data.includes('Finish'))
 						dataHtml += `<span class="c4">${data}</span>`;
-					else if(data.includes('fail') || data.includes('cancel'))
-						dataHtml += `<span class="c3">${data}</span>`;
+					//else if(data.includes('fail') || data.includes('cancel'))
+					//	dataHtml += `<span class="c3">${data}</span>`;
 					else
 						dataHtml += data;
 				});
