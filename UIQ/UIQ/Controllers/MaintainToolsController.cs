@@ -352,6 +352,22 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
+        public async Task<JsonResult> GetUnselectedShell(CheckPointInfoViewModel data)
+        {
+            var result = await _uiqService.GetUnselectedShell(data);
+            return Json(new ApiResponse<IEnumerable<CheckPointInfoResultViewModel>>(result));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> GetCheckPoints(int? memberId)
+        {
+            if (memberId.HasValue == false) return Json(new ApiResponse<IEnumerable<ShowCheckPointInfoViewModel>>(new List<ShowCheckPointInfoViewModel>()));
+
+            var datas = await _uiqService.GetShowCheckPointInfoDatas(memberId.Value);
+            return Json(new ApiResponse<IEnumerable<ShowCheckPointInfoViewModel>>(datas));
+        }
+
+        [HttpPost]
         public async Task<JsonResult> GetCommandInfo(int? commandId)
         {
             if (commandId.HasValue == false) return Json(null);

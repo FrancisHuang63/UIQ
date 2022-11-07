@@ -23,5 +23,7 @@ namespace UIQ.ViewModels
         public IEnumerable<Archive> Archives { get; set; }
 
         public IEnumerable<Output> Outputs { get; set; }
+
+        public IEnumerable<CheckPointSaveViewModel> CheckPoints { get; set; }
     }
 }

@@ -18,9 +18,10 @@ $(document).ready(function () {
 
     $(document).on('click', '#addCheckPoint', function () {
         var dialog_id = $(this).closest('div').prop('id');
+        var batch_id = $(this).parents('tr').children('th').attr('data-batch_name');
         var batch_name = $(this).parents('tr').children('th').attr('data-batch_name');
         var batch_index = $(this).parents('div.check_point_dialog').attr('id').split("_")[3];
-        add_new_check_point(dialog_id, $(this), batch_name, batch_index);
+        add_new_check_point(batch_id, dialog_id, $(this), batch_name, batch_index);
     });
 
     $(document).on('click', '#delCheckPoint', function () {
@@ -38,12 +39,13 @@ $(document).on('click', '#showCheckPoint', function () {
     let batch_row_index = $(this).closest('tr.batchItem').index();
     //batch_row_index = batch_row_index.substr(batch_row_index.indexOf("_") + 1);
     let batch_name = $(this).closest('tr.batchItem').find('[name="Batch.Batch_Name"]').val();
+    let batch_id = $(this).closest('tr.batchItem').find('[name="Batch.Batch_Id"]').val();
 
     if (!batch_name) {
         alert('Batch name is empty! Please set batch_name!');
         return;
     }
-    show_dialog(batch_name, batch_row_index);
+    show_dialog(batch_id, batch_name, batch_row_index);
 
     $('#typhoon_model').trigger('change');
 });
@@ -56,7 +58,7 @@ $(document).on('change', '#typhoon_model', function () {
     }
 });
 
-function show_dialog(batch_name, batch_row_index) {
+function show_dialog(batch_id, batch_name, batch_row_index) {
     var dialog_title = 'Batch: ' + batch_name;
     var new_dialog_id = "check_point_dialog_" + batch_row_index;
     if ($('body #' + new_dialog_id).length === 0) {
@@ -71,6 +73,7 @@ function show_dialog(batch_name, batch_row_index) {
 
     $('#' + new_dialog_id + ' #batch_name').text(dialog_title);
     $('#' + new_dialog_id + ' #batch_name').attr('data-batch_row_index', batch_row_index);
+    $('#' + new_dialog_id + ' #batch_id').attr('data-batch_name', batch_id);
     $('#' + new_dialog_id + ' #batch_name').attr('data-batch_name', batch_name);
 
     $('#' + new_dialog_id).dialog('open');
@@ -123,7 +126,7 @@ function initial_dialog(dialog_id, batch_row_index) {
     return new_dialog;
 }
 
-function add_new_check_point(dialog_id, item, batch_name, batch_index) {
+function add_new_check_point(batchId, dialog_id, item, batch_name, batch_index) {
     var model_id = item.parents().find('select#model_select').val();
     var member_name = item.parents().find('input[name="Member.Member_Name"]').val();
     var member_account = item.parents().find('input[name="Member.Account"]').val();
@@ -149,9 +152,11 @@ function add_new_check_point(dialog_id, item, batch_name, batch_index) {
             var id_prefix = "batch_" + batch_row_index + '_';
             var new_check_point_number = $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val();
 
-            var html = '<tr><td id="check_' + new_check_point_number + '" colspan="2"><table width="100%"><tr>';
+            var html = '<tr class="checkPointItem"><td id="check_' + new_check_point_number + '" colspan="2"><table width="100%"><tr>';
+            html += `<input type="hidden" name="CheckPoint.Batch_Id" value="${batchId}">`;
+            html += `<input type="hidden" name="CheckPoint.Batch_Name" value="${batch_name}">`;
             html += '<td>Shell Name<font color="red">*</font></td>';
-            html += '<td><select id="' + id_prefix + 'checkStep_' + new_check_point_number + '" name="' + id_prefix + 'checkStep_' + new_check_point_number + '">';
+            html += '<td><select id="' + id_prefix + 'checkStep_' + new_check_point_number + '" >';
             $.each(shell, function (key, value) {
                 html += '<option value = "' + value + '">' + value + '</option>';
             });
@@ -168,7 +173,7 @@ function add_new_check_point(dialog_id, item, batch_name, batch_index) {
             html += '<tr class="typhoon" style="display: none;"><td>Typhoon Time(min)</td>';
             html += '<td><input id="' + id_prefix + 'typhoonTime_' + new_check_point_number + '" name="' + id_prefix + 'typhoonTime_' + new_check_point_number + '" type="text" value="" disabled> (Ex: 20)</td></tr>';
             html += '<tr><td>Tolerance Time(min)</td>';
-            html += '<td><input id="' + id_prefix + 'checkToleranceTime_' + new_check_point_number + '" name="' + id_prefix + 'checkToleranceTime_' + new_check_point_number + '" type="text" value=""> (Ex: 20)</td></tr>';
+            html += '<td><input id="' + id_prefix + 'checkToleranceTime_' + new_check_point_number + '" name="CheckPoint.Tolerance_Time" type="text" value=""> (Ex: 20)</td></tr>';
             html += '</table></td></tr>';
 
             $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val(parseInt(new_check_point_number) + 1);
@@ -179,7 +184,7 @@ function add_new_check_point(dialog_id, item, batch_name, batch_index) {
             $("#check_" + new_check_point_number + " #" + id_prefix + "checkStep_" + new_check_point_number).flexselect({
                 allowMismatch: true,
                 inputNameTransform: function (name) {
-                    return id_prefix + 'checkStep_' + new_check_point_number;
+                    return 'CheckPoint.Shell_Name';
                 }
             });
         }
@@ -196,7 +201,7 @@ function set_new_shell_time(shell_info, id_prefix, new_check_point_number, round
     });
 }
 
-function set_old_check_dialog(batch_type, batch_dtg, item, batch_name, batch_row_index, check_point_info) {
+function set_old_check_dialog(batchId, batch_type, batch_dtg, item, batch_name, batch_row_index, check_point_info) {
     var dialog_title = 'Batch: ' + batch_name;
     var dialog_id = "check_point_dialog_" + batch_row_index;
     var $dialog = $("#check_point_dialog").clone().prop("id", dialog_id);
@@ -206,7 +211,7 @@ function set_old_check_dialog(batch_type, batch_dtg, item, batch_name, batch_row
     var id_prefix = "batch_" + batch_row_index + '_';
 
     $.each(check_point_info, function (key, value) {
-        add_old_check_point(batch_type, batch_dtg, item, batch_row_index, dialog_id, check_row_index, value);
+        add_old_check_point(batchId, batch_type, batch_dtg, item, batch_row_index, dialog_id, check_row_index, value);
         check_row_index = check_row_index + 1;
     });
 
@@ -216,7 +221,7 @@ function set_old_check_dialog(batch_type, batch_dtg, item, batch_name, batch_row
 
 }
 
-function add_old_check_point(batch_type, batch_dtg, item, batch_row_index, dialog_id, check_row_index, check_point_info) {
+function add_old_check_point(batchId, batch_type, batch_dtg, item, batch_row_index, dialog_id, check_row_index, check_point_info) {
     var id_prefix = "batch_" + batch_row_index + '_';
     var model_id = item.parents().find('select#model_select').val();
     var member_name = item.parents().find('input[name="Member.Member_Name"]').val();
@@ -224,16 +229,9 @@ function add_old_check_point(batch_type, batch_dtg, item, batch_row_index, dialo
     var batch_name = item.val();
     var run_type = batch_type.val();
     var round = batch_dtg.val();
-
-    var address = document.location.pathname.split("/");
-    if (address[4]) {
-        var ajax_url = '../get_unselected_shell';
-    } else {
-        var ajax_url = 'get_unselected_shell';
-    }
-
+    
     $.ajax({
-        url: ajax_url,
+        url: '/MaintainTools/GetUnselectedShell',
         type: 'post',
         data: {
             "shell_name": check_point_info.shell_name,
@@ -245,56 +243,64 @@ function add_old_check_point(batch_type, batch_dtg, item, batch_row_index, dialo
             "round": round
         },
         dataType: 'json',
-        success: function (shell_info) {
-            var shell = unset_repeat_shell(shell_info);
-            var html = '<tr><td id="check_' + check_row_index + '" colspan="2"><table width="100%"><tr>';
-            html += '<td>Shell Name<font color="red">*</font></td>';
-            html += '<td><select id="' + id_prefix + 'checkStep_' + check_row_index + '" name="' + id_prefix + 'checkStep_' + check_row_index + '">';
-            html += '<option value="' + check_point_info.shell_name + '" selected="selected">' + check_point_info.shell_name + '</option>';
-            $.each(shell, function (key, value) {
-                html += '<option value = "' + value + '">' + value + '</option>';
-            });
-            html += '</select> (Ex: Wn2d.ksh 0036)';
-            html += '<img id="delCheckPoint" src="../../images/delete_icons.png" alt="移除" align="right"/></td></tr>';
-            html += '<tr><td>Check Time(min)</td>';
-            html += '<td><input id="' + id_prefix + 'checkTime_' + check_row_index + '" name="' + id_prefix + 'checkTime_' + check_row_index + '" type="text" value="" disabled> (Ex: 20)</td></tr>';
-            html += '<tr class="typhoon" style="display: none;"><td>Typhoon Time(min)</td>';
-            html += '<td><input id="' + id_prefix + 'typhoonTime_' + check_row_index + '" name="' + id_prefix + 'typhoonTime_' + check_row_index + '" type="text" value="" disabled> (Ex: 20)</td></tr>';
-            html += '<tr><td>Tolerance Time(min)</td>';
-            html += '<td><input id="' + id_prefix + 'checkToleranceTime_' + check_row_index + '" name="' + id_prefix + 'checkToleranceTime_' + check_row_index + '" type="text" value="' + check_point_info.tolerance_time + '"> (Ex: 20)</td></tr>';
-            html += '</table></td></tr>';
+        success: function (response) {
+            if (response.success) {
+                let shell_info = response.data;
+                var shell = unset_repeat_shell(shell_info);
+                var html = '<tr class="checkPointItem"><td id="check_' + check_row_index + '" colspan="2"><table width="100%"><tr>';
+                html += `<input type="hidden" name="CheckPoint.Batch_Id" value="${batchId}">`;
+                html += `<input type="hidden" name="CheckPoint.Batch_Name" value="${batch_name}">`;
+                html += '<td>Shell Name<font color="red">*</font></td>';
+                html += '<td><select id="' + id_prefix + 'checkStep_' + check_row_index + '">';
+                html += '<option value="' + check_point_info.shell_name + '" selected="selected">' + check_point_info.shell_name + '</option>';
+                $.each(shell, function (key, value) {
+                    html += '<option value = "' + value + '">' + value + '</option>';
+                });
+                html += '</select> (Ex: Wn2d.ksh 0036)';
+                html += '<img id="delCheckPoint" src="../../images/delete_icons.png" alt="移除" align="right"/></td></tr>';
+                html += '<tr><td>Check Time(min)</td>';
+                html += '<td><input id="' + id_prefix + 'checkTime_' + check_row_index + '" name="' + id_prefix + 'checkTime_' + check_row_index + '" type="text" value="" disabled> (Ex: 20)</td></tr>';
+                html += '<tr class="typhoon" style="display: none;"><td>Typhoon Time(min)</td>';
+                html += '<td><input id="' + id_prefix + 'typhoonTime_' + check_row_index + '" name="' + id_prefix + 'typhoonTime_' + check_row_index + '" type="text" value="" disabled> (Ex: 20)</td></tr>';
+                html += '<tr><td>Tolerance Time(min)</td>';
+                html += '<td><input id="' + id_prefix + 'checkToleranceTime_' + check_row_index + '" name="CheckPoint.Tolerance_Time" type="text" value="' + check_point_info.tolerance_time + '"> (Ex: 20)</td></tr>';
+                html += '</table></td></tr>';
 
-            var target_batch_row_index = $('#' + dialog_id + ' #batch_' + batch_row_index + '_RowIndex');
-            var target_check_row_num = $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum');
-            if (target_batch_row_index.legth === 0) {
-                var batch_row_index_html = '<input id="batch_' + batch_row_index + '_RowIndex" type="hidden" name="batch_' + batch_row_index + '_RowIndex" value="' + batch_row_index + '">';
-                $('#' + dialog_id).append(batch_row_index_html);
-            }
-            if (target_check_row_num.length === 0) {
-                var check_row_num_html = '<input id="batch_' + batch_row_index + '_checkRowNum" type="hidden" name="batch_' + batch_row_index + '_checkRowNum" value="0">';
-                $('#' + dialog_id).append(check_row_num_html);
-            }
-
-            $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val(parseInt(check_row_index) + 1);
-            $('#' + dialog_id + ' tbody:eq(0)').append(html);
-
-            var check_time = get_avg_time("0", check_point_info.avg_time);
-            $('#' + id_prefix + 'checkTime_' + check_row_index).val(Math.ceil(check_time));
-
-            var typhoon_time = get_avg_time("1", check_point_info.avg_time);
-            $('#' + id_prefix + 'typhoonTime_' + check_row_index).val(typhoon_time);
-
-            var typhoon_time_value = $('#' + id_prefix + 'typhoonTime_' + check_row_index).val();
-            var check_time_value = $('#' + id_prefix + 'checkTime_' + check_row_index).val();
-            var shell_name = $('#' + id_prefix + 'checkStep_' + check_row_index).val();
-            set_old_shell_time(shell_info, shell_name, id_prefix, check_row_index, typhoon_time_value, check_time_value);
-
-            $("#" + id_prefix + "checkStep_" + check_row_index).flexselect({
-                allowMismatch: true,
-                inputNameTransform: function () {
-                    return id_prefix + 'checkStep_' + check_row_index;
+                var target_batch_row_index = $('#' + dialog_id + ' #batch_' + batch_row_index + '_RowIndex');
+                var target_check_row_num = $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum');
+                if (target_batch_row_index.legth === 0) {
+                    var batch_row_index_html = '<input id="batch_' + batch_row_index + '_RowIndex" type="hidden" name="batch_' + batch_row_index + '_RowIndex" value="' + batch_row_index + '">';
+                    $('#' + dialog_id).append(batch_row_index_html);
                 }
-            });
+                if (target_check_row_num.length === 0) {
+                    var check_row_num_html = '<input id="batch_' + batch_row_index + '_checkRowNum" type="hidden" name="batch_' + batch_row_index + '_checkRowNum" value="0">';
+                    $('#' + dialog_id).append(check_row_num_html);
+                }
+
+                $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val(parseInt(check_row_index) + 1);
+                $('#' + dialog_id + ' tbody:eq(0)').append(html);
+
+                var check_time = get_avg_time("0", check_point_info.avg_time);
+                $('#' + id_prefix + 'checkTime_' + check_row_index).val(Math.ceil(check_time));
+
+                var typhoon_time = get_avg_time("1", check_point_info.avg_time);
+                $('#' + id_prefix + 'typhoonTime_' + check_row_index).val(typhoon_time);
+
+                var typhoon_time_value = $('#' + id_prefix + 'typhoonTime_' + check_row_index).val();
+                var check_time_value = $('#' + id_prefix + 'checkTime_' + check_row_index).val();
+                var shell_name = $('#' + id_prefix + 'checkStep_' + check_row_index).val();
+                set_old_shell_time(shell_info, shell_name, id_prefix, check_row_index, typhoon_time_value, check_time_value);
+
+                $("#" + id_prefix + "checkStep_" + check_row_index).flexselect({
+                    allowMismatch: true,
+                    inputNameTransform: function () {
+                        return 'CheckPoint.Shell_Name';
+                    }
+                });
+            }
+            else {
+                alert('Error: ' + htmlEncode(response.message));
+            }
         }
     });
 }

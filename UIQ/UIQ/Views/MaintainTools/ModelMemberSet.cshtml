@@ -49,6 +49,7 @@
 					<table width="100%" border="1" aria-describedby="check_point_dialog">
 						<thead>
 							<tr>
+								<th style="display:none;" id="batch_id"></th>
 								<th id="batch_name" width=65%></th>
 								<th id="add_check_btn" width=35%>
 									<a type="button" id="addCheckPoint" class="btn_default">
@@ -363,6 +364,38 @@
 		</div>
 
 		<script>
+			$(function(){
+				getOldCheckPoint();
+			})
+
+			function setOldCheckPoint(response){
+				if(response.success){
+					if(response.data.length > 0){
+						$('tr.batchItem').each((idx, item) => {
+							let batchId = $(item).find('[name="Batch.Batch_Id"]').val();
+							let batchType = $(item).find('[name="Batch.Batch_Type"]');
+							let batchDtg = $(item).find('[name="Batch.Batch_Type"]');
+							let batchName = $(item).find('[name="Batch.Batch_Name"]');
+							let index = $(item).index();
+							let checkPointInfo = response.data.filter(x => x.batch_id == batchId);
+							set_old_check_dialog(batchId, batchType, batchDtg, batchName, batchName.val(), index, checkPointInfo);
+						});
+					}
+				}
+				else{
+					alert('Error : ' + htmlEncode(response.message));
+				}
+			}
+
+			function getOldCheckPoint(){
+				$.ajax({
+					url: '@Url.Action(nameof(MaintainToolsController.GetCheckPoints))',
+					type: 'POST',
+					data:{ memberId: $('#memberID').val() },
+					success: setOldCheckPoint
+				});
+			}
+
 			function addSatnamingCronGroup(){
 				if($('#crongrpTable_New').length > 0) return false;
 
@@ -590,7 +623,7 @@
 				//Model
 				let model = {};
 				model.Model_Id = $('[name="Model.Model_Id"]').val();
-				model.Model_Name = $('[name="Model.Model_Name"]').val();
+				model.Model_Name = $('[name="Model.Model_Id"] option:selected').text();
 				model.Model_Position = $('[name="Model.Model_Position"]').val();
 				postData.Model = model;
 
@@ -672,6 +705,20 @@
 					outputs.push(output);
 				});
 				postData.Outputs = outputs;
+
+				//CheckPoint
+				let checkPoints = [];
+				$('tr.checkPointItem').each((idx, item) => {
+					let checkPoint = {};
+					checkPoint.Member_Id = $('[name="memberId"]').val();
+					checkPoint.Batch_Id = $(item).find('[name="CheckPoint.Batch_Id"]').val();
+					checkPoint.Batch_Name = $(item).find('[name="CheckPoint.Batch_Name"]').val();
+					checkPoint.Shell_Name = $(item).find('[name="CheckPoint.Shell_Name"]').val();
+					checkPoint.Tolerance_Time = $(item).find('[name="CheckPoint.Tolerance_Time"]').val();
+
+					checkPoints.push(checkPoint);
+				});
+				postData.CheckPoints = checkPoints;
 
 				return postData
 			}

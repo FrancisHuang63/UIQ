@@ -5,7 +5,7 @@ namespace UIQ.ViewModels
     public class CheckPointInfoViewModel
     {
         [JsonPropertyName("model_id")]
-        public string Model_Id { get; set; }
+        public int Model_Id { get; set; }
 
         [JsonPropertyName("model_name")]
         public string Model_Name { get; set; }
@@ -27,5 +27,8 @@ namespace UIQ.ViewModels
 
         [JsonPropertyName("cron_mode")]
         public string Cron_Mode { get; set; }
-    }
+
+        [JsonPropertyName("shell_name")]
+        public string Shell_Name { get; set; }
+    }    
 }

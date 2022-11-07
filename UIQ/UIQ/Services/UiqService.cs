@@ -605,6 +605,47 @@ namespace UIQ.Services
                 result += await _dataBaseNcsUiService.DeleteAsync("output", new { Member_Id = memberId });
             }
 
+            //CheckPoint
+            await _dataBaseNcsUiService.DeleteAsync("check_point", new { Member_Id = memberId });
+            if (data.CheckPoints?.Any() ?? false)
+            {
+                foreach (var checkPoint in data.CheckPoints)
+                {
+                    var param = new
+                    {
+                        Model = data.Model.Model_Name ?? string.Empty,
+                        Member = data.Member.Member_Name ?? string.Empty,
+                        Account = data.Member.Account ?? string.Empty,
+                        Batch_Name = checkPoint.Batch_Name ?? string.Empty,
+                        Shell_Name = checkPoint.Shell_Name ?? string.Empty,
+                    };
+                    var isExist = await _dataBaseNcsLogService.IsExistAsync("execution_time_result", param);
+                    if (isExist == false)
+                    {
+                        var executionTimeResult = new ExecutionTimeResult()
+                        {
+                            Model = data.Model.Model_Name ?? string.Empty,
+                            Member = data.Member.Member_Name ?? string.Empty,
+                            Account = data.Member.Account ?? string.Empty,
+                            Batch_Name = checkPoint.Batch_Name ?? string.Empty,
+                            Shell_Name = checkPoint.Shell_Name ?? string.Empty,
+                        };
+                        await _dataBaseNcsLogService.InsertAsync("execution_time_result", executionTimeResult);
+                    }
+
+                    checkPoint.Member_Id = memberId;
+                    checkPoint.Model_Id = data.Model.Model_Id;
+                    var checkPointData = new CheckPoint()
+                    {
+                        Batch_Id = checkPoint.Batch_Id,
+                        Member_Id = checkPoint.Member_Id,
+                        Shell_Name = checkPoint.Shell_Name ?? string.Empty,
+                        Tolerance_Time = checkPoint.Tolerance_Time,
+                    };
+                    result += await _dataBaseNcsUiService.InsertAsync("check_point", checkPointData);
+                }
+            }
+
             return result > 0;
         }
 
@@ -876,7 +917,7 @@ namespace UIQ.Services
             var sql = "SELECT `model_name` FROM `model` WHERE `model_id` = @Model_Id";
             data.Model_Name = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Model_Id })).FirstOrDefault();
 
-            sql = @"SELECT `shell_name`, `round`, `typhoon_mode`, `avg_execution_time` 
+            sql = @"SELECT `shell_name`, `round`, `typhoon_mode`, `avg_execution_time`
                     FROM `execution_time_result`
                     WHERE `member` = @Member_Name
                     AND `account` = @Member_Account
@@ -884,13 +925,82 @@ namespace UIQ.Services
                     AND `model` = @Model_Name
                     AND `cron_mode` = @Cron_Mode
                     AND `shell_name` != 'unknown'";
-            
+
             var whereSql = new List<string>();
-            if (string.IsNullOrWhiteSpace(data.Run_Type) == false) whereSql.Add("`run_type` LIKE @Run_Type + '%'");
+            if (string.IsNullOrWhiteSpace(data.Run_Type) == false) whereSql.Add("`run_type` LIKE CONCAT(@Run_Type, '%')");
             if (string.IsNullOrWhiteSpace(data.Round) == false) whereSql.Add("`round` = @Round");
 
             sql += whereSql.Any() ? string.Join(" AND ", whereSql) : string.Empty;
             var result = await _dataBaseNcsLogService.QueryAsync<CheckPointInfoResultViewModel>(sql, data);
+            return result;
+        }
+
+        public async Task<IEnumerable<CheckPointInfoResultViewModel>> GetUnselectedShell(CheckPointInfoViewModel data)
+        {
+            var sql = @"SELECT `model_name` FROM `model`
+                        WHERE `model_id` = @Model_Id";
+            var modelName = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Model_Id })).FirstOrDefault();
+            data.Model_Name = modelName;
+
+            sql = $@"SELECT `shell_name`, `round`, `typhoon_mode`, `avg_execution_time`
+                     FROM `execution_time_result`
+                     WHERE `member` = @Member_Name
+                     AND `account` = @Member_Account
+                     AND `batch_name` = @Batch_Name
+                     AND `model` = @Model_Name
+                     AND `cron_mode` = @Cron_Mode
+                     AND `cron_mode` = 'Backup'
+                     AND `shell_name` != @Shell_Name
+                     AND `shell_name` != 'unknown'
+                     {(string.IsNullOrWhiteSpace(data.Round) == false ? " AND `round` = @Round" : string.Empty)}
+                     {(string.IsNullOrWhiteSpace(data.Run_Type) ? string.Empty : "AND `run_type` LIKE CONCAT(@Run_Type, '%')")}";
+
+            var result = await _dataBaseNcsLogService.QueryAsync<CheckPointInfoResultViewModel>(sql, data);
+            return result;
+        }
+
+        public async Task<IEnumerable<ShowCheckPointInfoViewModel>> GetShowCheckPointInfoDatas(int memberId)
+        {
+            var result = new List<ShowCheckPointInfoViewModel>();
+            var sql = @"SELECT model.model_name
+                             , `member`.`member_name`
+                             , `member`.`nickname`
+                             , `member`.`account`
+                             , `batch`.`batch_id`
+                             , `batch`.`batch_name`
+                             , `batch`.`batch_type`
+                             , `batch`.`batch_dtg`
+                             , `check_point`.`shell_name`
+                             , `check_point`.`tolerance_time`
+                        FROM `check_point`
+                        JOIN `batch` ON `batch`.`batch_id` = `check_point`.`batch_id`
+                        JOIN `member` ON `member`.`member_id` = `check_point`.`member_id`
+                        JOIN `model` ON `model`.`model_id` = `member`.`model_id`
+                        WHERE `check_point`.`member_id` = @MemberId
+                        ORDER BY `check_point`.`batch_id` ASC, `check_point`.`check_id` ASC";
+
+            var memberCheckPoints = await _dataBaseNcsUiService.QueryAsync<MemberCheckPoint>(sql, new { MemberId = memberId });
+            foreach (var item in memberCheckPoints)
+            {
+                sql = $@"SELECT `typhoon_mode`, CEILING(avg(`avg_execution_time`)/60) AS `avg_execution_time`
+                        FROM `execution_time_result`
+                        WHERE `model` = @Model_Name
+                        AND `member` = @Member_Name
+                        AND `account` = @Account
+                        AND `batch_name` = @Batch_Name
+                        AND `shell_name` = @Shell_Name
+                        {(string.IsNullOrWhiteSpace(item.Batch_Type) ? string.Empty : "AND `run_type` LIKE CONCAT(@Batch_Type, '%')")}
+                        {(string.IsNullOrWhiteSpace(item.Batch_Dtg) ? string.Empty : "AND `round` = @Batch_Dtg")}
+                        GROUP BY `typhoon_mode`";
+
+                var avgTimes = await _dataBaseNcsLogService.QueryAsync<AvgTime>(sql, item);
+
+                result.Add(new ShowCheckPointInfoViewModel(item)
+                {
+                    Avg_Time = avgTimes.ToList()
+                });
+            }
+
             return result;
         }
 
