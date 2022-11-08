@@ -45,7 +45,7 @@
 
                     @foreach (var role in roles)
                     {
-                        <input type="checkbox" id="chk_@(role.Role_Id)" name="roleIds" value="@role.Role_Id"  class="role-check" @(roleIds.Contains(role.Role_Id.ToString()) ? "checked" : string.Empty) />
+                        <input type="checkbox" id="chk_@(role.Role_Id)" name="roleIds" value="@role.Role_Id"  class="role-check" data-isCurrent="@roleIds.Contains(role.Role_Id.ToString())" @(roleIds.Contains(role.Role_Id.ToString()) ? @"checked=""checked"" disabled=""disabled""" : string.Empty) />
                         <label for="chk_@(role.Role_Id)">@role.Role_Name</label>
                     }
                 </div>
@@ -65,7 +65,10 @@
                     if($('input[name="roleIds"]:checked').length == 0){
                         e.preventDefault();
                         alert('Please select role!!');
+                        return false;
                     }
+
+                    $('input[name="roleIds"]:disabled').prop('disabled', false);
                 });
 
                 let message = '@message';
@@ -144,14 +147,18 @@
                     success: function(resp){
                         alert(resp.message);
                         if(resp.success == true){
-                            location.href = encodeURI(location.href);
+                            location.reload();
                         }
                     }
                 });
             }
 
             $('#allRole').change(function(){
-                $(`input.role-check`).prop('disabled', $(this).prop('checked'));
+                let val =  $(this).prop('checked');
+                $(`input.role-check`).prop('disabled', val);
+                if(val == false){
+                    $(`input.role-check[data-isCurrent="True"]`).prop('disabled', true);
+                }
             });
 
 		</script>

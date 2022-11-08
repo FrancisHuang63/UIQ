@@ -59,7 +59,7 @@ function showParameterModal(command_id, group){
 
     if(match_result != null){
         var parameter_example = $('#example').val();
-        $('label[for="parameters"]').html('Parameter (ex. ' + htmlEncode(parameter_example) + ')');
+        $('label[for="parameters"]').text('Parameter (ex. ' + htmlEncode(parameter_example) + ')');
 
         return;
     }
@@ -72,7 +72,7 @@ function showParameterModal(command_id, group){
         },
         dataType: 'json',
         success: function(cmd_data){
-            $('label[for="parameters"]').html('Parameter (ex.' + htmlEncode(cmd_data.command_example) + ')');
+            $('label[for="parameters"]').text('Parameter (ex.' + htmlEncode(cmd_data.command_example) + ')');
         }
     });
 }
@@ -139,14 +139,31 @@ function showCommandInfo(exe_url, time_url, ajax_data){
         },
         success: function (response) {
             if (response.success) {
-                var html = `<div>
-                            ${htmlEncode(response.data.result)}<br>
-                            Start Time: ${htmlEncode(response.data.startTime)}<br>
-                            Estimated Completion Time: <mark>${htmlEncode(response.data.estimatedCompletionTime)}</mark><br>
-                            <mark>Please wait...</mark><br><br>
-                        </div>`
+                //var html = `<div>
+                //                ${htmlEncode(response.data.result)}<br>
+                //                Start Time: ${htmlEncode(response.data.startTime)}<br>
+                //                Estimated Completion Time: <mark>${htmlEncode(response.data.estimatedCompletionTime)}</mark><br>
+                //                <mark>Please wait...</mark><br><br>
+                //            </div>`;
 
-                $('#show').html(html);
+                //$('#show').html(html);
+                let div = $('<div/>');
+                div.text(`${htmlEncode(response.data.result)}`);
+                div.append($('</br>'));
+                div.append(`Start Time: ${htmlEncode(response.data.startTime)}`);
+                div.append($('<br/>'));
+                div.append('Estimated Completion Time: ');
+                let mark = $('<mark/>');
+                mark.text(`${htmlEncode(response.data.estimatedCompletionTime)}`);
+                div.append(mark);
+                div.append($('<br/>'));
+                let mark2 = $('<mark/>');
+                mark2.text(`Please wait...`);
+                div.append(mark2);
+                div.append($('<br/>'));
+                div.append($('<br/>'));
+                $('#show').append(div);
+                
                 exeCommand(exe_url, ajax_data);
             }
             else {
@@ -167,7 +184,8 @@ function exeCommand(exe_url, ajax_data) {
         },
         success: function (response) {
             if (response.success) {
-                $('#show').append(htmlEncode(response.data));
+                let result = htmlEncode(response.data);
+                $('#show').append(result);
             }
             else {
                 alert(htmlEncode(response.message));

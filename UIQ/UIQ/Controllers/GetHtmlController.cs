@@ -137,6 +137,7 @@ namespace UIQ.Controllers
             var showDatas = Regex.Split(data, "/\\[Job\\s+Statistical\\s+Information\\]/");
 
             var jobDatas = new List<KeyValuePair<string, string>>();
+            jobDatas.Add(new KeyValuePair<string, string>("ALL", "ALL"));
             if (showDatas.Any())
             {
                 foreach (var item in showDatas)
@@ -340,8 +341,8 @@ namespace UIQ.Controllers
                             if (tmp.Substring(tmp.Length - 2) != "_R")
                             {
                                 var optionText = tmp;
-                                var tmp1 = (tmp + "_R");
-                                isStatus = output.Split("\n").Any(x => x == tmp1);
+                                var tmp1 = aList[aList.Count() - 1];
+                                isStatus = output.Split("\n").Any(x => x == (tmp + "_R"));
                                 if (isStatus)
                                 {
                                     dataList_R += dataList_R == string.Empty ? tmp1 : $"{dataList_R}|{tmp1}";

@@ -12,12 +12,12 @@ $(document).ready(function () {
 });
 
 function htmlEncode(str) {
-    let div = document.createElement("div");
-    let text = document.createTextNode(str);
-    div.appendChild(text);
+    return $('<div/>').text(str).html();
+    //let div = document.createElement("div");
+    //let text = document.createTextNode(str);
+    //div.appendChild(text);
 
-    return div.innerHTML;
-
+    //return div.innerHTML;
 }
 
 function htmlDecode(str) {

@@ -524,6 +524,7 @@ namespace UIQ.Services
             data.Member.Member_Id = memberId;
 
             //CronTab
+            result += await _dataBaseNcsUiService.DeleteAsync("crontab", new { Member_Id = memberId });
             if (data.CronTabs?.Any() ?? false)
             {
                 foreach (var cronTab in data.CronTabs)
@@ -544,12 +545,9 @@ namespace UIQ.Services
                     else result += await _dataBaseNcsUiService.InsertAsync("crontab", cronTab);
                 }
             }
-            else
-            {
-                result += await _dataBaseNcsUiService.DeleteAsync("crontab", new { Member_Id = memberId });
-            }
 
             //Batch
+            result += await _dataBaseNcsUiService.DeleteAsync("batch", new { Member_Id = memberId });
             if (data.Batchs?.Any() ?? false)
             {
                 foreach (var batch in data.Batchs)
@@ -565,12 +563,9 @@ namespace UIQ.Services
                     else result += await _dataBaseNcsUiService.InsertAsync("batch", batch);
                 }
             }
-            else
-            {
-                result += await _dataBaseNcsUiService.DeleteAsync("batch", new { Member_Id = memberId });
-            }
 
             //Archive
+            result += await _dataBaseNcsUiService.DeleteAsync("archive", new { Member_Id = memberId });
             if (data.Archives?.Any() ?? false)
             {
                 foreach (var archive in data.Archives)
@@ -582,12 +577,9 @@ namespace UIQ.Services
                     else result += await _dataBaseNcsUiService.InsertAsync("archive", archive);
                 }
             }
-            else
-            {
-                result += await _dataBaseNcsUiService.DeleteAsync("archive", new { Member_Id = memberId });
-            }
 
             //Output
+            result += await _dataBaseNcsUiService.DeleteAsync("output", new { Member_Id = memberId });
             if (data.Outputs?.Any() ?? false)
             {
                 foreach (var output in data.Outputs)
@@ -600,13 +592,9 @@ namespace UIQ.Services
                     else result += await _dataBaseNcsUiService.InsertAsync("output", output);
                 }
             }
-            else
-            {
-                result += await _dataBaseNcsUiService.DeleteAsync("output", new { Member_Id = memberId });
-            }
 
             //CheckPoint
-            await _dataBaseNcsUiService.DeleteAsync("check_point", new { Member_Id = memberId });
+            result += await _dataBaseNcsUiService.DeleteAsync("check_point", new { Member_Id = memberId });
             if (data.CheckPoints?.Any() ?? false)
             {
                 foreach (var checkPoint in data.CheckPoints)

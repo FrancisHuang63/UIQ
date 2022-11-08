@@ -27,7 +27,11 @@ namespace UIQ.Controllers
 			var logPath = Path.Combine(_readLogFileService.RootPath, "log", modelName, account, $"{memberName}.log");
 			var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
-			if (logContent == null) return Content($"<pre> There is no log file of {modelName}_{memberName}.");
+			if (logContent == null) return new ContentResult
+			{
+				ContentType = "text/html",
+				Content = $"There is no log file of {modelName}_{memberName}.",
+			};
 			var returnContent = isGetLastLine
 				? string.Empty
 				: $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">

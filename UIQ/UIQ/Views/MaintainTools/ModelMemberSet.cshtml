@@ -14,6 +14,7 @@
 
 	var currentModelItem = modelItems.FirstOrDefault(x => x.Model_Id == Model?.Model_Id);
 	var newModelPostion = (modelItems?.Max(x => x.Model_Position) ?? 0) + 1;
+	var masterCronGroup = cronTabItems?.FirstOrDefault()?.Master_Group;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -194,7 +195,7 @@
 											@foreach(var cronGroupCronTabItems in cronTabItems.GroupBy(g => g.Cron_Group))
 											{
 												<td valign="top">
-													<table id="crongrpTable_@(cronGroupCronTabItems.Key)" border="1" aria-describedby="crongrpTable" >
+													<table id="crongrpTable_@(cronGroupCronTabItems.Key)" border="1" bgcolor="@(cronGroupCronTabItems.Key == masterCronGroup ? "pink" : string.Empty)" aria-describedby="crongrpTable" >
 														<tbody>
 															<tr>
 																<th scope="col" bgcolor="lightcyan">@(cronGroupCronTabItems.Key)<img src="~/images/add_icons.png" onclick="addSatnamingCrontab('@(cronGroupCronTabItems.Key)')" alt="新增"></th>
@@ -437,7 +438,7 @@
 																	<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
 																</td>
 																<input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
-																<input type="hidden" name="CronTab.Master_Group" value="Normal" />
+																<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
 																<input type="hidden" name="CronTab.Group_Validation" value="0" />
 															</tr>
 														</tbody>
@@ -460,7 +461,7 @@
 										<img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingCrontab(this)" alt="移除">
 									</td>
 									<input type="hidden" name="CronTab.Cron_Group" value="${cronGroup}">
-									<input type="hidden" name="CronTab.Master_Group" value="Normal" />
+									<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
 									<input type="hidden" name="CronTab.Group_Validation" value="0" />
 								 </tr>`;
 				newTr.appendChild(newTd);
@@ -517,7 +518,7 @@
 										</table>
 									</td>
 								</tr>`;
-				$('#batchTable').prepend(newBatch);
+				$('#batchTable').append(newBatch);
 			}
 
 			function deleteSatnamingBatch(element){
@@ -548,7 +549,7 @@
 										<tr><input type="hidden" name="Archive.Archive_Id" value=""></tr>
 									</tbody>`;
 				
-				$('#archiveTable').prepend(newAcrchive);
+				$('#archiveTable').append(newAcrchive);
 			}
 
 			function deleteSatnamingArchive(element){
@@ -571,7 +572,7 @@
 									<input type="hidden" name="Output.Output_Id" value="" />
 								</tr>`;
 
-				$('#outputTbody').prepend(newOutput);
+				$('#outputTbody').append(newOutput);
 			}
 
 			function deleteSatnamingOutput(element){
