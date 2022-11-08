@@ -468,7 +468,7 @@ namespace UIQ.Controllers
                 var pathArray = fullPath.Split(' ');
                 foreach (var pathTok in pathArray)
                 {
-                    var command = $"rsh -l archive hsmsvr1a ls -al {pathTok} | sed 's%\\/.\\+\\/%%' | grep -v ^total";
+                    var command = $"sudo -u {_rshAccount} ssh -l archive hsmsvr1a ls -al {pathTok} | sed 's%\\/.\\+\\/%%' | grep -v ^total";
                     var commandResult = await _uiqService.RunCommandAsync(command);
                     displayDatas.Add(commandResult);
                     if (string.IsNullOrWhiteSpace(commandResult) == false)
@@ -492,7 +492,7 @@ namespace UIQ.Controllers
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
             var shell = await _uiqService.GetArchiveExecuteShellAsync(modelName, memberName, nickname, method);
 
-            var command = $"rsh -l {_rshAccount} {_dataMvIp} /ncs/{_hpcCtl}/web/shell/run_Archive.ksh {_rshAccount} {fullPath}{shell} {dtg} {node} {modelName} {memberName} {fullPath}";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_dataMvIp} /ncs/{_hpcCtl}/web/shell/run_Archive.ksh {_rshAccount} {fullPath}{shell} {dtg} {node} {modelName} {memberName} {fullPath}";
             var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}  Archive redo with {dtg} \r\n";

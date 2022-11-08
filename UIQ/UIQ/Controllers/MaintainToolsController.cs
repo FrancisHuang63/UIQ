@@ -66,12 +66,26 @@ namespace UIQ.Controllers
                 new{ DirName = "tdty", FilePrefix = "txt" },
             };
 
-            var datContents = new List<string>();
-            var txtContents = new List<string>();
-            foreach (var data in typhoonSetDatas)
+            var datContents = new Dictionary<string, string>();
+            var txtContents = new Dictionary<string, string>();
+            foreach (var dirNameParameter in dirNameParameters.GroupBy(x => x.DirName))
             {
-                datContents.Add($"{typhoonSetDatas.Count()}\n{data.Name.PadRight(9, ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM");
-                txtContents.Add($"20{dtg}\n{typhoonSetDatas.Count()}\n{data.Name.PadRight(16, ' ')} {data.Lat.Value} N   {data.Lng} E  {data.LatBefore6Hours} N   {data.LngBefore6Hours} E    {data.CenterPressure} MB   {data.Radius15MPerS} KM  {data.MaximumSpeed} M/S   {data.Radius25MPerS} KM");
+                var tmpDatContents = new List<string>();
+                var tmpTxtContents = new List<string>();
+                foreach (var data in typhoonSetDatas)
+                {
+                    if (dirNameParameter.Key == "ty" && data.Name.StartsWith("TD")) continue;
+
+                    var dataCount = dirNameParameter.Key == "ty" 
+                        ? typhoonSetDatas.Count(x => !x.Name.StartsWith("TD")) 
+                        : typhoonSetDatas.Count();
+
+                    tmpDatContents.Add($"{dataCount}\n{data.Name.PadRight(8, ' ')} {data.Lat.Value.ToString(".0").PadLeft(4, ' ')} N {data.Lng.Value.ToString(".0").PadLeft(5, ' ')} E {data.LatBefore6Hours.Value.ToString(".0").PadLeft(4, ' ')} N {data.LngBefore6Hours.Value.ToString(".0").PadLeft(5, ' ')} E {data.CenterPressure.ToString().PadLeft(4, ' ')} MB {data.Radius15MPerS.ToString().PadLeft(3, ' ')} KM {data.MaximumSpeed.ToString().PadLeft(2, ' ')} M/S {data.Radius25MPerS.ToString().PadLeft(3, ' ')} KM");
+                    tmpTxtContents.Add($"20{dtg}\n{dataCount}\n{data.Name.PadRight(15, ' ')} {data.Lat.Value.ToString(".0").PadLeft(4, ' ')} N {data.Lng.Value.ToString(".0").PadLeft(5, ' ')} E {data.LatBefore6Hours.Value.ToString(".0").PadLeft(4, ' ')} N {data.LngBefore6Hours.Value.ToString(".0").PadLeft(5, ' ')} E {data.CenterPressure.ToString().PadLeft(4, ' ')} MB {data.Radius15MPerS.ToString().PadLeft(3, ' ')} KM {data.MaximumSpeed.ToString().PadLeft(2, ' ')} M/S {data.Radius25MPerS.ToString().PadLeft(3, ' ')} KM");
+                }
+
+                datContents.Add(dirNameParameter.Key, string.Join("\n", tmpDatContents));
+                txtContents.Add(dirNameParameter.Key, string.Join("\n", tmpTxtContents));
             }
 
             foreach (var dirNameParameter in dirNameParameters)
@@ -84,7 +98,7 @@ namespace UIQ.Controllers
                 var realFileName = $"typhoon{dtg}.{dirNameParameter.FilePrefix}";
                 var realFilePath = realDirectory + realFileName;
 
-                var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents) : string.Join("\n\n", txtContents));
+                var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents[dirNameParameter.DirName]) : string.Join("\n\n", txtContents[dirNameParameter.DirName]));
                 //寫入暫存檔
                 await _logFileService.WriteDataIntoLogFileAsync(tmpPath, tmpFilePath, newDataContent);
                 datas.Add($"Write {tmpFilePath}...");
@@ -98,7 +112,7 @@ namespace UIQ.Controllers
                 }
 
                 //將檔案傳回HPC主機
-                command = $"rsh -l {_typhoonAccount} ${_loginIp} cp {tmpFilePath} {realFilePath}";
+                command = $"rsh -l {_typhoonAccount} {_loginIp} cp {tmpFilePath} {realFilePath}";
                 await _uiqService.RunCommandAsync(command);
                 datas.Add($"Copy to ${realFilePath}...");
             }

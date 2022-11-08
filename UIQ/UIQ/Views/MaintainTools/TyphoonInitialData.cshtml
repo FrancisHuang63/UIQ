@@ -68,21 +68,35 @@
 						<table class="xdebug-error xe-notice" dir="ltr" border="1" cellspacing="0" cellpadding="1"></table>
 					</font>`;
 
-		typhoonSetDatas.forEach(data => {
-			dirNameParameters.forEach(dirNameParam => {
-				let isDatType = dirNameParam.FilePrefix == 'dat';
-                let content = `${(isDatType ? '' : `20${dtg}<br>`)}
-									${typhoonSetDatas.length}<br>${padRight(htmlEncode(data.name), (isDatType ? 9 : 16), ' ')} ${htmlEncode(data.lat)} N   ${htmlEncode(data.lng)} E  ${htmlEncode(data.latBefore6Hours)} N   ${htmlEncode(data.lngBefore6Hours)} E    ${htmlEncode(data.centerPressure)} MB   ${htmlEncode(data.radius15MPerS)} KM  ${htmlEncode(data.maximumSpeed)} M/S   ${htmlEncode(data.radius25MPerS)} KM`;
-                html += `<h4 class="typhoon_file_name">${dirNameParam.DirName}/typhoon${dtg}.dat</h4>
-						<div id='${dirNameParam.DirName}_${dirNameParam.FilePrefix}_content'>
-							<pre>${content}</pre>
-						</div>`;
-			})
-		});
-
+		let groupDirNameParam = dirNameParameters.groupBy('DirName');
+		html += getFileContentByDirectoryName('ty', groupDirNameParam, typhoonSetDatas, dtg);
+		html += getFileContentByDirectoryName('tdty', groupDirNameParam, typhoonSetDatas, dtg);
         html += `<br><input id="btnSubmit" type="button" class="form" value="Submit" onclick="saveTyphoonSetDatas();">`;
 
 		$('#file_content').html(html);
+	}
+
+	function getFileContentByDirectoryName(directoryName, groupDirNameParam, typhoonSetDatas, dtg){
+		let html = '';
+		groupDirNameParam[directoryName].forEach(dirNameParam => {
+			let isDatType = dirNameParam.FilePrefix == 'dat';
+			let dataCount = directoryName === 'ty' ? typhoonSetDatas.filter(item => !item.name.startsWith('TD')).length : typhoonSetDatas.length;
+			let content = `${(isDatType ? '' : `20${dtg}<br>`)}${dataCount}<br>`;
+
+			typhoonSetDatas.forEach(data => {
+				if(directoryName === 'ty' && data.name.startsWith('TD')){
+					 return;
+				}
+				content += `${padRight(htmlEncode(data.name), (isDatType ? 8 : 15), ' ')} ${padLeft(htmlEncode(parseFloat(data.lat).toFixed(1)), 4, ' ')} N ${padLeft(htmlEncode(parseFloat(data.lng).toFixed(1)), 5, ' ')} E ${padLeft(htmlEncode(parseFloat(data.latBefore6Hours).toFixed(1)), 4, ' ')} N ${padLeft(htmlEncode(parseFloat(data.lngBefore6Hours).toFixed(1)), 5, ' ')} E ${padLeft(htmlEncode(data.centerPressure), 4, ' ')} MB ${padLeft(htmlEncode(data.radius15MPerS), 3, ' ')} KM ${padLeft(htmlEncode(data.maximumSpeed), 2, ' ')} M/S ${padLeft(htmlEncode(data.radius25MPerS), 3, ' ')} KM<br>`;
+			});
+
+			html += `<h4 class="typhoon_file_name">${dirNameParam.DirName}/typhoon${dtg}.${dirNameParam.FilePrefix}</h4>
+					<div id='${dirNameParam.DirName}_${dirNameParam.FilePrefix}_content'>
+						<pre>${content}</pre>
+					</div>`;
+		});
+
+		return html;
 	}
 
 	function saveTyphoonSetDatas(){
