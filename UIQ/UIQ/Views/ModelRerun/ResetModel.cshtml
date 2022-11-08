@@ -43,7 +43,7 @@
                 <option value="">-----</option>
             </select>
 
-            <input id="enquire" class='form' type='button' value='enquire' onclick="sendAJAXRequest('post', '@(Url.Action(nameof(GetHtmlController.ResetModelShow), "GetHtml"))', 'all');">
+            <input id="enquire" class='form' type='button' value='enquire'>
         </form>
 
         <h1>show the current status</h1>
@@ -68,8 +68,7 @@
                     let nickName = $('#nickname').val();
 
 					let showDataHtml = response.data.showDatas.length > 0 ? '' : 'There is no job!<br>';
-					response.data.showDatas.forEach(item => { showDataHtml += `${htmlEncode(item)}<br>
-                             -----------------------------------------------------------------<br>`; });
+					response.data.showDatas.forEach(item => { showDataHtml += `${htmlEncode(item)}<br>-----------------------------------------------------------------<br>`; });
 
 					$('#show').html(`<pre>======================current Job status======================
                                         <h3>${modelName}_${memberName}(User: ${htmlEncode(response.data.account)}, Nickname: ${nickName})</h3>
@@ -87,7 +86,9 @@
 
             function setResultData(response){
                 if(response.success){
-                    $('#result').text(htmlEncode(response.data));
+                    let pre = $('<pre/>');
+                    pre.text(htmlEncode(response.data))
+                    $('#result').append(pre);
 				}
 				else{
 					alert(htmlEncode(response.message));

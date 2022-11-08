@@ -75,7 +75,7 @@
 	            if(response.success){
                     let dataHtml = '';
                     response.data.forEach(item => dataHtml += `${htmlEncode(item)}<br>`);
-		            $('#result').html(dataHtml);
+		            $('#result').html(`<pre>${dataHtml}</pre>`);
 	            }
 	            else{
 		            alert(htmlEncode(response.message))

@@ -83,7 +83,7 @@
                     pageSize: 20,
                     pageSizes: [10,20,25,50,100],
                     actions: {
-                        listAction: '@(Url.Action(nameof(MaintainToolsController.GetUploadFile)))'
+                        listAction: '@(Url.Action(nameof(MaintainToolsController.GetUploadFile), new { isUnPermisson = true }))'
                     },
                     fields: {
                         file_id: {

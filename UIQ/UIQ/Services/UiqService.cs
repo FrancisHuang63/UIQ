@@ -637,14 +637,14 @@ namespace UIQ.Services
             return result > 0;
         }
 
-        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount)
+        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, bool isUnPermisson, out int totalCount)
         {
             var sql = @$"SELECT SQL_CALC_FOUND_ROWS *
                          FROM `upload_file`
-                         WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE `role_id` IN (SELECT `role_id`
+                         {(isUnPermisson ? "" : @$"WHERE `file_id` IN (SELECT `file_id` FROM `role_upload_file` WHERE `role_id` IN (SELECT `role_id`
                                                                                                           FROM `role_user`
                                                                                                           WHERE `user_id` = @UserId)
-                                                                                      OR `role_id` = -1)
+                                                                                      OR `role_id` = -1)")}
                          ORDER BY `create_datetime` DESC
                          LIMIT {pageSize} OFFSET {startIndex}";
 

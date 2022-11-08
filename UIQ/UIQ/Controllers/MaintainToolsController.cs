@@ -72,20 +72,19 @@ namespace UIQ.Controllers
             {
                 var tmpDatContents = new List<string>();
                 var tmpTxtContents = new List<string>();
+                var dataCount = dirNameParameter.Key == "ty"
+                        ? typhoonSetDatas.Count(x => !x.Name.StartsWith("TD"))
+                        : typhoonSetDatas.Count();
                 foreach (var data in typhoonSetDatas)
                 {
                     if (dirNameParameter.Key == "ty" && data.Name.StartsWith("TD")) continue;
 
-                    var dataCount = dirNameParameter.Key == "ty" 
-                        ? typhoonSetDatas.Count(x => !x.Name.StartsWith("TD")) 
-                        : typhoonSetDatas.Count();
-
-                    tmpDatContents.Add($"{dataCount}\n{data.Name.PadRight(8, ' ')} {data.Lat.Value.ToString(".0").PadLeft(4, ' ')} N {data.Lng.Value.ToString(".0").PadLeft(5, ' ')} E {data.LatBefore6Hours.Value.ToString(".0").PadLeft(4, ' ')} N {data.LngBefore6Hours.Value.ToString(".0").PadLeft(5, ' ')} E {data.CenterPressure.ToString().PadLeft(4, ' ')} MB {data.Radius15MPerS.ToString().PadLeft(3, ' ')} KM {data.MaximumSpeed.ToString().PadLeft(2, ' ')} M/S {data.Radius25MPerS.ToString().PadLeft(3, ' ')} KM");
-                    tmpTxtContents.Add($"20{dtg}\n{dataCount}\n{data.Name.PadRight(15, ' ')} {data.Lat.Value.ToString(".0").PadLeft(4, ' ')} N {data.Lng.Value.ToString(".0").PadLeft(5, ' ')} E {data.LatBefore6Hours.Value.ToString(".0").PadLeft(4, ' ')} N {data.LngBefore6Hours.Value.ToString(".0").PadLeft(5, ' ')} E {data.CenterPressure.ToString().PadLeft(4, ' ')} MB {data.Radius15MPerS.ToString().PadLeft(3, ' ')} KM {data.MaximumSpeed.ToString().PadLeft(2, ' ')} M/S {data.Radius25MPerS.ToString().PadLeft(3, ' ')} KM");
+                    tmpDatContents.Add($"{data.Name.PadRight(8, ' ')} {data.Lat.Value.ToString(".0").PadLeft(4, ' ')} N {data.Lng.Value.ToString(".0").PadLeft(5, ' ')} E {data.LatBefore6Hours.Value.ToString(".0").PadLeft(4, ' ')} N {data.LngBefore6Hours.Value.ToString(".0").PadLeft(5, ' ')} E {data.CenterPressure.ToString().PadLeft(4, ' ')} MB {data.Radius15MPerS.ToString().PadLeft(3, ' ')} KM {data.MaximumSpeed.ToString().PadLeft(2, ' ')} M/S {data.Radius25MPerS.ToString().PadLeft(3, ' ')} KM");
+                    tmpTxtContents.Add($"{data.Name.PadRight(15, ' ')} {data.Lat.Value.ToString(".0").PadLeft(4, ' ')} N {data.Lng.Value.ToString(".0").PadLeft(5, ' ')} E {data.LatBefore6Hours.Value.ToString(".0").PadLeft(4, ' ')} N {data.LngBefore6Hours.Value.ToString(".0").PadLeft(5, ' ')} E {data.CenterPressure.ToString().PadLeft(4, ' ')} MB {data.Radius15MPerS.ToString().PadLeft(3, ' ')} KM {data.MaximumSpeed.ToString().PadLeft(2, ' ')} M/S {data.Radius25MPerS.ToString().PadLeft(3, ' ')} KM");
                 }
 
-                datContents.Add(dirNameParameter.Key, string.Join("\n", tmpDatContents));
-                txtContents.Add(dirNameParameter.Key, string.Join("\n", tmpTxtContents));
+                datContents.Add(dirNameParameter.Key, $"{dataCount}\n{string.Join("\n", tmpDatContents)}");
+                txtContents.Add(dirNameParameter.Key, $"20{dtg}\n{dataCount}\n{string.Join("\n", tmpTxtContents)}");
             }
 
             foreach (var dirNameParameter in dirNameParameters)
@@ -98,7 +97,13 @@ namespace UIQ.Controllers
                 var realFileName = $"typhoon{dtg}.{dirNameParameter.FilePrefix}";
                 var realFilePath = realDirectory + realFileName;
 
-                var newDataContent = "\n" + (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents[dirNameParameter.DirName]) : string.Join("\n\n", txtContents[dirNameParameter.DirName]));
+                var newDataContent = (dirNameParameter.FilePrefix == "dat" ? string.Join("\n\n", datContents[dirNameParameter.DirName]) : string.Join("\n\n", txtContents[dirNameParameter.DirName]));
+                //刪除舊檔
+                if (System.IO.File.Exists(tmpFilePath))
+                {
+                    System.IO.File.Delete(tmpFilePath);
+                }
+
                 //寫入暫存檔
                 await _logFileService.WriteDataIntoLogFileAsync(tmpPath, tmpFilePath, newDataContent);
                 datas.Add($"Write {tmpFilePath}...");
@@ -357,7 +362,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> GetShell(CheckPointInfoViewModel data)
         {
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/shfun/shetc/setMode | awk '{{print $1}}'";
+            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/shfun/shetc/setMode | awk " + " '{print $1}'";
             var cron_mode = await _uiqService.RunCommandAsync(command);
             data.Cron_Mode = Regex.Replace(cron_mode, "/\\s\\s+/", "").Trim();
 
@@ -400,7 +405,6 @@ namespace UIQ.Controllers
 
             command = string.IsNullOrWhiteSpace(command) ? commandItem.Command_Content : command;
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + " '\\\"$parameters\\\"'";
-            command = $"rsh -l {_hpcCtl} {_loginIp} \"{command}\" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<string>(data: string.IsNullOrWhiteSpace(result) ? "No Result" : result);
@@ -433,9 +437,9 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetUploadFile(int jtStartIndex = 0, int jtPageSize = 20)
+        public JsonResult GetUploadFile(int jtStartIndex = 0, int jtPageSize = 20, bool isUnPermisson = false)
         {
-            var datas = _uiqService.GetUploadFilePageItems(jtStartIndex, jtPageSize, out var totalCnt).ToList();
+            var datas = _uiqService.GetUploadFilePageItems(jtStartIndex, jtPageSize, isUnPermisson, out var totalCnt).ToList();
             return new JsonResult(new PageDataResponse<IEnumerable<UploadFile>>(datas, totalCnt));
         }
     }

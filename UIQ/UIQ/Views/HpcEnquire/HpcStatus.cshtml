@@ -61,10 +61,10 @@
 			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
 			//For debug
             await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][commandResult] command : {pjshowrsc_s}, result: {commandResult}");
-			var pjshowrsc_sarr = Regex.Split(commandResult, "\n");
+			var pjshowrsc_sarr = commandResult.Split("\n");
 
 			//Make 5th line of pjshowrsc_s delimited by space
-			var dataArray = pjshowrsc_sarr.Count() >= 5 ? Regex.Split(pjshowrsc_sarr[4], "/\\s+/") : new string[] { };
+			var dataArray = pjshowrsc_sarr.Count() >= 5 ? pjshowrsc_sarr[4].Split(" ") : new string[] { };
 
 			//Get #line of nodelist.txt
 			var nodeNum = $"cat {uiPath}wwwroot/shell/nodelist.txt | wc -l";
@@ -77,14 +77,12 @@
 			}
 
 			// Print pjshowrsc_s result
-			<p>
-				@foreach(var item in pjshowrsc_sarr)
-				{
-					//For debug
-					await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][pjshowrsc_sarr] command : {item}, result: ");
-					@(await uiqService.RunCommandAsync(item))
-				}
-			</p>
+			@foreach(var item in pjshowrsc_sarr)
+			{
+				//For debug
+				await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][pjshowrsc_sarr] command : {item}, result: ");
+				@(await uiqService.RunCommandAsync(item) + "\n")
+			}
 
 			<p>Enquiring data completely!</p>
 
@@ -93,14 +91,14 @@
 			commandResult = await uiqService.RunCommandAsync(nodeList);
 			//For debug
 			await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][nodeList] command : {nodeList}, result: {commandResult}");
-			var nodelistArray =  Regex.Split(commandResult, "\n");
+			var nodelistArray =  commandResult.Split("\n");
 
 			//Execute pjshowrsc command and make it an array
 			var pjshowrsc_d = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
 			commandResult = await uiqService.RunCommandAsync(pjshowrsc_d);
 			//For debug
 			await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][pjshowrsc_d] command : {pjshowrsc_d}, result: {commandResult}");
-			var pjshowrsc_darr = Regex.Split(commandResult, "\n");
+			var pjshowrsc_darr = commandResult.Split("\n");
 			
 			<p>@($"{hpcCtl} {loginIp}")</p>
 
@@ -110,28 +108,26 @@
 			{
 				for(var i = 0; i < 5; i++)
 				{
-					<p>@(await uiqService.RunCommandAsync(pjshowrsc_darr[i]))</p>
+@(await uiqService.RunCommandAsync(pjshowrsc_darr[i]) + "\n")
 				}
-
-				foreach(var node in nodelistArray)
-				{
-					var marr =  pjshowrsc_darr.Where(x => x.Contains($"/{node}/"));
-					if(marr.Count() == 1)
-					{
-						<p>@(await uiqService.RunCommandAsync($"{marr.FirstOrDefault()}"))</p>
-					}
-					else if(marr.Count() == 0)
-					{
-						<span class="c1">@(node)      --      --      -    --Gi</span><br>
-					}
-					else
-					{
-						<span class="c2">@(node)     Matched 2 or more</span><br>
-					}
-				}
-
-				<p>Enquiring data completely!</p>
 			}
+			foreach(var node in nodelistArray)
+			{
+				var marr =  pjshowrsc_darr.Where(x => x.Contains($"{node}"));
+				if(marr.Count() == 1)
+				{
+@(await uiqService.RunCommandAsync($"{marr.FirstOrDefault()}") + "\n")
+				}
+				else if(marr.Count() == 0)
+				{
+<span class="c1">@($"{node}      --      --      -    --Gi\n")</span>
+				}
+				else
+				{
+<span class="c2">@($"\"{node}\"\t??Matched 2 or more\n")</span>
+				}
+			}
+			<p>Enquiring data completely!</p>
 		}
 	</pre>
 </div>

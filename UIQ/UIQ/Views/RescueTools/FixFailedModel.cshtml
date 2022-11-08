@@ -73,11 +73,11 @@
 	            if(response.success){
                     let tableDataHtml = '';
                     if(response.data.tableDatas.length == 0){
-                        tableDataHtml = `No target directory!! Please edit MySQL data.<br>
-                                         ---------------------------------------------<br>
-                                         Table name : member<br>
-                                         Column name: fix_failed_target_directory<br>
-                                         member_id  : ${htmlEncode(response.data.memberId)}<br>`;
+                        tableDataHtml += `No target directory!! Please edit MySQL data.<br>`;
+                        tableDataHtml += `---------------------------------------------<br>`;
+                        tableDataHtml += `Table name : member<br>`;
+                        tableDataHtml += `Column name: fix_failed_target_directory<br>`;
+                        tableDataHtml += `member_id  : ${htmlEncode(response.data.memberId)}<br>`;
                     }
                     else{
                         tableDataHtml = '<table><tr>';

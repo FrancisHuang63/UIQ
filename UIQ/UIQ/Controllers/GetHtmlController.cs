@@ -82,12 +82,15 @@ namespace UIQ.Controllers
             var fileSize = await _uiqService.RunCommandAsync(command);
 
             //File time
-            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $6\" \"$7\" \"$8}'";
-
+            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $6}'";
             var fileTime = await _uiqService.RunCommandAsync(command);
 
-            //For debug
-            await _logFileService.WriteUiErrorLogFileAsync($"[FileTime] command : {command}, result: {fileTime}");
+            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $7}'";
+            fileTime += " " + await _uiqService.RunCommandAsync(command);
+
+            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $8}'";
+            fileTime += " " + await _uiqService.RunCommandAsync(command);
+            fileTime = fileTime.Replace("\n", string.Empty);
 
             //Get last 30 lines of the file
             command = $"rsh -l {_rshAccount} {_loginIp} tail -n 30 {fullPath}/log/{node}";
@@ -134,7 +137,7 @@ namespace UIQ.Controllers
                                                       && x.Nickname == nickname)?.Account;
             var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -s ";
             var data = await _uiqService.RunCommandAsync(command);
-            var showDatas = Regex.Split(data, "/\\[Job\\s+Statistical\\s+Information\\]/");
+            var showDatas = data.Split("[Job Statistical Information]");
 
             var jobDatas = new List<KeyValuePair<string, string>>();
             jobDatas.Add(new KeyValuePair<string, string>("ALL", "ALL"));
@@ -145,8 +148,8 @@ namespace UIQ.Controllers
                     var dataLines = item.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToArray();
                     if (dataLines.Length > 1)
                     {
-                        var jobId = dataLines[1];
-                        var jobName = dataLines.Length > 6 ? dataLines[6] : string.Empty;
+                        var jobId = dataLines[0]?.Split(":")?.LastOrDefault()?.Trim();
+                        var jobName = dataLines.Length > 5 ? dataLines[5]?.Split(":")?.LastOrDefault()?.Trim() : string.Empty;
                         jobDatas.Add(new KeyValuePair<string, string>(jobId, $"{jobName}({jobId})"));
                     }
                 }
@@ -470,6 +473,7 @@ namespace UIQ.Controllers
                 {
                     var command = $"sudo -u {_rshAccount} ssh -l archive hsmsvr1a ls -al {pathTok} | sed 's%\\/.\\+\\/%%' | grep -v ^total";
                     var commandResult = await _uiqService.RunCommandAsync(command);
+                    displayDatas.Add(command);
                     displayDatas.Add(commandResult);
                     if (string.IsNullOrWhiteSpace(commandResult) == false)
                     {

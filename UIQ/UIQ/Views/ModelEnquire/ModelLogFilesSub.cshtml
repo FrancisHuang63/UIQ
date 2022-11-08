@@ -69,11 +69,11 @@
 					let data = htmlEncode(item);
 					let regex = new RegExp(/^[A-Za-z0-9_\s]+/);
 					if(regex.test(data) || data.includes('Finish'))
-						dataHtml += `<span class="c4">${data}</span>`;
-					//else if(data.includes('fail') || data.includes('cancel'))
-					//	dataHtml += `<span class="c3">${data}</span>`;
+						dataHtml += `<span class="c4">${data}</span>` + '\n';
+					else if(data.includes('fail') || data.includes('cancel'))
+						dataHtml += `<span class="c3">${data}</span>` + '\n';
 					else
-						dataHtml += data;
+						dataHtml += data + '\n';
 				});
 
 				$('#result').html(`<pre>${dataHtml}</pre>`);

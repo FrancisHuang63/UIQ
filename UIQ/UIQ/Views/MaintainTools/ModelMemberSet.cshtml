@@ -303,7 +303,7 @@
 													<select name="Archive.Data_Id">
 														@foreach (var data in dataItems)
 														{
-															<option value="@(data.Data_Id)">@data.Data_Name</option>
+															<!option value="@(data.Data_Id)" @(item?.Data_Id == data.Data_Id ? "selected" : string.Empty) >@data.Data_Name</!option>
 														}
 													</select>
 													<input name="Archive.Archive_Redo" type="text" value="@item?.Archive_Redo">(Ex: bin/Rarchive<font color="red">xxx</font>.ksh)
@@ -332,7 +332,7 @@
 													<select name="Output.Work_Id">
 														@foreach (var work in workItems)
 														{
-															<option value="@(work.Work_Id)">@work.Work_Name</option>	
+															<!option value="@(work.Work_Id)" @(item?.Work_Id == work.Work_Id ? "selected" : string.Empty)>@work.Work_Name</!option>	
 														}
 													</select>
 													<input name="Output.Model_Output" type="text" value="@item.Model_Output">(Ex: bin/R<font color="red">xxx</font>.ksh)
@@ -739,11 +739,11 @@
 					url: url,
 					type: 'POST',
 					dataType: 'json',
-					//data: form.serialize(),
 					data: postData,
 					success: function(response){
 						if(response.success){
 							alert('Save success!');
+							location.reload();
 						}
 						else{
 							alert('Save error!');

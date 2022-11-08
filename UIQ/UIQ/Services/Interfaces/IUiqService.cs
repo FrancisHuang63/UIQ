@@ -77,7 +77,7 @@ namespace UIQ.Services.Interfaces
 
         public Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
 
-        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, out int totalCount);
+        public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, bool isUnPermisson, out int totalCount);
 
         public Task<string> DeleteRejectLogAsync();
 
