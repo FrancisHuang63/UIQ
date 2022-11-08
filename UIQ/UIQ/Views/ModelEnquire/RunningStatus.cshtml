@@ -91,8 +91,8 @@
 
 				function setResultData(response){
 					if(response.success){
-						let dataHtml = `File size: ${htmlEncode(response.data.fileSize)}<br>
-										File time: ${htmlEncode(response.data.fileTime)}<br>`;
+						let dataHtml = `<p>File size: ${htmlEncode(response.data.fileSize)}</p>
+										<p>File time: ${htmlEncode(response.data.fileTime)}</p>`;
 						response.data.files.forEach(item => { dataHtml += `${htmlEncode(item)}<br>`; });
 
 						$('#show').html(`<pre>${dataHtml}</pre>`);

@@ -4,6 +4,7 @@
 @inject IConfiguration configuration
 @inject IOptions<RunningJobInfoOption> runningJobInfoOption
 @inject IUiqService uiqService
+@inject ILogFileService logFileService  //For debug
 
 @{
     Layout = null;
@@ -58,7 +59,9 @@
 			//Execute pjshowrsc command and make it an array
 			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc'";
 			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
-			var pjshowrsc_sarr = Regex.Split(commandResult, "/\n/");
+			//For debug
+            await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][commandResult] command : {pjshowrsc_s}, result: {commandResult}");
+			var pjshowrsc_sarr = Regex.Split(commandResult, "\n");
 
 			//Make 5th line of pjshowrsc_s delimited by space
 			var dataArray = pjshowrsc_sarr.Count() >= 5 ? Regex.Split(pjshowrsc_sarr[4], "/\\s+/") : new string[] { };
@@ -77,6 +80,8 @@
 			<p>
 				@foreach(var item in pjshowrsc_sarr)
 				{
+					//For debug
+					await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][pjshowrsc_sarr] command : {item}, result: ");
 					@(await uiqService.RunCommandAsync(item))
 				}
 			</p>
@@ -86,12 +91,16 @@
 			//Read node list and make it an array
 			var nodeList = $"cat {uiPath}wwwroot/shell/nodelist.txt";
 			commandResult = await uiqService.RunCommandAsync(nodeList);
-			var nodelistArray =  Regex.Split(commandResult, "/\n/");
+			//For debug
+			await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][nodeList] command : {nodeList}, result: {commandResult}");
+			var nodelistArray =  Regex.Split(commandResult, "\n");
 
 			//Execute pjshowrsc command and make it an array
 			var pjshowrsc_d = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
 			commandResult = await uiqService.RunCommandAsync(pjshowrsc_d);
-			var pjshowrsc_darr = Regex.Split(commandResult, "/\n/");
+			//For debug
+			await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][pjshowrsc_d] command : {pjshowrsc_d}, result: {commandResult}");
+			var pjshowrsc_darr = Regex.Split(commandResult, "\n");
 			
 			<p>@($"{hpcCtl} {loginIp}")</p>
 

@@ -40,16 +40,16 @@ namespace UIQ.Controllers
 			var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');
 			foreach (var logLineData in logLineDatas)
 			{
-				if (System.Text.RegularExpressions.Regex.IsMatch(logLineData, @"^[A-Z]+$")
+				if (System.Text.RegularExpressions.Regex.IsMatch(logLineData, @"^[A-Za-z0-9_\s]+$")
 					|| logLineData.Contains("Finish"))
 				{
 					returnContent += isGetLastLine
 						? "Finish"
-						: $@"<span class=""c4"">{logLineData}</span>";
+						: $@"<span class=""c4"">{logLineData}</span>" + "\n";
 				}
 				else if (logLineData.Contains("fail") || logLineData.Contains("cancel"))
 				{
-					returnContent += $@"<span class=""c3"">{logLineData}</span>";
+					returnContent += $@"<span class=""c3"">{logLineData}</span>" + "\n";
 				}
 				else returnContent += logLineData + "\n";
 			}

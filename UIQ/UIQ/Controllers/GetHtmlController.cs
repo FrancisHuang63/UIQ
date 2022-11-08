@@ -55,7 +55,7 @@ namespace UIQ.Controllers
             var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
 
-            var response = new ApiResponse<IEnumerable<string>>(listData.Split("/\n/")
+            var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
                 .Where(x => string.IsNullOrWhiteSpace(x) == false).ToList());
             return Json(response);
         }
@@ -80,14 +80,14 @@ namespace UIQ.Controllers
             //File size
             var command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $5}'";
             var fileSize = await _uiqService.RunCommandAsync(command);
-            /*html += $"File size: {fileSize}<br>"*/
-            ;
 
             //File time
             command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $6\" \"$7\" \"$8}'";
-            
+
             var fileTime = await _uiqService.RunCommandAsync(command);
-            //html += $"File time: {fileTime}<br>";
+
+            //For debug
+            await _logFileService.WriteUiErrorLogFileAsync($"[FileTime] command : {command}, result: {fileTime}");
 
             //Get last 30 lines of the file
             command = $"rsh -l {_rshAccount} {_loginIp} tail -n 30 {fullPath}/log/{node}";
@@ -380,7 +380,6 @@ namespace UIQ.Controllers
                         }
                     }
                 }
-               
             }
             var response = new ApiResponse<dynamic>(new { Dtg = dtg, Lid = lid, BatchDatas = batchSelectDatas, });
             return Json(response);
