@@ -57,14 +57,19 @@
 		{
 			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
 			//Execute pjshowrsc command and make it an array
-			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc'";
+			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} date";
+			var dateResult = await uiqService.RunCommandAsync(pjshowrsc_s);
+			@($"{rshAccount} {loginIp}")@(dateResult)
+			pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} pjshowrsc";
 			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
 			//For debug
-            await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][commandResult] command : {pjshowrsc_s}, result: {commandResult}");
+			var debugCommand = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc'";
+			var debugResult = await uiqService.RunCommandAsync(debugCommand);
+			await logFileService.WriteUiErrorLogFileAsync($"[HpcStatus][commandResult] command : {debugCommand}, result: {debugResult}");
 			var pjshowrsc_sarr = commandResult.Split("\n");
 
 			//Make 5th line of pjshowrsc_s delimited by space
-			var dataArray = pjshowrsc_sarr.Count() >= 5 ? pjshowrsc_sarr[4].Split(" ") : new string[] { };
+			var dataArray = pjshowrsc_sarr.Count() >= 4 ? pjshowrsc_sarr[3].Split(" ") : new string[] { };
 
 			//Get #line of nodelist.txt
 			var nodeNum = $"cat {uiPath}wwwroot/shell/nodelist.txt | wc -l";
