@@ -100,8 +100,9 @@
 
             function setResultData(response){
 	            if(response.success){
-                    let dataHtml = '';
+                    let dataHtml = '<pre>';
                     response.data.forEach(item => dataHtml += `${htmlEncode(item)}<br>`);
+                    dataHtml += '</pre>'
 		            $('#result').html(dataHtml);
 	            }
 	            else{

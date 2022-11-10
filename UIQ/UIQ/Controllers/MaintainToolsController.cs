@@ -395,16 +395,23 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> CommandExecute(int commandId, string parameters, string command)
+        public async Task<JsonResult> CommandExecute(int commandId, string parameters, string command, string passwd, int? execTime)
         {
             parameters = _urlEncodeService.HtmlEncode(parameters);
             command = _urlEncodeService.HtmlEncode(command);
 
             var commandItem = await _uiqService.GetCommandItemAsync(commandId);
+
             if (commandItem == null) return Json(new ApiResponse<string>("Error"));
+            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
+                && commandItem.Command_Pwd != passwd)
+            {
+                return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
+            }
 
             command = string.IsNullOrWhiteSpace(command) ? commandItem.Command_Content : command;
-            command = string.IsNullOrWhiteSpace(parameters) ? command : command + " '\\\"$parameters\\\"'";
+            command = string.IsNullOrWhiteSpace(parameters) ? command : command + " '\\\"parameters\\\"'";
+            command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<string>(data: string.IsNullOrWhiteSpace(result) ? "No Result" : result);

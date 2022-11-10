@@ -146,7 +146,7 @@ namespace UIQ.Services
             var datas = await _dataBaseNcsUiService.QueryAsync<FullPathViewModel>(sql, new { modelName = modelName, memberName = memberName, nickname = nickname });
 
             var result = datas.FirstOrDefault();
-            if (result == null) return null;
+            if (result == null) return string.Empty;
 
             return $"/{_SystemName}/{result.Account}{result.Member_Path}/{modelName}/{memberName}";
         }
@@ -783,6 +783,8 @@ namespace UIQ.Services
         public async Task SqlSync()
         {
             var hpcSql = _dataBaseNcsUiService.DataBaseName;
+            var account = _dataBaseNcsUiService.DataBaseUid;
+            var password = _dataBaseNcsUiService.DataBasePwd;
             var baseDir = $"/{_SystemName}/{_HpcCtl}/web";
             var dateString = DateTime.Now.ToString("yyMMdd");
             var filename = $"{baseDir}/{hpcSql}{dateString}.sql";
@@ -865,7 +867,7 @@ namespace UIQ.Services
             EditDump(filename);
 
             // copy to TOHOST
-            await RunCommandAsync($"rsh -l {_HpcCtl} {toHost} mysql -uncsadm -pAdm@ncs99 {hpcSql} --default-character-set=utf8 < {filename}");
+            await RunCommandAsync($"rsh -l {_HpcCtl} {toHost} mysql -{account} -{password} {hpcSql} --default-character-set=utf8 < {filename}");
         }
 
         public async Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
@@ -1550,9 +1552,11 @@ namespace UIQ.Services
             return data.FirstOrDefault();
         }
 
-        private void EditDump(string fileName)
+        private async void EditDump(string fileName)
         {
             var hpcSql = _dataBaseNcsUiService.DataBaseName;
+            var account = _dataBaseNcsUiService.DataBaseUid;
+            var password = _dataBaseNcsUiService.DataBasePwd;
             var baseDir = $"/{_SystemName}/{_HpcCtl}/web";
 
             var options = $"--ignore-table={hpcSql}.history_batch";
@@ -1565,8 +1569,9 @@ namespace UIQ.Services
             options += $" --ignore-table={hpcSql}.model_view";
             options += $" --ignore-table={hpcSql}.ouput_view";
             options += $" --ignore-table={hpcSql}.user_view";
-            var sqldump = $"mysqldump - uncsadm - padm@ncs99 {hpcSql} {options}";
-            var dumparr = Regex.Split(sqldump, "/\n /");
+            var sqldump = $"mysqldump -{account} -{password} {hpcSql} {options}";
+            var dump = await RunCommandAsync(sqldump);
+            var dumparr = Regex.Split(dump, "/\n /");
             foreach (var i in dumparr)
             {
                 var printStr = string.Empty;

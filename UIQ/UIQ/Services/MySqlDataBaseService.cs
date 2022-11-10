@@ -13,6 +13,8 @@ namespace UIQ.Services
 		public string ConnectionString { get; set; }
 		public DataBaseEnum DataBase { get; }
 		public string DataBaseName { get; set; }
+		public string DataBaseUid { get; set; }
+		public string DataBasePwd { get; set; }
 
 		public MySqlDataBaseService(IOptions<ConnectoinStringOption> connectoinStringOption, DataBaseEnum dataBase)
 		{
@@ -20,6 +22,10 @@ namespace UIQ.Services
 			ConnectionString = connectoinStringOption.Value.GetConnectoinString(dataBase);
 			using var connection = new MySqlConnection(ConnectionString);
 			DataBaseName = connection.Database;
+
+			var builder = new MySqlConnectionStringBuilder(ConnectionString);
+			DataBaseUid = builder.UserID;
+			DataBasePwd = builder.Password;
 		}
 
 		public async Task<int> DeleteAsync(string tableName, object parameter = null)

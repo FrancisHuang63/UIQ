@@ -174,12 +174,13 @@
 									</tr>
 									<tr>
 										<td>Typhoon Prediction Time：</td>
-										<td><input type="text" name="Typhoon_Pre_Time" value="@Model?.Typhoon_Pre_Time">(Ex: 300)</td>
+										<td><input type="text" name="Member.Typhoon_Pre_Time" value="@Model?.Typhoon_Pre_Time">(Ex: 300)</td>
 									</tr>
 									<tr>
 										<td>About Typhoon：</td>
 										<td><input type="checkbox" id="typhoon_model" name="Member.Typhoon_Model" @(Model?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) value="1"></td>
 									</tr>
+									<input type="hidden" name="Member.Fix_Failed_Target_Directory" value="@(Model?.Fix_Failed_Target_Directory)">
 								</table>
 							</td>
 						</tr>
