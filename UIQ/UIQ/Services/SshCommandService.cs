@@ -26,24 +26,6 @@ namespace UIQ.Services.Interfaces
                 output = await process.StandardOutput.ReadToEndAsync();
                 process.WaitForExit();
 
-                if (string.IsNullOrEmpty(output) == false) return output;
-
-                process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "/bin/bash",
-                        Arguments = command,
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false
-                    }
-                };
-                process.Start();
-                output = await process.StandardOutput.ReadToEndAsync();
-                process.WaitForExit();
-
                 return output;
                 
             }
