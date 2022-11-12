@@ -178,7 +178,7 @@
 									</tr>
 									<tr>
 										<td>About Typhoon：</td>
-										<td><input type="checkbox" id="typhoon_model" name="Member.Typhoon_Model" @(Model?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) value="1"></td>
+										<td><input type="checkbox" id="typhoon_model" name="Member.Typhoon_Model" @(Model?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) ></td>
 									</tr>
 									<input type="hidden" name="Member.Fix_Failed_Target_Directory" value="@(Model?.Fix_Failed_Target_Directory)">
 								</table>
@@ -647,7 +647,7 @@
 				member.Maintainer_Status = $('[name="maintainer_status"]:checked').val();
 				member.Normal_Pre_Time = $('[name="Member.Normal_Pre_Time"]').val();
 				member.Typhoon_Pre_Time = $('[name="Member.Typhoon_Pre_Time"]').val();
-				member.Typhoon_Model = $('[name="Member.Typhoon_Model"]').val();
+				member.Typhoon_Model = $('[name="Member.Typhoon_Model"]').prop('checked') ? 1 : 0;
 				postData.Member = member;
 
 				//CronTab

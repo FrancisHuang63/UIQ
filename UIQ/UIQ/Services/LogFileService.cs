@@ -50,7 +50,7 @@ namespace UIQ.Services
             }
 
             var logContnet = await ReadLogFileAsync(fullFilePath);
-            logContnet += newData;
+            logContnet += logContnet == string.Empty ? newData.TrimStart("\r\n".ToCharArray()) : newData;
             System.IO.File.WriteAllText(fullFilePath, logContnet);
         }
 
@@ -66,8 +66,16 @@ namespace UIQ.Services
         {
             var userAccount = _currentUser?.Identity?.Name ?? string.Empty;
             var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_error_{DateTime.Now.ToString("yyyyMMdd")}.log");
-            message = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}][user: {userAccount}] {message}";
+            message = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}] {message} [User: {userAccount}]";
             await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, message);
+        }
+
+        public async Task WriteUiTransationLogFileAsync(string content)
+        {
+            var userAccount = _currentUser?.Identity?.Name ?? string.Empty;
+            var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_transation_{DateTime.Now.ToString("yyyyMMdd")}.log");
+            content = $"\r\n[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff")}][TraceID: {_httpContextAccessor.HttpContext.TraceIdentifier}] {content} [User: {userAccount}]";
+            await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, content);
         }
     }
 }

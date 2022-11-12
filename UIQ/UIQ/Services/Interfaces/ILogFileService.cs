@@ -11,5 +11,7 @@
         public Task WriteUiActionLogFileAsync(string message);
 
         public Task WriteUiErrorLogFileAsync(string message);
+
+        public Task WriteUiTransationLogFileAsync(string content);
     }
 }

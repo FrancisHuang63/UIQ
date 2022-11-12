@@ -11,6 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMvc(config =>
 {
     config.Filters.Add(new ExceptionFilter());
+    config.Filters.Add(new ActoinLogFilter());
+    config.Filters.Add(new ResultLogFilter());
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

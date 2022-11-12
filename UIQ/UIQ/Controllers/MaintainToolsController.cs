@@ -410,8 +410,8 @@ namespace UIQ.Controllers
             }
 
             command = string.IsNullOrWhiteSpace(command) ? commandItem.Command_Content : command;
-            command = string.IsNullOrWhiteSpace(parameters) ? command : command + " '\\\"parameters\\\"'";
-            command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
+            command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
+            //command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<string>(data: string.IsNullOrWhiteSpace(result) ? "No Result" : result);
@@ -435,7 +435,7 @@ namespace UIQ.Controllers
             }
 
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
-            command = $@"rsh -l {_hpcCtl} {_loginIp} ""{(command ?? string.Empty).Split("\n").FirstOrDefault()}"" 2>&1";
+            //command = $@"rsh -l {_hpcCtl} {_loginIp} ""{(command ?? string.Empty).Split("\n").FirstOrDefault()}"" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);
 
             var datas = new { Result = result, StartTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"), EstimatedCompletionTime = DateTime.Now.AddMinutes(execTime).ToString("yyyy/MM/dd HH:mm:ss") };

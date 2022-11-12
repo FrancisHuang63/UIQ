@@ -9,7 +9,7 @@ namespace UIQ.Filters
         {
             var errorMessage = $"{GetType().Name} exception. Message: {context.Exception.Message}";
             var logFileService = context.HttpContext.RequestServices.GetService(typeof(ILogFileService)) as ILogFileService;
-            logFileService.WriteUiErrorLogFileAsync(errorMessage);
+            logFileService.WriteUiErrorLogFileAsync("\r\n" + errorMessage);
             return Task.CompletedTask;
         }
     }
