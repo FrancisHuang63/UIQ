@@ -1,0 +1,54 @@
+﻿@using UIQ.Controllers
+
+@{
+    Layout = null;
+    string modelName = ViewBag.ModelName;
+    string memberName = ViewBag.MemberName;
+    string account = ViewBag.Account;
+}
+
+<link rel=stylesheet type="text/css" href="~/css/fjstyle.css">
+<script type="text/javascript" src="~/js/jquery-3.1.1.min.js"></script>
+<script type="text/javascript" src="~/js/tool.js"></script>
+
+<pre id="preLogData"></pre>
+
+<script>
+    $(function(){
+        $.ajax({
+            url: '@(Url.Action(nameof(LogviewController.GetLogData)))',
+            type: 'POST',
+            data: { 'modelName': '@(modelName)', memberName: '@(memberName)', account: '@(account)' },
+            success: function(response){
+                if(response.success){
+                    setLogData(response);
+                }
+                else{
+                    alert(htmlEncode(response.message));
+                }
+            }
+        });
+    })
+
+    function setLogData(response){
+        if(response.data.length == 0){
+            $('#preLogData').text(`There is no log file of @(modelName)_@(memberName).`);
+        }
+        response.data.forEach((item, idx) => {
+            let dataHtml = '';
+            let logLineData = htmlEncode(item);
+            if(item.match(/^[A-Za-z0-9_\s]+/) || logLineData.includes('Finish')){
+                dataHtml += `<span class="c4">${logLineData}</span>\n`;
+            }
+            else if(logLineData.includes('fail') || logLineData.includes('cancel')){
+                dataHtml += `<span class="c3">${logLineData}</span>\n`;
+            }
+            else{
+                dataHtml += `${logLineData}\n`;
+            }
+
+            $('#preLogData').append(dataHtml);
+        });
+    }
+</script>
+

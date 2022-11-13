@@ -29,7 +29,12 @@ namespace UIQ.Services
 
         public async Task<string> ReadLogFileAsync(string filePath)
         {
-            if (System.IO.File.Exists(filePath) == false) return null;
+            var checkDirPath = Path.GetDirectoryName(filePath);
+            var checkFileName = Path.GetFileName(filePath);
+            var checkDir = new DirectoryInfo(checkDirPath);
+            //列舉全部檔案再比對檔名
+            var checkFile = checkDir.EnumerateFiles().FirstOrDefault(m => m.Name == checkFileName);
+            if (checkFile == null || checkFile.Exists == false) return null;
 
             var logContnet = await System.IO.File.ReadAllTextAsync(filePath);
             return logContnet;

@@ -1,6 +1,8 @@
-﻿namespace UIQ
+﻿using System.Security;
+
+namespace UIQ
 {
-    public static  class StringExtensions
+    public static class StringExtensions
     {
         public static string ToMD5(this string str)
         {
@@ -19,6 +21,13 @@
 
                 return md5;
             }
+        }
+
+        public static SecureString GetGetSecureString(this string str)
+        {
+            var secureString = new SecureString();
+            (str ?? string.Empty).ToList().ForEach(x => secureString.AppendChar(x));
+            return secureString;
         }
     }
 }

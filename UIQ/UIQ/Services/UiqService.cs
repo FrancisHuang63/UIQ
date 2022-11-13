@@ -148,7 +148,8 @@ namespace UIQ.Services
             var result = datas.FirstOrDefault();
             if (result == null) return string.Empty;
 
-            return $"/{_SystemName}/{result.Account}{result.Member_Path}/{modelName}/{memberName}";
+            var secureAccount = result.Account.GetGetSecureString();
+            return $"/{_SystemName}/{secureAccount.GetSecureStringToString()}{result.Member_Path}/{modelName}/{memberName}";
         }
 
         public async Task<IEnumerable<Model>> GetModelItemsAsync()
@@ -515,7 +516,8 @@ namespace UIQ.Services
             data.Member.Model_Id = data.Model.Model_Id;
             data.Member.Member_Name = data.Member.Member_Name ?? string.Empty;
             data.Member.Nickname = data.Member.Nickname ?? string.Empty;
-            data.Member.Account = data.Member.Account ?? string.Empty;
+            var secureAccount = (data.Member.Account ?? string.Empty).GetGetSecureString();
+            data.Member.Account = secureAccount.GetSecureStringToString();
 
             var isMemberExist = await _dataBaseNcsUiService.IsExistAsync("member", new { Member_Id = data.Member.Member_Id });
             if (isMemberExist) result += await _dataBaseNcsUiService.UpdateAsync("member", data.Member, new { Member_Id = data.Member.Member_Id });
@@ -548,6 +550,7 @@ namespace UIQ.Services
 
             //Batch
             result += await _dataBaseNcsUiService.DeleteAsync("batch", new { Member_Id = memberId });
+            var newBatchIdPair = new Dictionary<int, int>();
             if (data.Batchs?.Any() ?? false)
             {
                 foreach (var batch in data.Batchs)
@@ -556,11 +559,13 @@ namespace UIQ.Services
                     batch.Batch_Dtg = batch.Batch_Dtg ?? string.Empty;
                     batch.Batch_Type = batch.Batch_Type ?? string.Empty;
                     batch.Batch_Name = batch.Batch_Name ?? string.Empty;
-
-                    var paramter = new { Batch_Id = batch.Batch_Id };
-                    var isExist = await _dataBaseNcsUiService.IsExistAsync("batch", paramter);
-                    if (isExist) result += await _dataBaseNcsUiService.UpdateAsync("batch", batch, paramter);
-                    else result += await _dataBaseNcsUiService.InsertAsync("batch", batch);
+                    
+                    var newBatchId = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("batch", batch);
+                    if (newBatchId > 0) 
+                    {
+                        newBatchIdPair.Add(batch.Batch_Id, newBatchId);
+                        result += 1;
+                    }
                 }
             }
 
@@ -625,7 +630,7 @@ namespace UIQ.Services
                     checkPoint.Model_Id = data.Model.Model_Id;
                     var checkPointData = new CheckPoint()
                     {
-                        Batch_Id = checkPoint.Batch_Id,
+                        Batch_Id = newBatchIdPair[checkPoint.Batch_Id],
                         Member_Id = checkPoint.Member_Id,
                         Shell_Name = checkPoint.Shell_Name ?? string.Empty,
                         Tolerance_Time = checkPoint.Tolerance_Time,

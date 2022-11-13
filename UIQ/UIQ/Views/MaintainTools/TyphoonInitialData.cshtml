@@ -124,7 +124,7 @@
 	}
 
 	$('#btnSubmit').click(function(e){
-		let generateCount = $('#adjust').val();
+		let generateCount = parseInt($('#adjust').val());
 		if(!generateCount || generateCount == 0){
 			e.preventDefault();
 			e.stopPropagation();

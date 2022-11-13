@@ -1,7 +1,7 @@
 ﻿@using UIQ.Controllers
-@model Command
 @{
     Layout = null;
+    Command command = ViewBag.Command;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -35,29 +35,29 @@
                         <tr>
                             <td width=8%>Name</td>
                             <td>
-                                <input type="text" name="Command_Name" value="@Model?.Command_Name">
-                                <input type="hidden" name="Command_Id" value="@Model?.Command_Id">
+                                <input type="text" name="Command_Name" value="@command?.Command_Name">
+                                <input type="hidden" name="Command_Id" value="@command?.Command_Id">
                             </td>
                         </tr>
                         <tr>
                             <td>Password</td>
-                            <td><input type="password" name="Command_Pwd" value="@Model?.Command_Pwd"></td>
+                            <td><input type="password" name="Command_Pwd" value="@command?.Command_Pwd"></td>
                         </tr>
                         <tr>
                             <td>Execution Time(min)</td>
-                            <td><input id="exec_time" name="Execution_Time" value="@Model?.Execution_Time"></td>
+                            <td><input id="exec_time" name="Execution_Time" value="@command?.Execution_Time"></td>
                         </tr>
                         <tr>
                             <td>Describe</td>
-                            <td><textarea name="Command_Desc">@Model?.Command_Desc</textarea></td>
+                            <td><textarea name="Command_Desc">@command?.Command_Desc</textarea></td>
                         </tr>
                         <tr>
                             <td>Content</td>
-                            <td><textarea id="content" name="Command_Content">@Model?.Command_Content</textarea></td>
+                            <td><textarea id="content" name="Command_Content">@command?.Command_Content</textarea></td>
                         </tr>
                         <tr>
                             <td>Parameter Example</td>
-                            <td><textarea id="example" name="Command_Example">@Model?.Command_Example</textarea></td>
+                            <td><textarea id="example" name="Command_Example">@command?.Command_Example</textarea></td>
                         </tr>
                         <tr>
                             <td>Result</td>
@@ -67,7 +67,7 @@
                 </table>
                 <div>
                     <input type="submit" value="Save">
-                    <input type="button" value="Execute" onclick="showParameterModal('@(Model?.Command_Id)','ADM');" />
+                    <input type="button" value="Execute" onclick="showParameterModal('@(command?.Command_Id)','ADM');" />
                     <input type="button" value="Exit" onclick="if (confirm('Exit this edit page without saving?')){location.href='@Url.Action(nameof(MaintainToolsController.Command))';}">
                 </div>
             </form>

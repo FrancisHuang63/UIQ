@@ -71,8 +71,8 @@ function showParameterModal(command_id, group){
             commandId: command_id
         },
         dataType: 'json',
-        success: function(cmd_data){
-            $('label[for="parameters"]').text('Parameter (ex.' + htmlEncode(cmd_data.command_example) + ')');
+        success: function (command_example) {
+            $('label[for="parameters"]').text('Parameter (ex.' + htmlEncode(command_example) + ')');
         }
     });
 }

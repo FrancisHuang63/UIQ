@@ -17,10 +17,10 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '#addCheckPoint', function () {
-        var dialog_id = $(this).closest('div').prop('id');
-        var batch_id = $(this).parents('tr').children('th').attr('data-batch_name');
-        var batch_name = $(this).parents('tr').children('th').attr('data-batch_name');
-        var batch_index = $(this).parents('div.check_point_dialog').attr('id').split("_")[3];
+        var dialog_id = htmlEncode($(this).closest('div')[0].id);
+        var batch_id = htmlEncode($(this).parents('tr').children('th[id="batch_id"]').data('batch_id'));
+        var batch_name = htmlEncode($(this).parents('tr').children('th[id="batch_name"]').data('batch_name'));
+        var batch_index = htmlEncode($(this).parents('div.check_point_dialog').attr('id').split("_")[3]);
         add_new_check_point(batch_id, dialog_id, $(this), batch_name, batch_index);
     });
 
@@ -39,7 +39,7 @@ $(document).on('click', '#showCheckPoint', function () {
     let batch_row_index = $(this).closest('tr.batchItem').index();
     //batch_row_index = batch_row_index.substr(batch_row_index.indexOf("_") + 1);
     let batch_name = $(this).closest('tr.batchItem').find('[name="Batch.Batch_Name"]').val();
-    let batch_id = $(this).closest('tr.batchItem').find('[name="Batch.Batch_Id"]').val();
+    let batch_id = parseInt($(this).closest('tr.batchItem').find('[name="Batch.Batch_Id"]').val());
 
     if (!batch_name) {
         alert('Batch name is empty! Please set batch_name!');
@@ -62,8 +62,26 @@ function show_dialog(batch_id, batch_name, batch_row_index) {
     var dialog_title = 'Batch: ' + batch_name;
     var new_dialog_id = "check_point_dialog_" + batch_row_index;
     if ($('body #' + new_dialog_id).length === 0) {
-        var $dialog = $("#check_point_dialog").clone().prop("id", new_dialog_id);
-        $('body').append($dialog);
+        //var $dialog = $("#check_point_dialog").clone().prop("id", new_dialog_id);
+        //$('body').append($dialog);
+        let dialog = `<div class="check_point_dialog" id="${new_dialog_id}" title="Check Points" style="display:none;">
+					    <table width="100%" border="1" aria-describedby="check_point_dialog">
+						    <thead>
+							    <tr>
+								    <th style="display:none;" id="batch_id"></th>
+								    <th id="batch_name" width=65%></th>
+								    <th id="add_check_btn" width=35%>
+									    <a type="button" id="addCheckPoint" class="btn_default">
+										    <img src="../../images/add_icons.png" alt="新增"/>
+										    Add Check Point
+									    </a>
+								    </th>
+							    </tr>
+						    </thead>
+						    <tbody></tbody>
+					    </table>
+				    </div>`;
+        $('body').append(dialog);
     }
 
     if ($(".ui-dialog #" + new_dialog_id).length === 0) {
@@ -73,8 +91,8 @@ function show_dialog(batch_id, batch_name, batch_row_index) {
 
     $('#' + new_dialog_id + ' #batch_name').text(dialog_title);
     $('#' + new_dialog_id + ' #batch_name').attr('data-batch_row_index', batch_row_index);
-    $('#' + new_dialog_id + ' #batch_id').attr('data-batch_name', batch_id);
-    $('#' + new_dialog_id + ' #batch_name').attr('data-batch_name', batch_name);
+    $('#' + new_dialog_id + ' #batch_id').data('batch_id', batch_id);
+    $('#' + new_dialog_id + ' #batch_name').data('batch_name', batch_name);
 
     $('#' + new_dialog_id).dialog('open');
 }
@@ -149,8 +167,8 @@ function add_new_check_point(batchId, dialog_id, item, batch_name, batch_index) 
             var shell = unset_repeat_shell(shell_info);
             var member_id = $('#memberId').val();
             var batch_row_index = dialog_id.split("_")[3];
-            var id_prefix = "batch_" + batch_row_index + '_';
-            var new_check_point_number = $('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val();
+            var id_prefix = htmlEncode("batch_" + batch_row_index + '_');
+            var new_check_point_number = parseInt($('#' + dialog_id + ' #' + id_prefix + 'checkRowNum').val());
 
             var html = '<tr class="checkPointItem"><td id="check_' + new_check_point_number + '" colspan="2"><table width="100%"><tr>';
             html += `<input type="hidden" name="CheckPoint.Batch_Id" value="${batchId}">`;
@@ -192,6 +210,9 @@ function add_new_check_point(batchId, dialog_id, item, batch_name, batch_index) 
 }
 
 function set_new_shell_time(shell_info, id_prefix, new_check_point_number, round) {
+    id_prefix = htmlEncode(id_prefix);
+    new_check_point_number = parseInt(new_check_point_number);
+
     $(document).mousemove('#check_' + new_check_point_number + ' #' + id_prefix + 'checkStep_' + new_check_point_number + '_flexselect', function () {
         var shell_name = $('#check_' + new_check_point_number + ' #' + id_prefix + 'checkStep_' + new_check_point_number + '_flexselect').val();
         var check_time = get_shell_avg_time("0", shell_name, shell_info);

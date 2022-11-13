@@ -20,12 +20,11 @@ namespace UIQ.Services
             return Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload", fileName);
 #endif
             return Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "wwwroot", "upload", fileName);
-
         }
 
         public string GetUploadPathUrl(string fileName)
         {
-            return string.IsNullOrWhiteSpace(fileName) ? string.Empty : $"/upload/{fileName}";
+            return string.IsNullOrWhiteSpace(fileName) ? string.Empty : $"/upload/{fileName.Replace("/", string.Empty)}";
         }
 
         public async Task UploadFileAsync(IFormFile file)

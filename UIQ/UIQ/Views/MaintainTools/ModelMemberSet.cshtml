@@ -1,6 +1,5 @@
 ﻿@using UIQ.Controllers
 @using UIQ.Enums
-@model Member
 @{
 	Layout = null;
 	bool isNew = ViewBag.IsNew;
@@ -11,8 +10,9 @@
 	IEnumerable<Batch> batchItems = ViewBag.BatchItems;
 	IEnumerable<Archive> archiveItems = ViewBag.ArchiveItems;
 	IEnumerable<Output> outputItems = ViewBag.OutputItems;
+	Member member = ViewBag.Member;
 
-	var currentModelItem = modelItems.FirstOrDefault(x => x.Model_Id == Model?.Model_Id);
+	var currentModelItem = modelItems.FirstOrDefault(x => x.Model_Id == member?.Model_Id);
 	var newModelPostion = (modelItems?.Max(x => x.Model_Position) ?? 0) + 1;
 	var masterCronGroup = cronTabItems?.FirstOrDefault()?.Master_Group;
 }
@@ -44,7 +44,7 @@
 		<h1>This page is used to @(isNew ? "ADD a NEW" : "EDIT or DELETE an OLD") MODEL & MEMBER</h1>
 		<div>
 			<form id="setting" action="@Url.Action(nameof(MaintainToolsController.ModelMemberSet))" method="post" autocomplete="off"  enctype="multipart/form-data">
-				<input id="memberID" type="hidden" name="memberId" value="@Model?.Member_Id">
+				<input id="memberID" type="hidden" name="memberId" value="@member?.Member_Id">
 				@Html.Hidden("IsNew", isNew)
 				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
 					<table width="100%" border="1" aria-describedby="check_point_dialog">
@@ -89,7 +89,7 @@
 											<select id="model_select" name="Model.Model_Id">
 												@foreach (var item in modelItems)
 												{
-													var sel = item.Model_Id == Model?.Model_Id ? "selected" : string.Empty;
+													var sel = item.Model_Id == member?.Model_Id ? "selected" : string.Empty;
 													<!option value="@item.Model_Id" data-position="@item.Model_Position" @(sel) >@item.Model_Name</!option>
 												}
 											</select>
@@ -120,67 +120,67 @@
 									<tr>
 										<td>Member Name<span style="color:red;">*</span>：</td>
 										<td>
-											<input type="text" name="Member.Member_Name" value="@Model?.Member_Name">(Ex: M03)
-											<input type="hidden" name="Member.Member_Id" value="@Model?.Member_Id">
-											<input type="hidden" id="memberModelId" name="Member.Model_Id" value="@Model?.Model_Id">
+											<input type="text" name="Member.Member_Name" value="@member?.Member_Name">(Ex: M03)
+											<input type="hidden" name="Member.Member_Id" value="@member?.Member_Id">
+											<input type="hidden" id="memberModelId" name="Member.Model_Id" value="@member?.Model_Id">
 										</td>
 									</tr>
 									<tr>
 										<td>Member Nickname<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="Member.Nickname" value="@Model?.Nickname"></td>
+										<td><input type="text" name="Member.Nickname" value="@member?.Nickname"></td>
 									</tr>
 									<tr>
 										<td>Member Position<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="Member.Member_Position" value="@Model?.Member_Position">(Ex: 24)</td>
+										<td><input type="text" name="Member.Member_Position" value="@member?.Member_Position">(Ex: 24)</td>
 									</tr>
 									<tr>
 										<td>Member Account<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="Member.Account" value="@Model?.Account">(Ex: npcaxxx)</td>
+										<td><input type="text" name="Member.Account" value="@member?.Account">(Ex: npcaxxx)</td>
 									</tr>
 									<tr>
 										<td>Member Path：</td>
 										<td>
-											<input type="text" name="Member.Member_Path" value="@Model?.Member_Path">
+											<input type="text" name="Member.Member_Path" value="@member?.Member_Path">
 											(Ex: /ncs/npcaxxx/<span style="color:red;">*</span>/NFS/M03)
 										</td>
 									</tr>
 									<tr>
 										<td>Dtg Value<span style="color:red;">*</span>：</td>
-										<td><input type="text" name="Member.Member_Dtg_Value" value="@Model?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
+										<td><input type="text" name="Member.Member_Dtg_Value" value="@member?.Member_Dtg_Value">(Ex: 6 or 12 or 24)</td>
 									</tr>
 									<tr>
 										<td>Group Member Name：</td>
-										<td><input type="text" name="Member.Model_Group" value="@Model?.Model_Group">(Ex: M01 TWRF or M03 caa)</td>
+										<td><input type="text" name="Member.Model_Group" value="@member?.Model_Group">(Ex: M01 TWRF or M03 caa)</td>
 									</tr>
 									<tr>
 										<td>Member Reset：</td>
-										<td><input type="text" name="Member.Reset_Model" value="@Model?.Reset_Model">(Ex: cgibin/KillJob.ksh)</td>
+										<td><input type="text" name="Member.Reset_Model" value="@member?.Reset_Model">(Ex: cgibin/KillJob.ksh)</td>
 									</tr>
 									<tr>
 										<td>Member Dtg Adjust：</td>
-										<td><input type="text" name="Member.Dtg_Adjust" value="@Model?.Dtg_Adjust">(Ex: bin/setdtg.sh)</td>
+										<td><input type="text" name="Member.Dtg_Adjust" value="@member?.Dtg_Adjust">(Ex: bin/setdtg.sh)</td>
 									</tr>
 									<tr>
 										<td>Member Fix：</td>
-										<td><input type="text" name="Member.Fix_Failed_Model" value="@Model?.Fix_Failed_Model">(Ex: cgibin/Rescue.ksh)</td>
+										<td><input type="text" name="Member.Fix_Failed_Model" value="@member?.Fix_Failed_Model">(Ex: cgibin/Rescue.ksh)</td>
 									</tr>
 									<tr>
 										<td>Member Submit：</td>
-										<td><input type="text" name="Member.Submit_Model" value="@Model?.Submit_Model">(Ex: cgibin/ReRun.ksh)</td>
+										<td><input type="text" name="Member.Submit_Model" value="@member?.Submit_Model">(Ex: cgibin/ReRun.ksh)</td>
 									</tr>
 									<tr>
 										<td>Normal Prediction Time：</td>
-										<td><input type="text" name="normal_pre_time" value="@Model?.Normal_Pre_Time">(Ex: 300)</td>
+										<td><input type="text" name="normal_pre_time" value="@member?.Normal_Pre_Time">(Ex: 300)</td>
 									</tr>
 									<tr>
 										<td>Typhoon Prediction Time：</td>
-										<td><input type="text" name="Member.Typhoon_Pre_Time" value="@Model?.Typhoon_Pre_Time">(Ex: 300)</td>
+										<td><input type="text" name="Member.Typhoon_Pre_Time" value="@member?.Typhoon_Pre_Time">(Ex: 300)</td>
 									</tr>
 									<tr>
 										<td>About Typhoon：</td>
-										<td><input type="checkbox" id="typhoon_model" name="Member.Typhoon_Model" @(Model?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) ></td>
+										<td><input type="checkbox" id="typhoon_model" name="Member.Typhoon_Model" @(member?.Typhoon_Model == (int)TyphoonModeEnum.One ? "checked" : string.Empty) ></td>
 									</tr>
-									<input type="hidden" name="Member.Fix_Failed_Target_Directory" value="@(Model?.Fix_Failed_Target_Directory)">
+									<input type="hidden" name="Member.Fix_Failed_Target_Directory" value="@(member?.Fix_Failed_Target_Directory)">
 								</table>
 							</td>
 						</tr>
@@ -351,8 +351,8 @@
 						<tr>
 							<td>maintainer Setting</td>
 							<td>
-								<input id="maintainer_status" type="radio" name="maintainer_status" value="0" @(Model?.Maintainer_Status == 0 || Model?.Maintainer_Status == null ? "checked" : string.Empty) >on
-								<input id="maintainer_status" type="radio" name="maintainer_status" value="2" @(Model?.Maintainer_Status == 2 ? "checked" : string.Empty) >maintainer
+								<input id="maintainer_status" type="radio" name="maintainer_status" value="0" @(member?.Maintainer_Status == 0 || member?.Maintainer_Status == null ? "checked" : string.Empty) >on
+								<input id="maintainer_status" type="radio" name="maintainer_status" value="2" @(member?.Maintainer_Status == 2 ? "checked" : string.Empty) >maintainer
 							</td>
 						</tr>
 					</tbody>
@@ -421,8 +421,8 @@
 			}
 
 			function addNewCronGroup(e){
-				let crontabCronGroup_New = $('#crontabCronGroup_New').val();
-				let crontabStartTime_New = $('#crontabStartTime_New').val();
+				let crontabCronGroup_New = htmlEncode($('#crontabCronGroup_New').val());
+				let crontabStartTime_New = htmlEncode($('#crontabStartTime_New').val());
 				if(e.keyCode === 13 
 					&& crontabCronGroup_New
 				    && crontabStartTime_New){

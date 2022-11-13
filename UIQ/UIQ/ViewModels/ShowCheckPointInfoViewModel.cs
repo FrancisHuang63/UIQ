@@ -7,18 +7,18 @@ namespace UIQ.ViewModels
         [JsonPropertyName("avg_time")]
         public IEnumerable<AvgTime> Avg_Time { get; set; }
 
-        public ShowCheckPointInfoViewModel(MemberCheckPoint memberCheckPoint)
+        public ShowCheckPointInfoViewModel(MemberCheckPoint checkPoint)
         {
-            Model_Name = memberCheckPoint.Model_Name;
-            Member_Name = memberCheckPoint.Member_Name;
-            Nickname = memberCheckPoint.Nickname;
-            Account = memberCheckPoint.Account;
-            Batch_Id = memberCheckPoint.Batch_Id;
-            Batch_Name = memberCheckPoint.Batch_Name;
-            Batch_Type = memberCheckPoint.Batch_Type;
-            Batch_Dtg = memberCheckPoint.Batch_Dtg;
-            Shell_Name = memberCheckPoint.Shell_Name;
-            Tolerance_Time = memberCheckPoint.Tolerance_Time;
+            Model_Name = checkPoint.Model_Name;
+            Member_Name = checkPoint.Member_Name;
+            Nickname = checkPoint.Nickname;
+            Account = checkPoint.Account;
+            Batch_Id = checkPoint.Batch_Id;
+            Batch_Name = checkPoint.Batch_Name;
+            Batch_Type = checkPoint.Batch_Type;
+            Batch_Dtg = checkPoint.Batch_Dtg;
+            Shell_Name = checkPoint.Shell_Name;
+            Tolerance_Time = checkPoint.Tolerance_Time;
         }
     }
 

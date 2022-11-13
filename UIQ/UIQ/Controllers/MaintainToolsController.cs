@@ -57,6 +57,8 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> SaveTyphoonData(string dtg, TyphoonSetDataViewModel[] typhoonSetDatas)
         {
+            dtg = _urlEncodeService.HtmlEncode(dtg).Replace("..", "").Replace("/", "");
+
             var datas = new List<string>();
             var dirNameParameters = new[]
             {
@@ -109,7 +111,10 @@ namespace UIQ.Controllers
                 datas.Add($"Write {tmpFilePath}...");
 
                 //檢查同 DTG 檔案是否已存在，存在則變更檔名
-                if (System.IO.File.Exists(realFilePath))
+                var checkDir = new DirectoryInfo(realFilePath);
+                //列舉全部檔案再比對檔名
+                var checkFile = checkDir.EnumerateFiles().FirstOrDefault(m => m.Name == realFileName);
+                if (checkFile != null && checkFile.Exists)
                 {
                     command = $"rsh -l {_typhoonAccount} {_loginIp} mv {realFilePath} {realFilePath}{currentTime}";
                     await _uiqService.RunCommandAsync(command);
@@ -133,13 +138,15 @@ namespace UIQ.Controllers
         public IActionResult Command()
         {
             var model = _uiqService.GetCommandItemsAsync().GetAwaiter().GetResult();
-            return View(model);
+            ViewBag.Command = model;
+            return View();
         }
 
         public IActionResult CommandEdit(int? commandId)
         {
             var model = commandId.HasValue ? _uiqService.GetCommandItemsAsync().GetAwaiter().GetResult().FirstOrDefault(x => x.Command_Id == commandId.Value) : null;
-            return View(model);
+            ViewBag.Command = model;
+            return View();
         }
 
         [HttpPost]
@@ -209,8 +216,8 @@ namespace UIQ.Controllers
             ViewBag.BatchItems = memberId.HasValue ? _uiqService.GetBatchItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Batch> { new Batch() };
             ViewBag.ArchiveItems = memberId.HasValue ? _uiqService.GetArchiveItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Archive> { new Archive() };
             ViewBag.OutputItems = memberId.HasValue ? _uiqService.GetOutputItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Output> { new Output() };
-            var model = memberId.HasValue ? _uiqService.GetMemberItemAsync(memberId.Value).GetAwaiter().GetResult() : null;
-            return View(model);
+            ViewBag.Member = memberId.HasValue ? _uiqService.GetMemberItemAsync(memberId.Value).GetAwaiter().GetResult() : null;
+            return View();
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
@@ -367,14 +374,14 @@ namespace UIQ.Controllers
             data.Cron_Mode = Regex.Replace(cron_mode, "/\\s\\s+/", "").Trim();
 
             var result = await _uiqService.GetShell(data);
-            return Json(new ApiResponse<IEnumerable<CheckPointInfoResultViewModel>>(result));
+            return Json(new ApiResponse<dynamic>(result));
         }
 
         [HttpPost]
         public async Task<JsonResult> GetUnselectedShell(CheckPointInfoViewModel data)
         {
             var result = await _uiqService.GetUnselectedShell(data);
-            return Json(new ApiResponse<IEnumerable<CheckPointInfoResultViewModel>>(result));
+            return Json(new ApiResponse<dynamic>(result));
         }
 
         [HttpPost]
@@ -383,7 +390,7 @@ namespace UIQ.Controllers
             if (memberId.HasValue == false) return Json(new ApiResponse<IEnumerable<ShowCheckPointInfoViewModel>>(new List<ShowCheckPointInfoViewModel>()));
 
             var datas = await _uiqService.GetShowCheckPointInfoDatas(memberId.Value);
-            return Json(new ApiResponse<IEnumerable<ShowCheckPointInfoViewModel>>(datas));
+            return Json(new ApiResponse<dynamic>(datas));
         }
 
         [HttpPost]
@@ -391,7 +398,7 @@ namespace UIQ.Controllers
         {
             if (commandId.HasValue == false) return Json(null);
             var command = await _uiqService.GetCommandItemAsync(commandId.Value);
-            return Json(command);
+            return Json(command?.Command_Example);
         }
 
         [HttpPost]
@@ -400,16 +407,16 @@ namespace UIQ.Controllers
             parameters = _urlEncodeService.HtmlEncode(parameters);
             command = _urlEncodeService.HtmlEncode(command);
 
-            var commandItem = await _uiqService.GetCommandItemAsync(commandId);
+            var cItem = await _uiqService.GetCommandItemAsync(commandId);
 
-            if (commandItem == null) return Json(new ApiResponse<string>("Error"));
+            if (cItem == null) return Json(new ApiResponse<string>("Error"));
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
-                && commandItem.Command_Pwd != passwd)
+                && cItem.Command_Pwd != passwd)
             {
                 return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
             }
 
-            command = string.IsNullOrWhiteSpace(command) ? commandItem.Command_Content : command;
+            command = string.IsNullOrWhiteSpace(command) ? cItem.Command_Content : command;
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
             //command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);

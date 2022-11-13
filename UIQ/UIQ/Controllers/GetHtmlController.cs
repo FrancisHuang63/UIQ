@@ -131,10 +131,11 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> ResetModelShow(string modelName, string memberName, string nickname)
         {
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var account = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
-                                                      && x.Nickname == nickname)?.Account;
+                                                      && x.Nickname == nickname);
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
             var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -s ";
             var data = await _uiqService.RunCommandAsync(command);
             var showDatas = data.Split("[Job Statistical Information]");
@@ -166,7 +167,7 @@ namespace UIQ.Controllers
 
             var response = new ApiResponse<dynamic>(new
             {
-                Account = account,
+                Account = secureAccount.GetSecureStringToString(),
                 ShowDatas = showDatas,
                 JobDatas = jobDatas,
             });
@@ -178,13 +179,14 @@ namespace UIQ.Controllers
         {
             var result = string.Empty;
             var command = string.Empty;
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var account = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
-                                                      && x.Nickname == nickname)?.Account;
-            var member = await _uiqService.GetMemberItemAsync(modelName, memberName, nickname);
+                                                      && x.Nickname == nickname);
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
+            var mbr = await _uiqService.GetMemberItemAsync(modelName, memberName, nickname);
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
-            var resetModel = member?.Reset_Model;
+            var resetModel = mbr?.Reset_Model;
             var message = "Cancel running job function is not available for this member.";
             if (string.IsNullOrWhiteSpace(resetModel))
             {
@@ -193,10 +195,11 @@ namespace UIQ.Controllers
             }
             else
             {
-                command = $"rsh -l {account} {_loginIp} {fullPath}{resetModel} {fullPath}";
-                if (account != $"{_prefix}weps")
+                var acnt = secureAccount.GetSecureStringToString();
+                command = $"rsh -l {acnt} {_loginIp} {fullPath}{resetModel} {fullPath}";
+                if (acnt != $"{_prefix}weps")
                 {
-                    command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {account} {fullPath}{resetModel} {jobId} {fullPath}";
+                    command = $"rsh -l {acnt} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {acnt} {fullPath}{resetModel} {jobId} {fullPath}";
                     result += await _uiqService.RunCommandAsync(command);
                 }
             }
@@ -221,12 +224,10 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> DtgShow(string modelName, string memberName, string nickname)
         {
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = configData?.Account;
-            var dtgValue = configData?.Member_Dtg_Value;
+            var dtgValue = modelLogFile?.Member_Dtg_Value;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var command = $"cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
@@ -240,12 +241,12 @@ namespace UIQ.Controllers
         {
             var datas = new List<string>();
             dtg = dtg ?? string.Empty;
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = configData?.Account;
-            var dtgAdjust = configData?.Dtg_Adjust;
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
+            var dtgAdjust = modelLogFile?.Dtg_Adjust;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
 
             var message = "DTG adjust function is not available for this member";
@@ -255,7 +256,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {account} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                var command = $"rsh -l {secureAccount.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAccount.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
                 datas.Add(command);
                 var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
                 foreach (var item in (result ?? string.Empty).Split("\n"))
@@ -276,11 +277,6 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> LidShow(string modelName, string memberName, string nickname)
         {
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
-                                                      && x.Nickname == nickname);
-            var account = configData?.Account;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var command = $"cat {fullPath}/etc/Lid";
             var lid = await _uiqService.RunCommandAsync(command);
@@ -293,14 +289,14 @@ namespace UIQ.Controllers
         public async Task<JsonResult> LidResult(string modelName, string memberName, string nickname, string lid)
         {
             lid = lid ?? string.Empty;
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = configData?.Account;
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
-            var command = $"rsh -l {account} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {account} {fullPath} {lid}";
+            var command = $"rsh -l {secureAccount.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {secureAccount.GetSecureStringToString()} {fullPath} {lid}";
             var result = await _uiqService.RunCommandAsync(command);
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
@@ -313,11 +309,11 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> SubmitShow(string modelName, string memberName, string nickname)
         {
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = configData?.Account;
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
@@ -330,7 +326,7 @@ namespace UIQ.Controllers
             {
                 var item = batchs[i];
                 var dataList_R = string.Empty;
-                var tmpCommand = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{account}/{modelName}/{memberName}/etc/{item}*";
+                var tmpCommand = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{secureAccount.GetSecureStringToString()}/{modelName}/{memberName}/etc/{item}*";
                 var output = await _uiqService.RunCommandAsync(tmpCommand);
                 if (!string.IsNullOrEmpty(output))
                 {
@@ -392,12 +388,12 @@ namespace UIQ.Controllers
         public async Task<JsonResult> SubmitResult(string modelName, string memberName, string nickname, string dtg, string batch)
         {
             var datas = new List<string>();
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = configData?.Account;
-            var submitModel = configData?.Submit_Model;
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
+            var submitModel = modelLogFile?.Submit_Model;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
 
             var message = "submit model function is not avaliable for this member.\r\n";
@@ -407,7 +403,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {account} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {account} {fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
+                var command = $"rsh -l {secureAccount.GetSecureStringToString()} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {secureAccount.GetSecureStringToString()} {fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
                 message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Rerun the {modelName} {memberName} {nickname} with {dtg} in {batch} run \r\n";
                 datas.Add(message);
                 datas.Add(await _uiqService.RunCommandAsync(command));
@@ -440,10 +436,11 @@ namespace UIQ.Controllers
         {
             var displayDatas = new List<string>();
             var tableDatas = new List<string>();
-            var configs = _uiqService.GetArchiveViewModels();
-            var account = configs.FirstOrDefault(x => x.Model_Name == modelName
+            var configs = _uiqService.GetArchiveViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                 && x.Member_Name == memberName
-                                                && x.Nickname == nickname)?.Account;
+                                                && x.Nickname == nickname);
+            var account = configs?.Account;
+            var secureAccount = account.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var yymmdd = (await _uiqService.RunCommandAsync($"echo {dtg} | cut -c-6")).Trim();
             var yy = (await _uiqService.RunCommandAsync($"echo {dtg} | cut -c-2")).Trim();
@@ -462,7 +459,7 @@ namespace UIQ.Controllers
                     "---------------------------------------------",
                     "Table name : archive",
                     "Column name: target_directory",
-                    $"member_id  : {account}",
+                    $"member_id  : {secureAccount.GetSecureStringToString()}",
                     $"data_id    : {dataId}",
                 });
             }
@@ -518,10 +515,6 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> FixShowForEnquire(string modelName, string memberName, string nickname, string dtg)
         {
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
-                                                      && x.Nickname == nickname);
             var memberId = (await _uiqService.GetMemberItemAsync(modelName, memberName, nickname))?.Member_Id;
             var fullPath = (await _uiqService.GetModelMemberPathAsync(modelName, memberName, nickname)).FirstOrDefault() ?? string.Empty;
             fullPath = fullPath.Replace("{dtg}", dtg);
@@ -546,12 +539,12 @@ namespace UIQ.Controllers
             var datas = new List<string>();
             var message = string.Empty;
             var command = string.Empty;
-            var configList = _uiqService.GetModelLogFileViewModels();
-            var configData = configList.FirstOrDefault(x => x.Model_Name == modelName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
                                                       && x.Member_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = configData?.Account;
-            var fixFailedModel = configData?.Fix_Failed_Model;
+            var account = modelLogFile?.Account;
+            var secureAccount = account.GetGetSecureString();
+            var fixFailedModel = modelLogFile?.Fix_Failed_Model;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
 
             if (fixFailedModel == null)
@@ -561,7 +554,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/run_Fixfailed.ksh {account} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
+                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/run_Fixfailed.ksh {secureAccount.GetSecureStringToString()} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
                 if (string.IsNullOrWhiteSpace(parameter) == false)
                     command += $@" '""\""{parameter}\""""'";
 

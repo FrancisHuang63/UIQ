@@ -167,9 +167,6 @@
                     {
                         var trClass = (item.Status ?? string.Empty).ToUpper() == "FAIL" ? "failed" : string.Empty;
                         var upperStatus = (item.Status ?? string.Empty).ToUpper();
-                        var baseUrl = httpContextAccessor.HttpContext.Request.Scheme + "://" + httpContextAccessor.HttpContext.Request.Host;
-                        var logViewPath = baseUrl + Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account, isGetLastLine = true });
-                        var logViewData = encodeService.HtmlEncode(new System.Net.WebClient().DownloadString(logViewPath));
 
                         <tr class="@(trClass)">
                             <td class="left">
@@ -187,7 +184,7 @@
                             <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
                             <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
                             <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({item.Sms_Time.ToString("HH:mm")} -> {item.Pre_End.ToString("HH:mm")})")</td>
-                            <td class="center">@Html.Raw(logViewData)</td>
+                            <td class="center logData" data-model="@item.Model_Name" data-member="@item.Member_Name" data-account="@item.Account"></td>
                             <td class="@item.TdClass">@item.Comment</td>
                             <td>@item.NextRun</td>
                         </tr>
@@ -206,4 +203,46 @@
             </object>
         }
     </body>
+
+    <script>
+        $(function(){
+            $('td.logData').each(function(){
+                let tdLogData = $(this);
+                let modelName = tdLogData.data('model');
+                let memberName = tdLogData.data('member');
+                let account = tdLogData.data('account');
+
+                $.ajax({
+                    url: '@(Url.Action(nameof(LogviewController.GetLogData), "Logview"))',
+                    type: 'POST',
+                    data: { modelName: modelName, memberName: memberName, account: account, isGetLastLine: true },
+                    success: function(response){
+                        if(response.success){
+                            if(response.data.length > 0){
+                                let logData = response.data[0];
+                                let span = $('<span/>');
+
+                                if(logData.match(/^[A-Za-z0-9_\s]+/) || logData.includes('Finish')){
+                                    span.addClass('c4');
+                                    span.text('Finish');
+                                }
+                                else if(logData.includes('fail') || logData.includes('cancel')){
+                                    span.addClass('c3');
+                                    span.text(logData);
+                                }
+                                else{
+                                    span.text(logData);
+                                }
+
+                                tdLogData.append(span);
+                            }
+                        }
+                        else{
+                            alert('Error : ' + htmlEncode(response.message));
+                        }
+                    }
+                });
+            });
+        })
+    </script>
 </html>

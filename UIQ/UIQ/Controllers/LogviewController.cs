@@ -16,8 +16,19 @@ namespace UIQ.Controllers
 			_encodeService = encodeService;
 		}
 
-		public async Task<ContentResult> Index(string modelName, string memberName, string account, bool isGetLastLine = false)
+		public async Task<IActionResult> Index(string modelName, string memberName, string account)
 		{
+			var secureAccount = account.GetGetSecureString();
+			ViewBag.ModelName = _encodeService.HtmlEncode(modelName);
+			ViewBag.MemberName = _encodeService.HtmlEncode(memberName);
+			ViewBag.Account = _encodeService.HtmlEncode(secureAccount.GetSecureStringToString());
+			
+			return View();
+		}
+
+		[HttpPost]
+		public async Task<JsonResult> GetLogData(string modelName, string memberName, string account, bool isGetLastLine = false)
+        {
 			modelName = _encodeService.HtmlEncode(modelName);
 			memberName = _encodeService.HtmlEncode(memberName);
 			account = _encodeService.HtmlEncode(account);
@@ -27,40 +38,10 @@ namespace UIQ.Controllers
 			var logPath = Path.Combine(_readLogFileService.RootPath, "log", modelName, account, $"{memberName}.log");
 			var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
-			if (logContent == null) return new ContentResult
-			{
-				ContentType = "text/html",
-				Content = $"There is no log file of {modelName}_{memberName}.",
-			};
-			var returnContent = isGetLastLine
-				? string.Empty
-				: $@"<link rel=stylesheet type=""text/css"" href=""{baseUrl}/css/fjstyle.css"">
-									<pre>";
+			if (logContent == null) return Json(new ApiResponse<IEnumerable<string>>(data: new string[] { }));
 
 			var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');
-			foreach (var logLineData in logLineDatas)
-			{
-				if (System.Text.RegularExpressions.Regex.IsMatch(logLineData, @"^[A-Za-z0-9_\s]+$")
-					|| logLineData.Contains("Finish"))
-				{
-					returnContent += isGetLastLine
-						? "Finish"
-						: $@"<span class=""c4"">{logLineData}</span>" + "\n";
-				}
-				else if (logLineData.Contains("fail") || logLineData.Contains("cancel"))
-				{
-					returnContent += $@"<span class=""c3"">{logLineData}</span>" + "\n";
-				}
-				else returnContent += logLineData + "\n";
-			}
-
-			returnContent += isGetLastLine ? string.Empty : "</pre>";
-
-			return new ContentResult
-			{
-				ContentType = "text/html",
-				Content = returnContent
-			};
-		}
+			return Json(new ApiResponse<IEnumerable<string>>(data: logLineDatas));
+		} 
 	}
 }

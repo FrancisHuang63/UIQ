@@ -1,10 +1,10 @@
 ﻿@using System.Security.Claims
 @using UIQ.Controllers
 @using UIQ.Enums
-@model IEnumerable<Command>
 @inject IHttpContextAccessor httpContextAccessor
 @{
     Layout = null;
+    var command = (IEnumerable<Command>)ViewBag.Command;
     var currentUser = httpContextAccessor.HttpContext.User;
     var currentUserGroup = currentUser?.Identities.FirstOrDefault().Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role).Value;
 }
@@ -58,7 +58,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in command)
             {
                 var isUserAdmGroup = currentUser.IsInRole(GroupNameEnum.ADM.ToString());
 

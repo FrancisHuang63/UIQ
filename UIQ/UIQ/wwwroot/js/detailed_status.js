@@ -2,7 +2,7 @@ $(document).ready(function () {
     var status_table_height = $('#top').height();
     $('#main').css('padding-top', status_table_height);
 
-    var target_member = $('#target_member').val();
+    var target_member = htmlEncode($('#target_member')[0].value);
     if (target_member) {
         var target_tr = '#tablesorter-demo tr[id="' + target_member + '"]';
 
