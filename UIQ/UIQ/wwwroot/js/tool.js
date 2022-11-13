@@ -177,6 +177,8 @@ function build_delay_dialog(delay_data, delete_url) {
                 "buttons": {
                     "OK": function () {
                         delete_delay_data(value['id'], delete_url);
+                        document.getElementById('alert_audio').pause();
+                        document.getElementById('alert_audio').currentTime = 0;
                         $(this).dialog("close");
                     }
                 }
@@ -227,7 +229,7 @@ function show_reject_log_dialog(show_url, delete_url) {
             if (response.success) {
                 if (response.data !== "status : normal") {
                     build_reject_dialog(response.data, delete_url);
-                    play_alert_audio();
+                    play_reject_audio();
                 }
             }
             else {
@@ -251,6 +253,8 @@ function build_reject_dialog(data, delete_url) {
                 "buttons": {
                     "OK": function () {
                         delete_reject_dialog(delete_url);
+                        document.getElementById('reject_audio').pause();
+                        document.getElementById('reject_audio').currentTime = 0;
                         $(this).dialog("close");
                     }
                 }
@@ -281,13 +285,23 @@ function delete_reject_dialog(delete_url) {
 }
 
 function play_alert_audio() {
-    if($('audio #reject_alert').length !== 0) {
+    if ($('audio #alert_audio').length !== 0) {
         return;
     }
 
-    var html = "<audio id='reject_alert' src='/media/alert2.mp4' preload='auto'></audio>";
+    var html = "<audio id='alert_audio' src='/media/delaymedia.mp4' preload='auto'></audio>";
     $("body").append(html);
-    document.getElementById('reject_alert').play();
+    document.getElementById('alert_audio').play();
+}
+
+function play_reject_audio() {
+    if ($('audio #reject_audio').length !== 0) {
+        return;
+    }
+
+    var html = "<audio id='reject_audio' src='/media/alert2.mp4' preload='auto'></audio>";
+    $("body").append(html);
+    document.getElementById('reject_audio').play();
 }
 
 function padLeft(str, len, paddingStr) {
