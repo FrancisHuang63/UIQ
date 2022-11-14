@@ -1,5 +1,4 @@
 //Ajax Loading display
-
 $(document).ready(function () {
     $("#loading").ajaxStart(function () {
         $(this).show();
@@ -12,12 +11,11 @@ $(document).ready(function () {
 });
 
 function htmlEncode(str) {
-    return $('<div/>').text(str).html();
-    //let div = document.createElement("div");
-    //let text = document.createTextNode(str);
-    //div.appendChild(text);
-
-    //return div.innerHTML;
+    if (str.length == 0) return '';
+    _str = str.replace(/&/g, '&');
+    _str = _str.replace(/g/, '>');
+ 
+    return _str;
 }
 
 function htmlDecode(str) {
@@ -50,13 +48,14 @@ function sendAJAXRequest(req_type, uri, callBackFunction) {
     var keyw = $("#keyw").val();
     var parameter = $("#parameter").val();
 
-    target_url = uri; 
-    
+    target_url = uri;
+
     $.ajax({
         url: target_url,
         type: req_type,
         dataType: 'json',
-        data: {ModelName: model,
+        data: {
+            ModelName: model,
             MemberName: member,
             Dtg: dtg,
             Lid: lid,
@@ -194,7 +193,7 @@ function build_delay_dialog(delay_data, delete_url) {
                 },
             });
 
-        if(value['run_type'] === 'Default') {
+        if (value['run_type'] === 'Default') {
             value['run_type'] = '';
         }
 
@@ -228,7 +227,8 @@ function show_reject_log_dialog(show_url, delete_url) {
         success: function (response) {
             if (response.success) {
                 if (response.data !== "status : normal") {
-                    build_reject_dialog(response.data, delete_url);
+                    let data = htmlEncode(response.data);
+                    build_reject_dialog(data, delete_url);
                     play_reject_audio();
                 }
             }
@@ -241,34 +241,34 @@ function show_reject_log_dialog(show_url, delete_url) {
 
 function build_reject_dialog(data, delete_url) {
     $("<div id='error_message'></div>")
-            .dialog({
-                "maxHeight": "300",
-                "maxWidth": "400",
-                "minWidth": "200",
-                "position": {
-                    at: "center center-10%",
-                    of: window
-                },
-                "title": "Model Error Message",
-                "buttons": {
-                    "OK": function () {
-                        delete_reject_dialog(delete_url);
-                        document.getElementById('reject_audio').pause();
-                        document.getElementById('reject_audio').currentTime = 0;
-                        $(this).dialog("close");
-                    }
+        .dialog({
+            "maxHeight": "300",
+            "maxWidth": "400",
+            "minWidth": "200",
+            "position": {
+                at: "center center-10%",
+                of: window
+            },
+            "title": "Model Error Message",
+            "buttons": {
+                "OK": function () {
+                    delete_reject_dialog(delete_url);
+                    document.getElementById('reject_audio').pause();
+                    document.getElementById('reject_audio').currentTime = 0;
+                    $(this).dialog("close");
                 }
-            })
-            .dialogExtend({
-                "closable": false,
-                "minimizable": true,
-                "collapsable": true,
-                "dblclick": "collapse",
-                "titlebar": "transparent",
-                "icons": {
-                    "maximize": "ui-icon-circle-plus"
-                }
-            });
+            }
+        })
+        .dialogExtend({
+            "closable": false,
+            "minimizable": true,
+            "collapsable": true,
+            "dblclick": "collapse",
+            "titlebar": "transparent",
+            "icons": {
+                "maximize": "ui-icon-circle-plus"
+            }
+        });
     data = htmlEncode(data);
     data = data.replace(/\n/g, "<br>");
     $('#error_message').html(data);

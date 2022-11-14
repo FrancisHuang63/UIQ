@@ -33,7 +33,11 @@ namespace UIQ.Services
 
             var filePath = GetUploadPath(file.FileName);
 
-            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            var checkDirPath = Path.GetDirectoryName(filePath);
+            var checkFileName = Path.GetFileName(filePath);
+            var checkDir = new DirectoryInfo(checkDirPath);
+
+            using (var fileStream = new FileStream(Path.Combine(checkDirPath, file.Name), FileMode.Create, FileAccess.Write))
             {
                 await file.CopyToAsync(fileStream);
             }

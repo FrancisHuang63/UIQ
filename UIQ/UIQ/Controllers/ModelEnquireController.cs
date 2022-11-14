@@ -88,8 +88,8 @@ namespace UIQ.Controllers
 
             if (string.IsNullOrWhiteSpace(modelName)) return new JsonResult(new ApiResponse<IEnumerable<string>>(new string[] { }));
 
-            var datas = _uiqService.GetModelLogFileViewModels().Where(x => x.Model_Name == modelName);
-            var memberNames = datas.Select(x => x.Member_Name).Distinct().ToList();
+            var datas = _uiqService.GetModelLogFileViewModels().Where(x => x.Md_Name == modelName);
+            var memberNames = datas.Select(x => x.Mb_Name).Distinct().ToList();
             return new JsonResult(new ApiResponse<IEnumerable<string>>(memberNames) { Success = true });
         }
 
@@ -101,7 +101,7 @@ namespace UIQ.Controllers
 
             if (string.IsNullOrWhiteSpace(modelName) || string.IsNullOrWhiteSpace(memberName)) return new JsonResult(new ApiResponse<IEnumerable<string>>(new string[] { }));
 
-            var datas = _uiqService.GetModelLogFileViewModels().Where(x => x.Model_Name == modelName && x.Member_Name == memberName);
+            var datas = _uiqService.GetModelLogFileViewModels().Where(x => x.Md_Name == modelName && x.Mb_Name == memberName);
             var nickNames = datas.Select(x => x.Nickname).Distinct().ToList();
             return new JsonResult(new ApiResponse<IEnumerable<string>>(nickNames) { Success = true });
         }

@@ -150,7 +150,8 @@ function showCommandInfo(exe_url, time_url, ajax_data){
                 let div = $('<div/>');
                 div.text(`${htmlEncode(response.data.result)}`);
                 div.append($('</br>'));
-                div.append(`Start Time: ${htmlEncode(response.data.startTime)}`);
+                let startTime = htmlEncode(response.data.startTime);
+                div.append(`Start Time: ${startTime}`);
                 div.append($('<br/>'));
                 div.append('Estimated Completion Time: ');
                 let mark = $('<mark/>');

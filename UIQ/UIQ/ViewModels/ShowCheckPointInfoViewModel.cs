@@ -9,10 +9,10 @@ namespace UIQ.ViewModels
 
         public ShowCheckPointInfoViewModel(MemberCheckPoint checkPoint)
         {
-            Model_Name = checkPoint.Model_Name;
-            Member_Name = checkPoint.Member_Name;
+            Md_Name = checkPoint.Md_Name;
+            Mb_Name = checkPoint.Mb_Name;
             Nickname = checkPoint.Nickname;
-            Account = checkPoint.Account;
+            Acnt = checkPoint.Acnt;
             Batch_Id = checkPoint.Batch_Id;
             Batch_Name = checkPoint.Batch_Name;
             Batch_Type = checkPoint.Batch_Type;
@@ -24,17 +24,17 @@ namespace UIQ.ViewModels
 
     public class MemberCheckPoint
     {
-        [JsonPropertyName("model_name")]
-        public string Model_Name { get; set; }
+        [JsonPropertyName("md_name")]
+        public string Md_Name { get; set; }
 
-        [JsonPropertyName("member_name")]
-        public string Member_Name { get; set; }
+        [JsonPropertyName("mb_name")]
+        public string Mb_Name { get; set; }
 
         [JsonPropertyName("nickname")]
         public string Nickname { get; set; }
 
-        [JsonPropertyName("account")]
-        public string Account { get; set; }
+        [JsonPropertyName("acnt")]
+        public string Acnt { get; set; }
 
         [JsonPropertyName("batch_id")]
         public int Batch_Id { get; set; }

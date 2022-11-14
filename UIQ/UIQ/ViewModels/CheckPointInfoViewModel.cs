@@ -4,17 +4,17 @@ namespace UIQ.ViewModels
 {
     public class CheckPointInfoViewModel
     {
-        [JsonPropertyName("model_id")]
-        public int Model_Id { get; set; }
+        [JsonPropertyName("md_id")]
+        public int Md_Id { get; set; }
 
-        [JsonPropertyName("model_name")]
-        public string Model_Name { get; set; }
+        [JsonPropertyName("md_name")]
+        public string Md_Name { get; set; }
 
-        [JsonPropertyName("member_name")]
-        public string Member_Name { get; set; }
+        [JsonPropertyName("mb_name")]
+        public string Mb_Name { get; set; }
 
-        [JsonPropertyName("member_account")]
-        public string Member_Account { get; set; }
+        [JsonPropertyName("mb_acnt")]
+        public string Mb_Acnt { get; set; }
 
         [JsonPropertyName("batch_name")]
         public string Batch_Name { get; set; }
@@ -28,7 +28,7 @@ namespace UIQ.ViewModels
         [JsonPropertyName("cron_mode")]
         public string Cron_Mode { get; set; }
 
-        [JsonPropertyName("shell_name")]
-        public string Shell_Name { get; set; }
+        [JsonPropertyName("sh_name")]
+        public string Sh_Name { get; set; }
     }    
 }

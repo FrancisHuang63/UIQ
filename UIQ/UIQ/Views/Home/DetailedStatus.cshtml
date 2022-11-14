@@ -159,7 +159,7 @@
                 $.ajax({
                     url: '@(Url.Action(nameof(LogviewController.GetLogData), "Logview"))',
                     type: 'POST',
-                    data: { modelName: modelName, memberName: memberName, account: account, isGetLastLine: true },
+                    data: { modelName: modelName, memberName: memberName, acnt: account, isGetLastLine: true },
                     success: function(response){
                         if(response.success){
                             if(response.data.length > 0){

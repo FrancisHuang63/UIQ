@@ -131,10 +131,10 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> ResetModelShow(string modelName, string memberName, string nickname)
         {
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -s ";
             var data = await _uiqService.RunCommandAsync(command);
@@ -179,14 +179,13 @@ namespace UIQ.Controllers
         {
             var result = string.Empty;
             var command = string.Empty;
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
-            var mbr = await _uiqService.GetMemberItemAsync(modelName, memberName, nickname);
+            var resetModel = await _uiqService.GetMemberResetModelAsync(modelName, memberName, nickname);
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
-            var resetModel = mbr?.Reset_Model;
             var message = "Cancel running job function is not available for this member.";
             if (string.IsNullOrWhiteSpace(resetModel))
             {
@@ -224,8 +223,8 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> DtgShow(string modelName, string memberName, string nickname)
         {
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
             var dtgValue = modelLogFile?.Member_Dtg_Value;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
@@ -241,10 +240,10 @@ namespace UIQ.Controllers
         {
             var datas = new List<string>();
             dtg = dtg ?? string.Empty;
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var dtgAdjust = modelLogFile?.Dtg_Adjust;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
@@ -289,10 +288,10 @@ namespace UIQ.Controllers
         public async Task<JsonResult> LidResult(string modelName, string memberName, string nickname, string lid)
         {
             lid = lid ?? string.Empty;
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
@@ -309,10 +308,10 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> SubmitShow(string modelName, string memberName, string nickname)
         {
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
@@ -388,10 +387,10 @@ namespace UIQ.Controllers
         public async Task<JsonResult> SubmitResult(string modelName, string memberName, string nickname, string dtg, string batch)
         {
             var datas = new List<string>();
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var submitModel = modelLogFile?.Submit_Model;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
@@ -436,10 +435,10 @@ namespace UIQ.Controllers
         {
             var displayDatas = new List<string>();
             var tableDatas = new List<string>();
-            var configs = _uiqService.GetArchiveViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                && x.Member_Name == memberName
+            var configs = _uiqService.GetArchiveViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                && x.Mb_Name == memberName
                                                 && x.Nickname == nickname);
-            var account = configs?.Account;
+            var account = configs?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
             var yymmdd = (await _uiqService.RunCommandAsync($"echo {dtg} | cut -c-6")).Trim();
@@ -487,8 +486,8 @@ namespace UIQ.Controllers
         public async Task<JsonResult> ArchiveResult(string modelName, string memberName, string nickname, string method, string dtg, string node)
         {
             var configs = _uiqService.GetArchiveViewModels();
-            var data = configs.FirstOrDefault(x => x.Model_Name == modelName
-                                && x.Member_Name == memberName
+            var data = configs.FirstOrDefault(x => x.Md_Name == modelName
+                                && x.Mb_Name == memberName
                                 && x.Nickname == nickname);
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";
             var shell = await _uiqService.GetArchiveExecuteShellAsync(modelName, memberName, nickname, method);
@@ -539,10 +538,10 @@ namespace UIQ.Controllers
             var datas = new List<string>();
             var message = string.Empty;
             var command = string.Empty;
-            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Model_Name == modelName
-                                                      && x.Member_Name == memberName
+            var modelLogFile = _uiqService.GetModelLogFileViewModels().FirstOrDefault(x => x.Md_Name == modelName
+                                                      && x.Mb_Name == memberName
                                                       && x.Nickname == nickname);
-            var account = modelLogFile?.Account;
+            var account = modelLogFile?.Acnt;
             var secureAccount = account.GetGetSecureString();
             var fixFailedModel = modelLogFile?.Fix_Failed_Model;
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname) + "/";

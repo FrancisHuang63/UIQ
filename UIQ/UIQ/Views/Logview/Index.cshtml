@@ -18,7 +18,7 @@
         $.ajax({
             url: '@(Url.Action(nameof(LogviewController.GetLogData)))',
             type: 'POST',
-            data: { 'modelName': '@(modelName)', memberName: '@(memberName)', account: '@(account)' },
+            data: { 'modelName': '@(modelName)', memberName: '@(memberName)', acnt: '@(account)' },
             success: function(response){
                 if(response.success){
                     setLogData(response);

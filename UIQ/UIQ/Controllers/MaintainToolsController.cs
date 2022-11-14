@@ -397,8 +397,8 @@ namespace UIQ.Controllers
         public async Task<JsonResult> GetCommandInfo(int? commandId)
         {
             if (commandId.HasValue == false) return Json(null);
-            var command = await _uiqService.GetCommandItemAsync(commandId.Value);
-            return Json(command?.Command_Example);
+            var example = await _uiqService.GetCommandExampleAsync(commandId.Value);
+            return Json(example);
         }
 
         [HttpPost]
@@ -411,12 +411,12 @@ namespace UIQ.Controllers
 
             if (cItem == null) return Json(new ApiResponse<string>("Error"));
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
-                && cItem.Command_Pwd != passwd)
+                && cItem.C_Pwd != passwd)
             {
                 return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
             }
 
-            command = string.IsNullOrWhiteSpace(command) ? cItem.Command_Content : command;
+            command = string.IsNullOrWhiteSpace(command) ? cItem.C_Content : command;
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
             //command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
             var result = await _uiqService.RunCommandAsync(command);
@@ -436,7 +436,7 @@ namespace UIQ.Controllers
             if (commandItem == null) return Json(new ApiResponse<string>("Error"));
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
-                && passwd != commandItem.Command_Pwd)
+                && passwd != commandItem.C_Pwd)
             {
                 return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
             }

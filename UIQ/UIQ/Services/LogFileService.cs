@@ -36,7 +36,7 @@ namespace UIQ.Services
             var checkFile = checkDir.EnumerateFiles().FirstOrDefault(m => m.Name == checkFileName);
             if (checkFile == null || checkFile.Exists == false) return null;
 
-            var logContnet = await System.IO.File.ReadAllTextAsync(filePath);
+            var logContnet = await System.IO.File.ReadAllTextAsync(Path.Combine(checkDirPath, checkFile.Name));
             return logContnet;
         }
 

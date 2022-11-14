@@ -27,15 +27,15 @@ namespace UIQ.Controllers
 		}
 
 		[HttpPost]
-		public async Task<JsonResult> GetLogData(string modelName, string memberName, string account, bool isGetLastLine = false)
+		public async Task<JsonResult> GetLogData(string modelName, string memberName, string acnt, bool isGetLastLine = false)
         {
 			modelName = _encodeService.HtmlEncode(modelName);
 			memberName = _encodeService.HtmlEncode(memberName);
-			account = _encodeService.HtmlEncode(account);
+			acnt = _encodeService.HtmlEncode(acnt);
 
 			var baseUrl = _httpContextAccessor.HttpContext.Request.Scheme + "://" + _httpContextAccessor.HttpContext.Request.Host;
-			var logUrl = $"{baseUrl}/log/{modelName}/{account}/{memberName}.log";
-			var logPath = Path.Combine(_readLogFileService.RootPath, "log", modelName, account, $"{memberName}.log");
+			var logUrl = $"{baseUrl}/log/{modelName}/{acnt}/{memberName}.log";
+			var logPath = Path.Combine(_readLogFileService.RootPath, "log", modelName, acnt, $"{memberName}.log");
 			var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
 			if (logContent == null) return Json(new ApiResponse<IEnumerable<string>>(data: new string[] { }));

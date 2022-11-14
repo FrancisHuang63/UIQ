@@ -39,7 +39,9 @@ namespace UIQ.Services.Interfaces
 
         public Task<IEnumerable<Command>> GetCommandItemsAsync();
 
-        public Task<Command> GetCommandItemAsync(int commandId);
+        public Task<CommandViewModel> GetCommandItemAsync(int commandId);
+
+        public Task<string> GetCommandExampleAsync(int commandId);
 
         public Task<IEnumerable<MenuViewModel>> GetMenuItemsWithPermissonAsync();
 
@@ -66,6 +68,8 @@ namespace UIQ.Services.Interfaces
         public Task<Member> GetMemberItemAsync(int memberId);
 
         public Task<Member> GetMemberItemAsync(string modelName, string memberName, string nickname);
+
+        public Task<string> GetMemberResetModelAsync(string modelName, string memberName, string nickname);
 
         public Task<int> DeleteDelayDataAsync(int id);
 

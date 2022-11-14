@@ -118,11 +118,11 @@ namespace UIQ.Services
 
         public IEnumerable<ModelLogFileViewModel> GetModelLogFileViewModels()
         {
-            var sql = @"SELECT `model`.`model_name`,
-                        `member`.`model_id`,
-                        `member`.`member_name`,
+            var sql = @"SELECT `model`.`model_name` AS `md_name`,
+                        `member`.`model_id` AS `md_id`,
+                        `member`.`member_name` AS `mb_name`,
                         `member`.`nickname`,
-                        `member`.`account`,
+                        `member`.`account` AS `acnt`,
                         `member`.`member_dtg_value`,
                         `member`.`dtg_adjust`,
                         `member`.`submit_model`,
@@ -136,7 +136,7 @@ namespace UIQ.Services
 
         public async Task<string> GetFullPathAsync(string modelName, string memberName, string nickname)
         {
-            var sql = @"SELECT `member`.`account`, `member`.`member_path`
+            var sql = @"SELECT `member`.`account` AS `acnt`, `member`.`member_path`
                         FROM `member`
                         LEFT JOIN `model` ON `member`.`model_id` = `model`.`model_id`
                         WHERE `model`.`model_name` = @modelName
@@ -148,7 +148,7 @@ namespace UIQ.Services
             var result = datas.FirstOrDefault();
             if (result == null) return string.Empty;
 
-            var secureAccount = result.Account.GetGetSecureString();
+            var secureAccount = result.Acnt.GetGetSecureString();
             return $"/{_SystemName}/{secureAccount.GetSecureStringToString()}{result.Member_Path}/{modelName}/{memberName}";
         }
 
@@ -294,7 +294,7 @@ namespace UIQ.Services
         public IEnumerable<ArchiveViewModel> GetArchiveViewModels()
         {
             var sql = @"SELECT
-                            `model`.`model_id`, `model`.`model_name`, `member`.`member_name`, `member`.`nickname`, `member`.`account`
+                            `model`.`model_id` AS `md_id`, `model`.`model_name` AS `md_name`, `member`.`member_name` AS `mb_name`, `member`.`nickname`, `member`.`account` AS `acnt`
                         FROM (SELECT `archive`.`member_id`
                               FROM `archive`
                               GROUP BY `archive`.`member_id`
@@ -365,10 +365,25 @@ namespace UIQ.Services
             return await _dataBaseNcsUiService.DeleteAsync("command", new { Command_Id = commandId }) > 0;
         }
 
-        public async Task<Command> GetCommandItemAsync(int commandId)
+        public async Task<CommandViewModel> GetCommandItemAsync(int commandId)
         {
-            var sql = @"SELECT * FROM `command` WHERE `command_id` = @CommandId";
-            return (await _dataBaseNcsUiService.QueryAsync<Command>(sql, new { CommandId = commandId })).FirstOrDefault();
+            var sql = @"SELECT `command_id` AS `c_id`
+                              ,`command_name` AS `c_name`
+                              ,`command_desc` AS `c_desc`
+                              ,`command_content` AS `c_content`
+                              ,`command_pwd` AS `c_pwd`
+                              ,`execution_time`
+                              ,`command_example` AS `c_example`
+                              ,`command_id` AS `c_id`
+                              ,`command_id` AS `c_id`
+                        FROM `command` WHERE `command_id` = @CommandId";
+            return (await _dataBaseNcsUiService.QueryAsync<CommandViewModel>(sql, new { CommandId = commandId })).FirstOrDefault();
+        }
+
+        public async Task<string> GetCommandExampleAsync(int commandId)
+        {
+            var sql = @"SELECT `command_example` FROM `command` WHERE `command_id` = @CommandId";
+            return (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { CommandId = commandId })).FirstOrDefault();
         }
 
         public async Task<IEnumerable<MenuViewModel>> GetMenuItemsWithPermissonAsync()
@@ -473,6 +488,18 @@ namespace UIQ.Services
             return result.FirstOrDefault();
         }
 
+        public async Task<string> GetMemberResetModelAsync(string modelName, string memberName, string nickname)
+        {
+            var sql = @"SELECT mb.`reset_model`
+                        FROM `member` mb
+                        LEFT JOIN `model` md ON md.`model_id` = mb.`model_id`
+                        WHERE md.`model_name` = @model_name
+                        AND mb.`member_name` = @member_name
+                        AND mb.`nickname` = @nickname";
+            var result = await _dataBaseNcsUiService.QueryAsync<string>(sql, new { model_name = modelName, member_name = memberName, nickname = nickname });
+            return result.FirstOrDefault();
+        }
+
         public async Task<int> DeleteDelayDataAsync(int id)
         {
             return await _dataBaseNcsUiService.UpdateAsync("check_point_delay", new { Is_Processed = "1" }, new { Id = id });
@@ -559,9 +586,9 @@ namespace UIQ.Services
                     batch.Batch_Dtg = batch.Batch_Dtg ?? string.Empty;
                     batch.Batch_Type = batch.Batch_Type ?? string.Empty;
                     batch.Batch_Name = batch.Batch_Name ?? string.Empty;
-                    
+
                     var newBatchId = (int)await _dataBaseNcsUiService.InsertAndReturnAutoGenerateIdAsync("batch", batch);
-                    if (newBatchId > 0) 
+                    if (newBatchId > 0)
                     {
                         newBatchIdPair.Add(batch.Batch_Id, newBatchId);
                         result += 1;
@@ -910,7 +937,7 @@ namespace UIQ.Services
         public async Task<IEnumerable<CheckPointInfoResultViewModel>> GetShell(CheckPointInfoViewModel data)
         {
             var sql = "SELECT `model_name` FROM `model` WHERE `model_id` = @Model_Id";
-            data.Model_Name = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Model_Id })).FirstOrDefault();
+            data.Md_Name = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Md_Id })).FirstOrDefault();
 
             sql = @"SELECT `shell_name`, `round`, `typhoon_mode`, `avg_execution_time`
                     FROM `execution_time_result`
@@ -934,10 +961,10 @@ namespace UIQ.Services
         {
             var sql = @"SELECT `model_name` FROM `model`
                         WHERE `model_id` = @Model_Id";
-            var modelName = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Model_Id })).FirstOrDefault();
-            data.Model_Name = modelName;
+            var modelName = (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { Model_Id = data.Md_Id })).FirstOrDefault();
+            data.Md_Name = modelName;
 
-            sql = $@"SELECT `shell_name`, `round`, `typhoon_mode`, `avg_execution_time`
+            sql = $@"SELECT `shell_name` AS `sh_name`, `round`, `typhoon_mode`, `avg_execution_time`
                      FROM `execution_time_result`
                      WHERE `member` = @Member_Name
                      AND `account` = @Member_Account
@@ -957,10 +984,10 @@ namespace UIQ.Services
         public async Task<IEnumerable<ShowCheckPointInfoViewModel>> GetShowCheckPointInfoDatas(int memberId)
         {
             var result = new List<ShowCheckPointInfoViewModel>();
-            var sql = @"SELECT model.model_name
-                             , `member`.`member_name`
+            var sql = @"SELECT model.model_name AS `md_name`
+                             , `member`.`member_name` AS `mb_name`
                              , `member`.`nickname`
-                             , `member`.`account`
+                             , `member`.`account` AS `acnt`
                              , `batch`.`batch_id`
                              , `batch`.`batch_name`
                              , `batch`.`batch_type`

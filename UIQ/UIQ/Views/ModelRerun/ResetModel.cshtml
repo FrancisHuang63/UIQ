@@ -27,7 +27,7 @@
             Model:
             <select id="model" class="form">
                 <option value="">-----</option>
-                @foreach(var item in configList.GroupBy(x => x.Model_Name))
+                @foreach(var item in configList.GroupBy(x => x.Md_Name))
                 {
                     <option value="@item.Key">@item.Key</option>
                 }

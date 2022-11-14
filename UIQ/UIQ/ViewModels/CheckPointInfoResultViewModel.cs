@@ -4,8 +4,8 @@ namespace UIQ.ViewModels
 {
     public class CheckPointInfoResultViewModel
     {
-        [JsonPropertyName("shell_name")]
-        public string Shell_Name { get; set; }
+        [JsonPropertyName("sh_name")]
+        public string Sh_Name { get; set; }
 
         [JsonPropertyName("round")]
         public string Round { get; set; }

@@ -394,7 +394,7 @@
 					url: '@Url.Action(nameof(MaintainToolsController.GetCheckPoints))',
 					type: 'POST',
 					data:{ memberId: $('#memberID').val() },
-					success: setOldCheckPoint
+					success: setOldCheckPoint(response)
 				});
 			}
 

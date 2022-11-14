@@ -224,9 +224,26 @@ function set_new_shell_time(shell_info, id_prefix, new_check_point_number, round
 
 function set_old_check_dialog(batchId, batch_type, batch_dtg, item, batch_name, batch_row_index, check_point_info) {
     var dialog_title = 'Batch: ' + batch_name;
-    var dialog_id = "check_point_dialog_" + batch_row_index;
-    var $dialog = $("#check_point_dialog").clone().prop("id", dialog_id);
-    $('body').append($dialog);
+    var dialog_id = htmlEncode("check_point_dialog_" + batch_row_index);
+    //var $dialog = $("#check_point_dialog").clone().prop("id", dialog_id);
+    let dialog = $`<div class="check_point_dialog" id="${dialog_id}" title="Check Points" style="display:none;">
+					<table width="100%" border="1" aria-describedby="check_point_dialog">
+						<thead>
+							<tr>
+								<th style="display:none;" id="batch_id"></th>
+								<th id="batch_name" width=65%></th>
+								<th id="add_check_btn" width=35%>
+									<a type="button" id="addCheckPoint" class="btn_default">
+										<img src="~/images/add_icons.png" alt="新增"/>
+										Add Check Point
+									</a>
+								</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>`;
+    $('body').append(dialog);
 
     var check_row_index = 0;
     var id_prefix = "batch_" + batch_row_index + '_';
@@ -256,9 +273,9 @@ function add_old_check_point(batchId, batch_type, batch_dtg, item, batch_row_ind
         type: 'post',
         data: {
             "shell_name": check_point_info.shell_name,
-            "model_id": model_id,
-            "member_name": member_name,
-            "member_account": member_account,
+            "model_id": mo_id,
+            "member_name": mb_name,
+            "member_account": acnt,
             "batch_name": batch_name,
             "run_type": run_type,
             "round": round
@@ -347,7 +364,7 @@ function get_shell_avg_time(mode, shell_name, shell_info) {
     var row = 0;
     var shell_avg_time = 0;
     $.each(shell_info, function (key, value) {
-        if (value['shell_name'] === shell_name && value['typhoon_mode'] === mode) {
+        if (value['sh_name'] === shell_name && value['typhoon_mode'] === mode) {
             row++;
             shell_avg_time += value['avg_execution_time'] * 1;
         }
