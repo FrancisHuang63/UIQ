@@ -421,8 +421,8 @@
 			}
 
 			function addNewCronGroup(e){
-				let crontabCronGroup_New = htmlEncode($('#crontabCronGroup_New').val());
-				let crontabStartTime_New = htmlEncode($('#crontabStartTime_New').val());
+				let crontabCronGroup_New = htmlEncode($('#crontabCronGroup_New')[0].value);
+				let crontabStartTime_New = htmlEncode($('#crontabStartTime_New')[0].value);
 				if(e.keyCode === 13 
 					&& crontabCronGroup_New
 				    && crontabStartTime_New){

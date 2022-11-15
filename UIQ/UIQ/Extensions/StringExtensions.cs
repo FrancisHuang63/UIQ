@@ -29,5 +29,12 @@ namespace UIQ
             (str ?? string.Empty).ToList().ForEach(x => secureString.AppendChar(x));
             return secureString;
         }
+
+        public static string GetFilterPathTraversal(this string str)
+        {
+            if (str == null) return null;
+
+            return str.Replace("..", string.Empty).Replace("/", string.Empty).Replace("\\", string.Empty).Replace("'", string.Empty);
+        }
     }
 }

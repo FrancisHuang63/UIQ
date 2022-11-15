@@ -61,9 +61,9 @@ namespace UIQ.Services
 
         public async Task WriteUiActionLogFileAsync(string message)
         {
-            var userAccount = _currentUser?.Identity?.Name ?? string.Empty;
+            var userAcnt = _currentUser?.Identity?.Name ?? string.Empty;
             var fileFullPath = Path.Combine(_LogDirectoryPath, $"UI_actions_{DateTime.Now.ToString("yyyyMMdd")}.log");
-            message = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}][user: {userAccount}] {message}";
+            message = $"[{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}][user: {userAcnt}] {message}";
             await WriteDataIntoLogFileAsync(_LogDirectoryPath, fileFullPath, message);
         }
 

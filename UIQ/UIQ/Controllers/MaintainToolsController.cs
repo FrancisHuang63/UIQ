@@ -402,12 +402,12 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> CommandExecute(int commandId, string parameters, string command, string passwd, int? execTime)
+        public async Task<JsonResult> CommandExecute(int cId, string parameters, string command, string passwd, int? execTime)
         {
             parameters = _urlEncodeService.HtmlEncode(parameters);
             command = _urlEncodeService.HtmlEncode(command);
 
-            var cItem = await _uiqService.GetCommandItemAsync(commandId);
+            var cItem = await _uiqService.GetCommandItemAsync(cId);
 
             if (cItem == null) return Json(new ApiResponse<string>("Error"));
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
@@ -426,13 +426,13 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> CalculateCommandExecuteTime(int commandId, string parameters, string passwd, string command, int execTime)
+        public async Task<JsonResult> CalculateCommandExecuteTime(int cId, string parameters, string passwd, string command, int execTime)
         {
             parameters = _urlEncodeService.HtmlEncode(parameters);
             passwd = _urlEncodeService.HtmlEncode(passwd);
             command = _urlEncodeService.HtmlEncode(command);
 
-            var commandItem = await _uiqService.GetCommandItemAsync(commandId);
+            var commandItem = await _uiqService.GetCommandItemAsync(cId);
             if (commandItem == null) return Json(new ApiResponse<string>("Error"));
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false

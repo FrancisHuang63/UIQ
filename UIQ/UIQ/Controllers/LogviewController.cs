@@ -29,9 +29,9 @@ namespace UIQ.Controllers
 		[HttpPost]
 		public async Task<JsonResult> GetLogData(string modelName, string memberName, string acnt, bool isGetLastLine = false)
         {
-			modelName = _encodeService.HtmlEncode(modelName);
-			memberName = _encodeService.HtmlEncode(memberName);
-			acnt = _encodeService.HtmlEncode(acnt);
+			modelName = _encodeService.HtmlEncode(modelName).GetFilterPathTraversal();
+			memberName = _encodeService.HtmlEncode(memberName).GetFilterPathTraversal();
+			acnt = _encodeService.HtmlEncode(acnt).GetFilterPathTraversal();
 
 			var baseUrl = _httpContextAccessor.HttpContext.Request.Scheme + "://" + _httpContextAccessor.HttpContext.Request.Host;
 			var logUrl = $"{baseUrl}/log/{modelName}/{acnt}/{memberName}.log";

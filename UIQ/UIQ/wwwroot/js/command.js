@@ -88,7 +88,7 @@ function excuteCmdWithParameters() {
     var time_url = '/MaintainTools/CalculateCommandExecuteTime/?timeStamp=' + new Date().getTime();
     if (match_add_result != null || match_edit_result != null) {
         var ajax_data = {
-            commandId: command_id,
+            cId: command_id,
             parameters: parameters,
             passwd: pwd,
             command: $('#content').val(),

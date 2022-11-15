@@ -148,8 +148,8 @@ namespace UIQ.Services
             var result = datas.FirstOrDefault();
             if (result == null) return string.Empty;
 
-            var secureAccount = result.Acnt.GetGetSecureString();
-            return $"/{_SystemName}/{secureAccount.GetSecureStringToString()}{result.Member_Path}/{modelName}/{memberName}";
+            var secureAcnt = result.Acnt.GetGetSecureString();
+            return $"/{_SystemName}/{secureAcnt.GetSecureStringToString()}{result.Member_Path}/{modelName}/{memberName}";
         }
 
         public async Task<IEnumerable<Model>> GetModelItemsAsync()

@@ -71,13 +71,13 @@
 					response.data.showDatas.forEach(item => { showDataHtml += `${htmlEncode(item)}<br>-----------------------------------------------------------------<br>`; });
 
 					$('#show').html(`<pre>======================current Job status======================
-                                        <h3>${modelName}_${memberName}(User: ${htmlEncode(response.data.account)}, Nickname: ${nickName})</h3>
+                                        <h3>${modelName}_${memberName}(User: ${htmlEncode(response.data.acnt)}, Nickname: ${nickName})</h3>
                                         ${showDataHtml}
                                     </pre>`);
 
                     response.data.jobDatas.forEach(item => { $('#jobid').append(`<option value="${htmlEncode(item.key)}">${htmlEncode(item.value)}</option>`); });
 
-                    $('#account').val(htmlEncode(response.data.account));
+                    $('#account').val(htmlEncode(response.data.acnt));
 				}
 				else{
 					alert(htmlEncode(response.message));
