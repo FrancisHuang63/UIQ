@@ -10,19 +10,18 @@ $(document).ready(function () {
 
 });
 
-function htmlEncode(str) {
-    if (str.length == 0) return '';
-    _str = str.replace(/&/g, '&');
-    _str = _str.replace(/g/, '>');
- 
-    return _str;
+function htmlEncode(s) {
+    return s.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/'/g, '&#39;')
+        .replace(/"/g, '&#34;');
 }
 
 function htmlDecode(str) {
     let div = document.createElement("div");
-    div.innerHTML = str;
 
-    return div.innerHTML;
+    return div.html(str).text();
 }
 
 //Ajax function by jQuery
@@ -227,8 +226,7 @@ function show_reject_log_dialog(show_url, delete_url) {
         success: function (response) {
             if (response.success) {
                 if (response.data !== "status : normal") {
-                    let data = htmlEncode(response.data);
-                    build_reject_dialog(data, delete_url);
+                    build_reject_dialog(htmlEncode(response.data), delete_url);
                     play_reject_audio();
                 }
             }
@@ -269,9 +267,8 @@ function build_reject_dialog(data, delete_url) {
                 "maximize": "ui-icon-circle-plus"
             }
         });
-    data = htmlEncode(data);
     data = data.replace(/\n/g, "<br>");
-    $('#error_message').html(data);
+    $('#error_message').html(htmlEncode(data));
 }
 
 function delete_reject_dialog(delete_url) {

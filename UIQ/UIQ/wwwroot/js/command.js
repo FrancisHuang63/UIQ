@@ -13,8 +13,8 @@ $(document).ready(function () {
         $("#parameters").focus();
     });
 
-    $("#modal_execute").on('click',function(){
-        if (confirm("Execute this command?")){
+    $("#modal_execute").on('click', function () {
+        if (confirm("Execute this command?")) {
             $('#modal_close').trigger('click');
             $('#show').empty();
 
@@ -23,24 +23,24 @@ $(document).ready(function () {
     });
 });
 
-function showParameterModal(command_id, group){
+function showParameterModal(command_id, group) {
     $('#selected_cmd_id').text(command_id);
 
-    var match_result=check_urlstring_by_regex('(Add|Edit)');
+    var match_result = check_urlstring_by_regex('(Add|Edit)');
     var command = $('#content').val();
 
     var match_add_result = check_urlstring_by_regex('(Add)');
     var match_edit_result = check_urlstring_by_regex('(Edit)');
-    if(match_add_result && match_edit_result){
+    if (match_add_result && match_edit_result) {
         var check_time_result = checkExeTimeFormat();
 
-        if(check_time_result !== "OK"){
+        if (check_time_result !== "OK") {
             alert(check_time_result);
             return;
         }
     }
 
-    if (match_result != null && !command){
+    if (match_result != null && !command) {
         alert('Please input "Content"!');
         return;
     }
@@ -48,7 +48,7 @@ function showParameterModal(command_id, group){
     $('#parameters').val('');
     $('#password').val('');
 
-    if (group !== 'ADM'){
+    if (group !== 'ADM') {
         $('#pwd_form_group').show();
     }
 
@@ -57,7 +57,7 @@ function showParameterModal(command_id, group){
     });
 
 
-    if(match_result != null){
+    if (match_result != null) {
         var parameter_example = $('#example').val();
         $('label[for="parameters"]').text('Parameter (ex. ' + htmlEncode(parameter_example) + ')');
 
@@ -67,7 +67,7 @@ function showParameterModal(command_id, group){
     $.ajax({
         url: '/MaintainTools/GetCommandInfo',
         type: 'POST',
-        data:{
+        data: {
             commandId: command_id
         },
         dataType: 'json',
@@ -77,7 +77,7 @@ function showParameterModal(command_id, group){
     });
 }
 
-function excuteCmdWithParameters(){
+function excuteCmdWithParameters() {
     var command_id = $('#selected_cmd_id').text();
     var parameters = $('#parameters').val();
     var pwd = $('#password').val();
@@ -86,7 +86,7 @@ function excuteCmdWithParameters(){
     var match_edit_result = check_urlstring_by_regex('(Edit)');
     var exe_url = '/MaintainTools/CommandExecute/?timeStamp=' + new Date().getTime();
     var time_url = '/MaintainTools/CalculateCommandExecuteTime/?timeStamp=' + new Date().getTime();
-    if(match_add_result != null || match_edit_result != null){
+    if (match_add_result != null || match_edit_result != null) {
         var ajax_data = {
             commandId: command_id,
             parameters: parameters,
@@ -94,7 +94,7 @@ function excuteCmdWithParameters(){
             command: $('#content').val(),
             execTime: $('#exec_time').val()
         };
-    }else{
+    } else {
         var ajax_data = {
             commandId: command_id,
             parameters: parameters,
@@ -106,29 +106,29 @@ function excuteCmdWithParameters(){
     showCommandInfo(exe_url, time_url, ajax_data);
 }
 
-function check_urlstring_by_regex(url_slug_regex){
-    var url=window.location.href;
+function check_urlstring_by_regex(url_slug_regex) {
+    var url = window.location.href;
     var match_result = url.match(url_slug_regex);
 
     return match_result;
 }
 
-function checkExeTimeFormat(){
+function checkExeTimeFormat() {
     var match_add_result = check_urlstring_by_regex('(Add)');
     var match_edit_result = check_urlstring_by_regex('(Edit)');
 
-    if(match_add_result != null || match_edit_result != null){
+    if (match_add_result != null || match_edit_result != null) {
         var exec_time = $('#exec_time').val();
 
-        if(!/^([\d]+)$/.test(exec_time)){
-            return('The format of execution time is wrong!');
+        if (!/^([\d]+)$/.test(exec_time)) {
+            return ('The format of execution time is wrong!');
         }
 
         return 'OK';
     }
 }
 
-function showCommandInfo(exe_url, time_url, ajax_data){
+function showCommandInfo(exe_url, time_url, ajax_data) {
     $.ajax({
         url: time_url,
         type: 'POST',
@@ -148,14 +148,18 @@ function showCommandInfo(exe_url, time_url, ajax_data){
 
                 //$('#show').html(html);
                 let div = $('<div/>');
-                div.text(`${htmlEncode(response.data.result)}`);
+                if (response.data.result !== 0)
+                    div.text(`${response.data.result}`);
                 div.append($('</br>'));
-                let startTime = htmlEncode(response.data.startTime);
-                div.append(`Start Time: ${startTime}`);
+                let startTime = $('Start Time: ');
+                if (response.data.startTime !== 0)
+                    startTime.text(`${response.data.startTime}`);
+                div.append(startTime);
                 div.append($('<br/>'));
                 div.append('Estimated Completion Time: ');
                 let mark = $('<mark/>');
-                mark.text(`${htmlEncode(response.data.estimatedCompletionTime)}`);
+                if (response.data.estimatedCompletionTime !== 0)
+                    mark.text(`${response.data.estimatedCompletionTime}`);
                 div.append(mark);
                 div.append($('<br/>'));
                 let mark2 = $('<mark/>');
@@ -164,7 +168,6 @@ function showCommandInfo(exe_url, time_url, ajax_data){
                 div.append($('<br/>'));
                 div.append($('<br/>'));
                 $('#show').append(div);
-                
                 exeCommand(exe_url, ajax_data);
             }
             else {
@@ -185,8 +188,11 @@ function exeCommand(exe_url, ajax_data) {
         },
         success: function (response) {
             if (response.success) {
-                let result = htmlEncode(response.data);
-                $('#show').append(result);
+                if (response.data !== 0) {
+                    let responsedate = $('<br/>');
+                    responsedate.text(`${response.data}`);
+                    $('#show').append(htmlEncode(responsedate));
+                }
             }
             else {
                 alert(htmlEncode(response.message));
