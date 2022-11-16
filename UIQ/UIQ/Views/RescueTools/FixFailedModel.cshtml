@@ -15,6 +15,7 @@
 <html lang="zh-hant">
     <head><title>Model output generate</title></head>
     <body>
+        <div id="loading" style="left: 50%; top: 50%; margin-left: 0px !important; margin-top: 0px !important; position: fixed !important; display: none;"><img alt="loading" src="~/images/clock.gif"></div>
         <div class="topic">Rescue tools > Model output generate</div>
         <form Name="myForm" class="form">
             Model:
@@ -73,11 +74,12 @@
 	            if(response.success){
                     let tableDataHtml = '';
                     if(response.data.tableDatas.length == 0){
-                        tableDataHtml += `No target directory!! Please edit MySQL data.<br>`;
-                        tableDataHtml += `---------------------------------------------<br>`;
-                        tableDataHtml += `Table name : member<br>`;
-                        tableDataHtml += `Column name: fix_failed_target_directory<br>`;
-                        tableDataHtml += `member_id  : ${htmlEncode(response.data.memberId)}<br>`;
+                        //tableDataHtml += `No target directory!! Please edit MySQL data.<br>`;
+                        //tableDataHtml += `---------------------------------------------<br>`;
+                        //tableDataHtml += `Table name : member<br>`;
+                        //tableDataHtml += `Column name: fix_failed_target_directory<br>`;
+                        //tableDataHtml += `member_id  : ${htmlEncode(response.data.memberId)}<br>`;
+                        tableDataHtml += 'No data!!';
                     }
                     else{
                         tableDataHtml = '<table><tr>';

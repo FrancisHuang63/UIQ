@@ -15,6 +15,7 @@
 <html lang="zh-hant">
     <head><title>Archive redo</title></head>
     <body>
+        <div id="loading" style="left: 50%; top: 50%; margin-left: 0px !important; margin-top: 0px !important; position: fixed !important; display: none;"><img alt="loading" src="~/images/clock.gif"></div>
         <div class="topic">Rescue tools > Archive redo</div>
         <form name="myForm" class="form">
             Model:
@@ -66,7 +67,8 @@
         <script type="text/JavaScript">
             function setShowData(response){
                 if(response.success){
-                    clearSelectOption('method');
+                    //clearSelectOption('method');
+                    $('#method').html('');
 
                     response.data.methodDatas.forEach(item => $('#method').append(`<option value="${htmlEncode(item.key)}">${htmlEncode(item.value)}</option>`));
                     $('#dtg').val(htmlEncode(response.data.dtg))
@@ -87,7 +89,7 @@
                         tableDataHtml = 'No data!!';
                     }
                     else{
-                        tableDataHtml = '<table><tr>';
+                        tableDataHtml = '<br><table><tr>';
                         response.data.tableDatas.forEach((item, idx) => {
                             tableDataHtml += `<td>${htmlEncode(item)}</td><tr>`;
                             if(idx % 9 == 8){
@@ -98,7 +100,7 @@
                         tableDataHtml += '</table><br><br>';
                     }
                     
-		            $('#ShowLog').html(`<pre>${displayDataHtml}<br>${tableDataHtml}</pre>`);
+		            $('#ShowLog').html(`<pre>${displayDataHtml}${tableDataHtml}</pre>`);
 	            }
 	            else{
 		            alert(htmlEncode(response.message))

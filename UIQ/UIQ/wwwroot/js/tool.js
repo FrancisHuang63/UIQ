@@ -11,6 +11,7 @@ $(document).ready(function () {
 });
 
 function htmlEncode(s) {
+    s = s.toString();
     return s.replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -18,10 +19,9 @@ function htmlEncode(s) {
         .replace(/"/g, '&#34;');
 }
 
-function htmlDecode(str) {
-    let div = document.createElement("div");
-
-    return div.html(str).text();
+function htmlDecode(s) {
+    s = s.toString();
+    return $('<textarea />').html(s).text();
 }
 
 //Ajax function by jQuery

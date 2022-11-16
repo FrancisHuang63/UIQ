@@ -106,7 +106,7 @@
 			dataType: 'json',
 			data: $('#typhoonSetDataFrom').serialize(),
 			error: function () {
-				alert("Syntax error on " + uri);
+				alert("Syntax error on " + '@(Url.Action(nameof(MaintainToolsController.SaveTyphoonData), "MaintainTools"))');
 			},
 			success: function (response) {
 				if(response.success){

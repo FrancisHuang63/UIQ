@@ -1,5 +1,6 @@
 ﻿@using UIQ.Controllers
 @using UIQ.Enums
+@using UIQ.Models
 @{
 	Layout = null;
 	bool isNew = ViewBag.IsNew;
@@ -44,6 +45,7 @@
 		<h1>This page is used to @(isNew ? "ADD a NEW" : "EDIT or DELETE an OLD") MODEL & MEMBER</h1>
 		<div>
 			<form id="setting" action="@Url.Action(nameof(MaintainToolsController.ModelMemberSet))" method="post" autocomplete="off"  enctype="multipart/form-data">
+				<input id="memberID" type="hidden" name="memberId" value="@member?.Member_Id">
 				<input id="memberID" type="hidden" name="memberId" value="@member?.Member_Id">
 				@Html.Hidden("IsNew", isNew)
 				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
@@ -203,13 +205,13 @@
 															</tr>
 															@for (var idx = 0; idx < cronGroupCronTabItems.Count(); idx ++)
 															{
-																var item = cronTabItems.ElementAt(idx);
+																var item = cronGroupCronTabItems.ElementAt(idx);
 																<tr class="cronTabItem">
 																	<td>
 																		<input type="text" name="CronTab.Start_Time" value="@item.Start_Time">@(idx == 0 ? "(Ex: 17:00:00)" : string.Empty)
 																		<img src="~/images/delete_icons.png" onclick="deleteSatnamingCrontab(this)" alt="移除">
 																	</td>
-																	<input type="hidden" name="CronTab.Cron_Group" value="@item.Cron_Group">
+																	<input type="hidden" name="CronTab.Cron_Group" value="@cronGroupCronTabItems.Key">
 																	<input type="hidden" name="CronTab.Master_Group" value="@item.Master_Group" />
 																	<input type="hidden" name="CronTab.Group_Validation" value="@item.Group_Validation" />
 																</tr>
@@ -394,7 +396,9 @@
 					url: '@Url.Action(nameof(MaintainToolsController.GetCheckPoints))',
 					type: 'POST',
 					data:{ memberId: $('#memberID').val() },
-					success: setOldCheckPoint(response)
+					success: function(response){
+						setOldCheckPoint(response)
+					}	
 				});
 			}
 
@@ -421,11 +425,36 @@
 			}
 
 			function addNewCronGroup(e){
-				let crontabCronGroup_New = htmlEncode($('#crontabCronGroup_New')[0].value);
-				let crontabStartTime_New = htmlEncode($('#crontabStartTime_New')[0].value);
+				let crontabCronGroup_New = $('#crontabCronGroup_New')[0].value.toString();
+				crontabCronGroup_New = htmlEncode(crontabCronGroup_New);
+				let crontabStartTime_New = $('#crontabStartTime_New')[0].value.toString();
+				crontabStartTime_New = htmlEncode(crontabStartTime_New);
 				if(e.keyCode === 13 
 					&& crontabCronGroup_New
 				    && crontabStartTime_New){
+						//let trCronTable = document.getElementById('crontabTableItem');
+						//let newTd = document.createElement("td");
+						//$(newTd).attr('valign', 'top')
+						//let newGroupTable = document.createElement("table");
+						//newGroupTable.innerHTML = `<tbody>
+						//								<tr>
+						//									<th scope="col" bgcolor="lightcyan">${crontabCronGroup_New}<img src="@Href("~/images/add_icons.png")" onclick="addSatnamingCrontab('${crontabCronGroup_New}')" alt="新增"></th>
+						//								</tr>
+						//								<tr class="cronTabItem">
+						//									<td>
+						//										<input type="text" name="CronTab.Start_Time" value="${crontabStartTime_New}">(Ex: 17:00:00)
+						//										<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
+						//									</td>
+						//									<input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
+						//									<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
+						//									<input type="hidden" name="CronTab.Group_Validation" value="0" />
+						//								</tr>
+						//							</tbody>`;
+						//$(newGroupTable).attr('id', `crongrpTable_${crontabCronGroup_New}`);
+						//$(newGroupTable).attr('border', 1);
+						//$(newGroupTable).attr('aria-describedby', 'crongrpTable');
+						//newTd.appendChild(newGroupTable);
+						//trCronTable.appendChild(newTd);
 
 let newGroupTable = `
 <td valign="top">
@@ -446,7 +475,8 @@ let newGroupTable = `
 		</tbody>
 	</table>
 </td>`;
-						$('#crontabTableItem').prepend(htmlEncode(newGroupTable));
+//						$('#crontabTableItem').prepend(newGroupTable);
+						$('#crontabTableItem')[0].outerHTML = newGroupTable + $('#crontabTableItem')[0].outerHTML;
 						$('#crongrpTable_New').remove();
 				}
 			}
@@ -456,16 +486,13 @@ let newGroupTable = `
 				let idx = $(`#${groupTable} tr.cronTabItem`).length;
 				let newTr = document.getElementById(groupTable).insertRow(-1);
 				let newTd = document.createElement("td");
-				newTd.innerHTML=`<tr class="cronTabItem">
-									<td>
-										<input type="text" name="CronTab.Start_Time" value="">${(idx == 0 ? '(Ex: 17:00:00)' : '')}
-										<img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingCrontab(this)" alt="移除">
-									</td>
-									<input type="hidden" name="CronTab.Cron_Group" value="${cronGroup}">
-									<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
-									<input type="hidden" name="CronTab.Group_Validation" value="0" />
-								 </tr>`;
+				newTd.innerHTML=`<input type="text" name="CronTab.Start_Time" value="" />${(idx == 0 ? '(Ex: 17:00:00)' : '')}
+								<img src="@(Href("~/images/delete_icons.png"))" onclick="deleteSatnamingCrontab(this)" alt="移除">`;
+				$(newTr).addClass('cronTabItem');
 				newTr.appendChild(newTd);
+				newTr.innerHTML += `<input type="hidden" name="CronTab.Cron_Group" value="${cronGroup}">`;
+				newTr.innerHTML += `<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />`;
+				newTr.innerHTML += `<input type="hidden" name="CronTab.Group_Validation" value="0" />`;
 			}
 
 			function deleteSatnamingCrontab(element){
@@ -590,7 +617,7 @@ let newGroupTable = `
 							success: function(response){
 								if(response.success){
 									alert('Delete success!!');
-									location.reload();
+									location.href = encodeURI('@Url.Action(nameof(MaintainToolsController.ModelMemberSet), new{ memberId = member?.Member_Id })');
 								}
 								else{
 									alert(htmlEncode(response.message));
@@ -607,9 +634,24 @@ let newGroupTable = `
 
 			function deleteCheck(){
 				if (confirm('Do You Want to Delete This Member ?')){
-					let setting = $('#setting');
-					setting.prop('action', '@Url.Action(nameof(MaintainToolsController.DeleteMember))');
-					setting.submit();
+					let memberId = $('#memberID').val();
+					$.ajax({
+						url: '@Url.Action(nameof(MaintainToolsController.DeleteMember))',
+						type: 'POST',
+						data: { memberId: memberId },
+						success: function(response){
+							if(response.success){
+								alert('Delete success!!');
+								window.close();
+							}
+							else{
+								alert(htmlEncode(response.message));
+							}							
+						},
+						error: function(response){
+							alert(`Delete error!!`);
+						}
+					});
 				}
 			}
 
@@ -744,7 +786,7 @@ let newGroupTable = `
 					success: function(response){
 						if(response.success){
 							alert('Save success!');
-							location.reload();
+							location.href = encodeURI('@Url.Action(nameof(MaintainToolsController.ModelMemberSet), new{ memberId = member?.Member_Id })');
 						}
 						else{
 							alert('Save error!');

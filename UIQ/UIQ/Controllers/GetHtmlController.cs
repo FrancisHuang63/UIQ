@@ -255,7 +255,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                var command = $"rsh ssh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
                 datas.Add(command);
                 var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
                 foreach (var item in (result ?? string.Empty).Split("\n"))
@@ -452,15 +452,15 @@ namespace UIQ.Controllers
             fullPath = fullPath.Replace("{mm}", mm);
             if (string.IsNullOrWhiteSpace(fullPath))
             {
-                displayDatas.AddRange(new string[]
-                {
-                    "No target directory!! Please edit MySQL data.",
-                    "---------------------------------------------",
-                    "Table name : archive",
-                    "Column name: target_directory",
-                    $"member_id  : {secureAcnt.GetSecureStringToString()}",
-                    $"data_id    : {dataId}",
-                });
+                //displayDatas.AddRange(new string[]
+                //{
+                //    "No target directory!! Please edit MySQL data.",
+                //    "---------------------------------------------",
+                //    "Table name : archive",
+                //    "Column name: target_directory",
+                //    $"member_id  : {secureAcnt.GetSecureStringToString()}",
+                //    $"data_id    : {dataId}",
+                //});
             }
             else
             {
@@ -470,15 +470,19 @@ namespace UIQ.Controllers
                     var command = $"sudo -u {_rshAccount} ssh -l archive hsmsvr1a ls -al {pathTok} | sed 's%\\/.\\+\\/%%' | grep -v ^total";
                     var commandResult = await _uiqService.RunCommandAsync(command);
                     displayDatas.Add(command);
-                    displayDatas.Add(commandResult);
                     if (string.IsNullOrWhiteSpace(commandResult) == false)
                     {
+                        displayDatas.Add(commandResult);
                         tableDatas = commandResult.Split(" \n\t").ToList();
+                    }
+                    else
+                    {
+                        tableDatas.Add("No data!!");
                     }
                 }
             }
 
-            var response = new ApiResponse<dynamic>(new { DisplayDatas = displayDatas, TableDatas = tableDatas });
+            var response = new ApiResponse<dynamic>(new { DisplayDatas = displayDatas, TableDatas = tableDatas, IsPathExist = string.IsNullOrWhiteSpace(fullPath) });
             return Json(response);
         }
 
@@ -568,6 +572,18 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> GetTyphoonSetDatas(TyphoonSetDataViewModel[] typhoonSetDatas)
         {
+            if (typhoonSetDatas?.Any() ?? false)
+            {
+                foreach (var item in typhoonSetDatas)
+                {
+                    item.LatBefore6Hours = item.LatBefore6Hours ?? -1;
+                    item.LngBefore6Hours = item.LngBefore6Hours ?? -1;
+                    item.CenterPressure = item.CenterPressure ?? -1;
+                    item.Radius15MPerS = item.Radius15MPerS ?? -1;
+                    item.MaximumSpeed = item.MaximumSpeed ?? -1;
+                    item.Radius25MPerS = item.Radius25MPerS ?? -1;
+                }
+            }
             return Json(new ApiResponse<TyphoonSetDataViewModel[]>(typhoonSetDatas));
         }
     }

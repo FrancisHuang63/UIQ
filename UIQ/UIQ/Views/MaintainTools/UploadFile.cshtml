@@ -147,7 +147,7 @@
                     success: function(resp){
                         alert(resp.message);
                         if(resp.success == true){
-                            location.reload();
+                            location.href = encodeURI('@Url.Action(nameof(MaintainToolsController.UploadFile))');
                         }
                     }
                 });

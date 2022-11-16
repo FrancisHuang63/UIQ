@@ -12,7 +12,7 @@
         { 
             get
             {
-                if (Status.ToUpper() == "FAIL" && AlertFlag) return "FAIL";
+                if (Status?.ToUpper() == "FAIL" && AlertFlag) return "FAIL";
 
                 var lowerComment = Comment.ToLower();
                 if (lowerComment.Contains("delay 10+ mins")) return "delay10";
@@ -23,7 +23,7 @@
                 if (lowerComment.Contains("halt 2hr+")) return "delay3h_s";
                 if (lowerComment.Contains("cancelled")) return "cancelled";
 
-                if (Status.ToUpper() == "RUNNING") return "RUNNING";
+                if (Status?.ToUpper() == "RUNNING") return "RUNNING";
 
                 return string.Empty;
             }

@@ -48,7 +48,7 @@ namespace UIQ.Services
 
         public IEnumerable<HomeTableViewModel> GetHomeTableDatas()
         {
-            var command = string.Empty;
+            var command = $"cat /{_SystemName}/{_HpcCtl}/shfun/shetc/Checkpoint_Lid |" + " awk '{print $1}'";
             var checkPointLid = RunCommandAsync(command).GetAwaiter().GetResult();
 
             var batchInfos = GetShowBatchInfos();
@@ -61,7 +61,7 @@ namespace UIQ.Services
                 var itemIndex = index + 1;
                 return new HomeTableViewModel(modelConfig)
                 {
-                    AlertFlag = (modelConfig.Status.ToUpper() == "FAIL" && modelConfig.Lid != Enums.LidEnum.Zero && modelConfig.Comment != "Cancelled"),
+                    AlertFlag = (modelConfig.Status?.ToUpper() == "FAIL" && modelConfig.Lid != Enums.LidEnum.Zero && modelConfig.Comment != "Cancelled"),
                     Href = $"/Home/DetailedStatus?modelMemberNickname={(System.Web.HttpUtility.UrlEncode($"{modelConfig.Model_Name}_{modelConfig.Member_Name}_{modelConfig.Nickname}"))}",
                 };
             }).OrderBy(x => x.Member_Position).ToList();
@@ -365,7 +365,7 @@ namespace UIQ.Services
             return await _dataBaseNcsUiService.DeleteAsync("command", new { Command_Id = commandId }) > 0;
         }
 
-        public async Task<CommandViewModel> GetCommandItemAsync(int commandId)
+        public async Task<CommandViewModel> GetCItemAsync(int commandId)
         {
             var sql = @"SELECT `command_id` AS `c_id`
                               ,`command_name` AS `c_name`
@@ -374,10 +374,20 @@ namespace UIQ.Services
                               ,`command_pwd` AS `c_pwd`
                               ,`execution_time`
                               ,`command_example` AS `c_example`
-                              ,`command_id` AS `c_id`
-                              ,`command_id` AS `c_id`
                         FROM `command` WHERE `command_id` = @CommandId";
             return (await _dataBaseNcsUiService.QueryAsync<CommandViewModel>(sql, new { CommandId = commandId })).FirstOrDefault();
+        }
+
+        public async Task<string> GetCommandPwdAsync(int commandId)
+        {
+            var sql = @"SELECT `command_pwd` FROM `command` WHERE `command_id` = @CommandId";
+            return (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { CommandId = commandId })).FirstOrDefault();
+        }
+
+        public async Task<string> GetCommandContentAsync(int commandId)
+        {
+            var sql = @"SELECT `command_content` FROM `command` WHERE `command_id` = @CommandId";
+            return (await _dataBaseNcsUiService.QueryAsync<string>(sql, new { CommandId = commandId })).FirstOrDefault();
         }
 
         public async Task<string> GetCommandExampleAsync(int commandId)
@@ -902,15 +912,15 @@ namespace UIQ.Services
             await RunCommandAsync($"rsh -l {_HpcCtl} {toHost} mysql -u{account} -p{password} {hpcSql} --default-character-set=utf8 < {filename}");
         }
 
-        public async Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
+        public async Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
         {
             var sql = @"SELECT `archive_redo`
 						FROM `archive_view`
 					    WHERE `model_name` = @ModelName
 						AND `member_name`= @MemberName
 						AND `data_name` = @DataName";
-            var param = new { ModelName = modelName, MemberName = memberName, Nickname = nickname, DataName = method };
-            var result = await _dataBaseNcsUiService.QueryAsync<int>(sql, param);
+            var param = new { ModelName = modelName, MemberName = memberName, DataName = method };
+            var result = await _dataBaseNcsUiService.QueryAsync<string>(sql, param);
             return result.FirstOrDefault();
         }
 
@@ -1032,11 +1042,9 @@ namespace UIQ.Services
         {
             foreach (var modelInfo in modelInfos)
             {
-                if ($"{modelInfo.Model_Name}_{modelInfo.Member_Name}({modelInfo.Nickname})" == "GFS_MNH(T511)")
-                {
-                }
+                modelInfo.Member_Path = modelInfo.Member_Path ?? string.Empty;
                 var maxPerRunTime = modelInfo.Member_Dtg_Value * 60 * 60;
-                if (modelInfo.Status == "Cancelled" || modelInfo.Status.ToUpper() == "FAIL")
+                if (modelInfo.Status == "Cancelled" || modelInfo.Status?.ToUpper() == "FAIL")
                     WriteDebugMessage($"[{DateTime.Now.ToString("HH:mm:ss")}]${modelInfo.Model_Name}_${modelInfo.Member_Name}_${modelInfo.Nickname}(C) {modelInfo.Status}, run_end:{modelInfo.Run_End.ToString("HH:mm:ss")}\n");
 
                 modelInfo.PreTime = GetPreTime(modelInfo.Model_Name, modelInfo.Member_Name, modelInfo.Nickname);
@@ -1045,7 +1053,7 @@ namespace UIQ.Services
 
                 var preStartTime = new DateTime(modelInfo.Pre_Start.Ticks);
                 var now = DateTime.Now;
-                var workStartTime = new DateTime(modelInfo.Sms_Time.Ticks);
+                var workStartTime = new DateTime(modelInfo.Sms_Time?.Ticks ?? 0);
 
                 //若工作起始時間 > 現在時間 表跨天
                 if (workStartTime > now) workStartTime = workStartTime.AddDays(-1);
@@ -1074,11 +1082,11 @@ namespace UIQ.Services
                     modelInfo.Comment = "delay 1hr+";
                     WriteDebugMessage($"[{now.ToString("HH:mm:ss")}]{modelInfo.Model_Name}_{modelInfo.Member_Name}_{modelInfo.Nickname}(03) {modelInfo.Comment}, pre_start:{preStartTime.ToString("HH:mm:ss")}, job_started:{workStartTime.ToString("HH:mm:ss")}, diff:{diffMinutes}\n");
                 }
-                //if (modelInfo.SmsTime == "")
-                //{
-                //    modelInfo.Comment = "unknown";
-                //    WriteDebugMessage($"[{now.ToString("HH:mm:ss")}]{modelInfo.Model_Name}_{modelInfo.Member_Name}_{modelInfo.Nickname}(04) {modelInfo.Comment}, pre_start:{preStartTime.ToString("HH:mm:ss")}, job_started:{workStartTime.ToString("HH:mm:ss")}, diff:{diffMinutes}\n");
-                //}
+                if (modelInfo.Sms_Time == null)
+                {
+                    modelInfo.Comment = "unknown";
+                    WriteDebugMessage($"[{now.ToString("HH:mm:ss")}]{modelInfo.Model_Name}_{modelInfo.Member_Name}_{modelInfo.Nickname}(04) {modelInfo.Comment}, pre_start:{preStartTime.ToString("HH:mm:ss")}, job_started:{workStartTime.ToString("HH:mm:ss")}, diff:{diffMinutes}\n");
+                }
 
                 #endregion consider delay 工作 啟始延遲判斷   (running)
 
@@ -1524,35 +1532,35 @@ namespace UIQ.Services
         private IEnumerable<ModelConfigViewModel> GetShowModelConfigs()
         {
             var sql = @"SELECT `member`.*
-                            , `model`.`model_name`
-                            , `model`.`model_position`
-                            ,`monitoring_info`.`lid`
-                            ,`monitoring_info`.`dtg`
-                            ,`monitoring_info`.`run`
-                            ,`monitoring_info`.`complete_run_type`
-                            ,`monitoring_info`.`run_type`
-                            ,`monitoring_info`.`cron_mode`
-                            ,`monitoring_info`.`typhoon_mode`
-                            ,`monitoring_info`.`manual`
-                            ,`monitoring_info`.`start_flag`
-                            ,`monitoring_info`.`stage_flag`
-                            ,`monitoring_info`.`status`
-                            ,`monitoring_info`.`sms_name`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`sms_time`) AS `sms_time`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`start_time`) AS `start_time`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`end_time`) AS `end_time`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`pre_start`) AS `pre_start`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`pre_end`) AS `pre_end`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`run_end`) AS `run_end`
-                            ,`monitoring_info`.`shell_name`
-                            ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`shell_time`) AS `shell_time`
-                            ,`monitoring_info`.`error_message`
-                        FROM `member`, `model`, `monitoring_info`
-                        WHERE `member`.`model_id` = `model`.`model_id`
-                        AND `monitoring_info`.`model` = `model`.`model_name`
-                        AND `monitoring_info`.`member` = `member`.`member_name`
-                        AND `monitoring_info`.`nickname` = `member`.`nickname`
-                        ORDER BY `model_position` ASC, `member_position` ASC";
+                        , `model`.`model_name`
+                        , `model`.`model_position`
+                        ,`monitoring_info`.`lid`
+                        ,`monitoring_info`.`dtg`
+                        ,`monitoring_info`.`run`
+                        ,`monitoring_info`.`complete_run_type`
+                        ,`monitoring_info`.`run_type`
+                        ,`monitoring_info`.`cron_mode`
+                        ,`monitoring_info`.`typhoon_mode`
+                        ,`monitoring_info`.`manual`
+                        ,`monitoring_info`.`start_flag`
+                        ,`monitoring_info`.`stage_flag`
+                        ,`monitoring_info`.`status`
+                        ,`monitoring_info`.`sms_name`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`sms_time`) AS `sms_time`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`start_time`) AS `start_time`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`end_time`) AS `end_time`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`pre_start`) AS `pre_start`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`pre_end`) AS `pre_end`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`run_end`) AS `run_end`
+                        ,`monitoring_info`.`shell_name`
+                        ,CONCAT(DATE_FORMAT(curdate(),'%Y/%m/%d'), ' ', `monitoring_info`.`shell_time`) AS `shell_time`
+                        ,`monitoring_info`.`error_message`
+                        FROM `member`
+                        INNER JOIN `model` ON `model`.`model_id` = `member`.`model_id`
+                        LEFT JOIN `monitoring_info` ON `monitoring_info`.`model` = `model`.`model_name`
+                                                   AND  `monitoring_info`.`member` = `member`.`member_name`
+                                                   AND `monitoring_info`.`nickname` = `member`.`nickname`
+                        ORDER BY `model`.`model_position` ASC, `member`.`member_position` ASC";
 
             return _dataBaseNcsUiService.QueryAsync<ModelConfigViewModel>(sql).Result;
         }

@@ -39,7 +39,11 @@ namespace UIQ.Services.Interfaces
 
         public Task<IEnumerable<Command>> GetCommandItemsAsync();
 
-        public Task<CommandViewModel> GetCommandItemAsync(int commandId);
+        public Task<CommandViewModel> GetCItemAsync(int commandId);
+
+        public Task<string> GetCommandPwdAsync(int commandId);
+
+        public Task<string> GetCommandContentAsync(int commandId);
 
         public Task<string> GetCommandExampleAsync(int commandId);
 
@@ -111,7 +115,7 @@ namespace UIQ.Services.Interfaces
 
         public Task SqlSync();
 
-        public Task<int> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method);
+        public Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method);
 
         public Task<string> GetArchiveResultPathAsync(string modelName, string memberName, string nickname, string method);
 

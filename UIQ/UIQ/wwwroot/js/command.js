@@ -88,18 +88,18 @@ function excuteCmdWithParameters() {
     var time_url = '/MaintainTools/CalculateCommandExecuteTime/?timeStamp=' + new Date().getTime();
     if (match_add_result != null || match_edit_result != null) {
         var ajax_data = {
-            cId: command_id,
+            cNum: command_id,
             parameters: parameters,
             passwd: pwd,
-            command: $('#content').val(),
+            comd: $('#content').val(),
             execTime: $('#exec_time').val()
         };
     } else {
         var ajax_data = {
-            commandId: command_id,
+            cNum: command_id,
             parameters: parameters,
             passwd: pwd,
-            command: ''
+            comd: ''
         };
     }
 
@@ -151,9 +151,9 @@ function showCommandInfo(exe_url, time_url, ajax_data) {
                 if (response.data.result !== 0)
                     div.text(`${response.data.result}`);
                 div.append($('</br>'));
-                let startTime = $('Start Time: ');
+                let startTime = $('<span/>');
                 if (response.data.startTime !== 0)
-                    startTime.text(`${response.data.startTime}`);
+                    startTime.text(`Start Time: ${response.data.startTime}`);
                 div.append(startTime);
                 div.append($('<br/>'));
                 div.append('Estimated Completion Time: ');
@@ -189,9 +189,9 @@ function exeCommand(exe_url, ajax_data) {
         success: function (response) {
             if (response.success) {
                 if (response.data !== 0) {
-                    let responsedate = $('<br/>');
-                    responsedate.text(`${response.data}`);
-                    $('#show').append(htmlEncode(responsedate));
+                    let responsedate = $('<span/>');
+                    responsedate.text(`${response.data.result}`);
+                    $('#show').append(responsedate);
                 }
             }
             else {

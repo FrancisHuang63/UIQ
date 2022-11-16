@@ -59,6 +59,19 @@ namespace UIQ.Controllers
         {
             dtg = _urlEncodeService.HtmlEncode(dtg).Replace("..", "").Replace("/", "");
 
+            if (typhoonSetDatas?.Any() ?? false)
+            {
+                foreach (var item in typhoonSetDatas)
+                {
+                    item.LatBefore6Hours = item.LatBefore6Hours ?? -1;
+                    item.LngBefore6Hours = item.LngBefore6Hours ?? -1;
+                    item.CenterPressure = item.CenterPressure ?? -1;
+                    item.Radius15MPerS = item.Radius15MPerS ?? -1;
+                    item.MaximumSpeed = item.MaximumSpeed ?? -1;
+                    item.Radius25MPerS = item.Radius25MPerS ?? -1;
+                }
+            }
+
             var datas = new List<string>();
             var dirNameParameters = new[]
             {
@@ -111,9 +124,9 @@ namespace UIQ.Controllers
                 datas.Add($"Write {tmpFilePath}...");
 
                 //檢查同 DTG 檔案是否已存在，存在則變更檔名
-                var checkDir = new DirectoryInfo(realFilePath);
+                var checkDir = new DirectoryInfo(realDirectory);
                 //列舉全部檔案再比對檔名
-                var checkFile = checkDir.EnumerateFiles().FirstOrDefault(m => m.Name == realFileName);
+                var checkFile = checkDir.EnumerateFiles()?.FirstOrDefault(m => m.Name == realFileName);
                 if (checkFile != null && checkFile.Exists)
                 {
                     command = $"rsh -l {_typhoonAccount} {_loginIp} mv {realFilePath} {realFilePath}{currentTime}";
@@ -333,16 +346,18 @@ namespace UIQ.Controllers
         public IActionResult ParameterSetting()
         {
             var model = _uiqService.GetParameterItemAsync().GetAwaiter().GetResult();
+            ViewBag.IsSaveSuccess = (bool)(TempData["isSaveSuccess"] ?? false);
             return View(model);
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ParameterSetting)]
         [HttpPost]
-        public IActionResult ParameterSetting(Parameter data)
+        public async Task<IActionResult> ParameterSetting(Parameter data)
         {
             if (data == null) return RedirectToAction(nameof(ParameterSetting));
 
-            _uiqService.UpdateParameterAsync(data);
+            var result = await _uiqService.UpdateParameterAsync(data);
+            TempData["isSaveSuccess"] = result;
             return RedirectToAction(nameof(ParameterSetting));
         }
 
@@ -357,13 +372,13 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public IActionResult DeleteMember(int? memberId)
+        public JsonResult DeleteMember(int? memberId)
         {
-            if (memberId.HasValue == false) return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+            if (memberId.HasValue == false) return Json(new ApiResponse<bool>("Member id is not exist!!"));
 
             _uiqService.DeleteMemberAsync(memberId.Value);
             _uiqService.SqlSync();
-            return RedirectToAction(nameof(ModelMemberSet), new { memberId = memberId });
+            return Json(new ApiResponse<bool>(true));
         }
 
         [HttpPost]
@@ -402,51 +417,51 @@ namespace UIQ.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> CommandExecute(int cId, string parameters, string command, string passwd, int? execTime)
+        public async Task<JsonResult> CommandExecute(int cNum, string parameters, string comd, string passwd, int? execTime)
         {
             parameters = _urlEncodeService.HtmlEncode(parameters);
-            command = _urlEncodeService.HtmlEncode(command);
+            comd = _urlEncodeService.HtmlEncode(comd);
             passwd = _urlEncodeService.HtmlEncode(passwd);
-            var cItem = await _uiqService.GetCommandItemAsync(cId);
-            if (cItem == null) return Json(new ApiResponse<string>("Error"));
+            string C_Pwd = await _uiqService.GetCommandPwdAsync(cNum);
+            if (C_Pwd == null) return Json(new ApiResponse<string>("Command ID is error"));
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
-                && cItem.C_Pwd != passwd)
+                && C_Pwd != passwd)
             {
                 return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
             }
-
-            command = string.IsNullOrWhiteSpace(command) ? cItem.C_Content : command;
-            command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
+            string C_Content = await _uiqService.GetCommandContentAsync(cNum);
+            comd = string.IsNullOrWhiteSpace(comd) ? C_Content : comd;
+            comd = string.IsNullOrWhiteSpace(parameters) ? comd : comd + $" '\\\"{parameters}\\\"'";
             //command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
-            string result = await _uiqService.RunCommandAsync(command);
+            string result = await _uiqService.RunCommandAsync(comd);
 
-            var response = new ApiResponse<string>(data: string.IsNullOrWhiteSpace(result) ? "No Result" : result);
+            var data = new { Result = string.IsNullOrWhiteSpace(result) ? "No Result" : result };
+            var response = new ApiResponse<dynamic>(data);
             return Json(response);
         }
 
         [HttpPost]
-        public async Task<JsonResult> CalculateCommandExecuteTime(int cId, string parameters, string passwd, string command, int execTime)
+        public async Task<JsonResult> CalculateCommandExecuteTime(int cNum, string parameters, string passwd, string comd, int execTime)
         {
             parameters = _urlEncodeService.HtmlEncode(parameters);
             passwd = _urlEncodeService.HtmlEncode(passwd);
-            command = _urlEncodeService.HtmlEncode(command);
+            comd = _urlEncodeService.HtmlEncode(comd);
 
-            var commandItem = await _uiqService.GetCommandItemAsync(cId);
-            if (commandItem == null) return Json(new ApiResponse<string>("Error"));
+            string C_Pwd = await _uiqService.GetCommandPwdAsync(cNum);
+            if (C_Pwd == null) return Json(new ApiResponse<string>("Command ID is error"));
 
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
-                && passwd != commandItem.C_Pwd)
+                && passwd != C_Pwd)
             {
                 return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
             }
 
-            command = string.IsNullOrWhiteSpace(command) ? commandItem.C_Content : command;
-            command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
-            //command = $@"rsh -l {_hpcCtl} {_loginIp} ""{(command ?? string.Empty).Split("\n").FirstOrDefault()}"" 2>&1";
-            //var result = await _uiqService.RunCommandAsync(command);
+            string C_Content = await _uiqService.GetCommandContentAsync(cNum);
+            comd = string.IsNullOrWhiteSpace(comd) ? C_Content : comd;
+            comd = string.IsNullOrWhiteSpace(parameters) ? comd : comd + $" '\\\"{parameters}\\\"'";
 
-            var datas = new { Result = command, StartTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"), EstimatedCompletionTime = DateTime.Now.AddMinutes(execTime).ToString("yyyy/MM/dd HH:mm:ss") };
+            var datas = new { Result = comd, StartTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"), EstimatedCompletionTime = DateTime.Now.AddMinutes(execTime).ToString("yyyy/MM/dd HH:mm:ss") };
             var response = new ApiResponse<dynamic>(datas);
             return Json(response);
         }

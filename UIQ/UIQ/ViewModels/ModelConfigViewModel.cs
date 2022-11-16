@@ -48,7 +48,7 @@ namespace UIQ.ViewModels
         public string Sms_Name { get; set; }
 
         [JsonPropertyName("sms_time")]
-        public DateTime Sms_Time { get; set; }
+        public DateTime? Sms_Time { get; set; }
 
         [JsonPropertyName("start_time")]
         public DateTime Start_Time { get; set; }

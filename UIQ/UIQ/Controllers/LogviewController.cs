@@ -29,9 +29,9 @@ namespace UIQ.Controllers
 		[HttpPost]
 		public async Task<JsonResult> GetLogData(string modelName, string memberName, string acnt, bool isGetLastLine = false)
         {
-			string ModelName = _encodeService.HtmlEncode(modelName).GetFilterPathTraversal();
-            string MemberName = _encodeService.HtmlEncode(memberName).GetFilterPathTraversal();
-            string Acnt = _encodeService.HtmlEncode(acnt).GetFilterPathTraversal();
+			string ModelName = GetFilterPathTraversal(_encodeService.HtmlEncode(modelName));
+            string MemberName = GetFilterPathTraversal(_encodeService.HtmlEncode(memberName));
+            string Acnt = GetFilterPathTraversal(_encodeService.HtmlEncode(acnt));
 
 			var baseUrl = _httpContextAccessor.HttpContext.Request.Scheme + "://" + _httpContextAccessor.HttpContext.Request.Host;
 			var logUrl = $"{baseUrl}/log/{ModelName}/{Acnt}/{MemberName}.log";
@@ -42,6 +42,14 @@ namespace UIQ.Controllers
 
 			var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');
 			return Json(new ApiResponse<IEnumerable<string>>(data: logLineDatas));
-		} 
-    }
+		}
+
+		private string GetFilterPathTraversal(string str)
+        {
+			if (str == null) return "";
+
+			return str.Replace("..", "").Replace("/", "").Replace("\\", "").Replace("'", "");
+		}
+
+	}
 }

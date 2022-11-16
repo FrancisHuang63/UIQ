@@ -2,6 +2,7 @@
 @model Parameter
 @{
     Layout = null;
+    var isSaveSuccess = (bool)ViewBag.IsSaveSuccess;
 }
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -9,11 +10,12 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link href="~/css/style.css" rel="stylesheet" type="text/css" />
+        <script src="~/js/jquery-1.3.2.min.js"></script>
 
         <title>Parameter Setting</title>
     </head>
     <body>
-        <form method="post" class="form" action="@(Url.Action(nameof(MaintainToolsController.ParameterSetting)))" enctype="multipart/form-data">
+        <form method="post" action="@(Url.Action(nameof(MaintainToolsController.ParameterSetting)))" class="form" enctype="multipart/form-data">
         <div id="loading"><img alt="loading" src="~/images/clock.gif"></div>
         <div class=topic>Parameter Setting</div>
         <div class="mt-10">
@@ -22,8 +24,17 @@
             <input type="hidden" name="Parameter_Id"  value="@Model?.Parameter_Id" /> 
         </div>
 
-        <input class="mt-10" type=submit value="Save" style="width:100px">
+        <input class="mt-10" id="btnSave" type=submit value="Save" style="width:100px"><br>
+        <span id="result" style="color:red;"></span>
         </form>
+
+        <script>
+            $(function(){
+                if('@(isSaveSuccess)' == 'True'){
+                    $('#result').text(`Success to save refresh time: ${@(Model?.Parameter_Value)} sec.`)
+                }
+            })
+        </script>
     </body>
 </html>
 
