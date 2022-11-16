@@ -32,9 +32,9 @@ namespace UIQ
 
         public static string GetFilterPathTraversal(this string str)
         {
-            if (str == null) return null;
+            if (str == null) return "";
 
-            return str.Replace("..", string.Empty).Replace("/", string.Empty).Replace("\\", string.Empty).Replace("'", string.Empty);
+            return str.Replace("..", "").Replace("/", "").Replace("\\", "").Replace("'", "");
         }
     }
 }

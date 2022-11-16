@@ -29,13 +29,13 @@ namespace UIQ.Controllers
 		[HttpPost]
 		public async Task<JsonResult> GetLogData(string modelName, string memberName, string acnt, bool isGetLastLine = false)
         {
-			modelName = _encodeService.HtmlEncode(modelName).GetFilterPathTraversal();
-			memberName = _encodeService.HtmlEncode(memberName).GetFilterPathTraversal();
-			acnt = _encodeService.HtmlEncode(acnt).GetFilterPathTraversal();
+			string ModelName = _encodeService.HtmlEncode(modelName).GetFilterPathTraversal();
+            string MemberName = _encodeService.HtmlEncode(memberName).GetFilterPathTraversal();
+            string Acnt = _encodeService.HtmlEncode(acnt).GetFilterPathTraversal();
 
 			var baseUrl = _httpContextAccessor.HttpContext.Request.Scheme + "://" + _httpContextAccessor.HttpContext.Request.Host;
-			var logUrl = $"{baseUrl}/log/{modelName}/{acnt}/{memberName}.log";
-			var logPath = Path.Combine(_readLogFileService.RootPath, "log", modelName, acnt, $"{memberName}.log");
+			var logUrl = $"{baseUrl}/log/{ModelName}/{Acnt}/{MemberName}.log";
+			var logPath = Path.Combine(_readLogFileService.RootPath, "log", ModelName, Acnt, $"{MemberName}.log");
 			var logContent = await _readLogFileService.ReadLogFileAsync(logPath);
 
 			if (logContent == null) return Json(new ApiResponse<IEnumerable<string>>(data: new string[] { }));
@@ -43,5 +43,5 @@ namespace UIQ.Controllers
 			var logLineDatas = isGetLastLine ? new string[] { logContent.Split('\n').LastOrDefault(x => !string.IsNullOrEmpty(x)) } : logContent.Split('\n');
 			return Json(new ApiResponse<IEnumerable<string>>(data: logLineDatas));
 		} 
-	}
+    }
 }

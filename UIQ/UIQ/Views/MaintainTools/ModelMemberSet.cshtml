@@ -427,26 +427,26 @@
 					&& crontabCronGroup_New
 				    && crontabStartTime_New){
 
-						let newGroupTable = `<td valign="top">
-													<table id="crongrpTable_${crontabCronGroup_New}" border="1" aria-describedby="crongrpTable" >
-														<tbody>
-															<tr>
-																<th scope="col" bgcolor="lightcyan">${crontabCronGroup_New}<img src="@Href("~/images/add_icons.png")" onclick="addSatnamingCrontab('${crontabCronGroup_New}')" alt="新增"></th>
-															</tr>
-															<tr class="cronTabItem">
-																<td>
-																	<input type="text" name="CronTab.Start_Time" value="${crontabStartTime_New}">(Ex: 17:00:00)
-																	<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
-																</td>
-																<input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
-																<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
-																<input type="hidden" name="CronTab.Group_Validation" value="0" />
-															</tr>
-														</tbody>
-													</table>
-												</td>`;
-
-						$('#crontabTableItem').prepend(newGroupTable);
+let newGroupTable = `
+<td valign="top">
+	<table id="crongrpTable_${crontabCronGroup_New}" border="1" aria-describedby="crongrpTable" >
+		<tbody>
+			<tr>
+				<th scope="col" bgcolor="lightcyan">${crontabCronGroup_New}<img src="@Href("~/images/add_icons.png")" onclick="addSatnamingCrontab('${crontabCronGroup_New}')" alt="新增"></th>
+			</tr>
+			<tr class="cronTabItem">
+				<td>
+					<input type="text" name="CronTab.Start_Time" value="${crontabStartTime_New}">(Ex: 17:00:00)
+					<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
+				</td>
+				<input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
+				<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
+				<input type="hidden" name="CronTab.Group_Validation" value="0" />
+			</tr>
+		</tbody>
+	</table>
+</td>`;
+						$('#crontabTableItem').prepend(htmlEncode(newGroupTable));
 						$('#crongrpTable_New').remove();
 				}
 			}

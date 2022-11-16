@@ -199,7 +199,7 @@ namespace UIQ.Controllers
                 if (decodeAcnt != $"{_prefix}weps")
                 {
                     command = $"rsh -l {decodeAcnt} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {decodeAcnt} {fullPath}{resetModel} {jobId} {fullPath}";
-                    result += await _uiqService.RunCommandAsync(command);
+                    //result += await _uiqService.RunCommandAsync(command);
                 }
             }
 

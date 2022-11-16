@@ -406,10 +406,10 @@ namespace UIQ.Controllers
         {
             parameters = _urlEncodeService.HtmlEncode(parameters);
             command = _urlEncodeService.HtmlEncode(command);
-
+            passwd = _urlEncodeService.HtmlEncode(passwd);
             var cItem = await _uiqService.GetCommandItemAsync(cId);
-
             if (cItem == null) return Json(new ApiResponse<string>("Error"));
+
             if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false
                 && cItem.C_Pwd != passwd)
             {
@@ -419,7 +419,7 @@ namespace UIQ.Controllers
             command = string.IsNullOrWhiteSpace(command) ? cItem.C_Content : command;
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
             //command = $"rsh -l {_hpcCtl} {_loginIp} \"" + (command ?? string.Empty).Split("\n").FirstOrDefault() + "\" 2>&1";
-            var result = await _uiqService.RunCommandAsync(command);
+            string result = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<string>(data: string.IsNullOrWhiteSpace(result) ? "No Result" : result);
             return Json(response);
@@ -441,11 +441,12 @@ namespace UIQ.Controllers
                 return Json(new ApiResponse<string>("Your password is Wrong!!!!"));
             }
 
+            command = string.IsNullOrWhiteSpace(command) ? commandItem.C_Content : command;
             command = string.IsNullOrWhiteSpace(parameters) ? command : command + $" '\\\"{parameters}\\\"'";
             //command = $@"rsh -l {_hpcCtl} {_loginIp} ""{(command ?? string.Empty).Split("\n").FirstOrDefault()}"" 2>&1";
-            var result = await _uiqService.RunCommandAsync(command);
+            //var result = await _uiqService.RunCommandAsync(command);
 
-            var datas = new { Result = result, StartTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"), EstimatedCompletionTime = DateTime.Now.AddMinutes(execTime).ToString("yyyy/MM/dd HH:mm:ss") };
+            var datas = new { Result = command, StartTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"), EstimatedCompletionTime = DateTime.Now.AddMinutes(execTime).ToString("yyyy/MM/dd HH:mm:ss") };
             var response = new ApiResponse<dynamic>(datas);
             return Json(response);
         }
