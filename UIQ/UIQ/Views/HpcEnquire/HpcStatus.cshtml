@@ -34,7 +34,7 @@
 		@if (runningJobInfo != null)
 		{
 			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
-			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} /users/xa09/bin/chknode";
+			var pjshowrsc_s = $"sudo -u {rshAccount} ssh -l {rshAccount} {loginIp} /users/xa09/bin/chknode";
 			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
 			var pjshowrsc_sarr = Regex.Split(commandResult, "/\n/");
 			<p>
@@ -56,10 +56,10 @@
 		{
 			var loginIp = runningJobInfo?.Items?.FirstOrDefault()?.Datas.FirstOrDefault()?.LoginIp;
 			//Execute pjshowrsc command and make it an array
-			var pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} date";
+			var pjshowrsc_s = $"sudo -u {rshAccount} ssh -l {rshAccount} {loginIp} date";
 			var dateResult = await uiqService.RunCommandAsync(pjshowrsc_s);
 @($"{rshAccount} {loginIp}")@(dateResult)
-			pjshowrsc_s = $"rsh -l {rshAccount} {loginIp} pjshowrsc";
+			pjshowrsc_s = $"sudo -u {rshAccount} ssh -l {rshAccount} {loginIp} pjshowrsc";
 			var commandResult = await uiqService.RunCommandAsync(pjshowrsc_s);
 			var pjshowrsc_sarr = commandResult.Split("\n");
 			//Make 5th line of pjshowrsc_s delimited by space
@@ -83,7 +83,7 @@
 			commandResult = await uiqService.RunCommandAsync(nodeList);
 			var nodelistArray =  commandResult.Split("\n");
 			//Execute pjshowrsc command and make it an array
-			var pjshowrsc_d = $"rsh -l {rshAccount} {loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
+			var pjshowrsc_d = $"sudo -u {rshAccount} ssh -l {rshAccount} {loginIp} 'date; pjshowrsc -v -E | cut -c-41'";
 			commandResult = await uiqService.RunCommandAsync(pjshowrsc_d);
 			var pjshowrsc_darr = commandResult.Split("\n");
 <p>@($"{hpcCtl} {loginIp}")</p>

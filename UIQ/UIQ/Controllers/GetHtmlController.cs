@@ -40,7 +40,7 @@ namespace UIQ.Controllers
         public async Task<JsonResult> ModelLogEnquire(string modelName, string memberName, string nickname)
         {
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var command = $"rsh -l {_rshAccount} {_loginIp} ls {fullPath}/log | grep job | grep -v job1 | grep -v OP_";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls {fullPath}/log | grep job | grep -v job1 | grep -v OP_";
             var listData = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
@@ -52,7 +52,7 @@ namespace UIQ.Controllers
         public async Task<JsonResult> ModelLogResult(string modelName, string memberName, string nickname, string node)
         {
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/log/{node}";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat {fullPath}/log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
@@ -64,7 +64,7 @@ namespace UIQ.Controllers
         public async Task<JsonResult> RunningEnquire(string modelName, string memberName, string nickname, string keyword)
         {
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var command = $"rsh -l {_rshAccount} {_loginIp} ls {fullPath}/log {(!string.IsNullOrWhiteSpace(keyword) ? $"| grep -i {keyword}" : string.Empty)}";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls {fullPath}/log {(!string.IsNullOrWhiteSpace(keyword) ? $"| grep -i {keyword}" : string.Empty)}";
             var listData = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
@@ -78,22 +78,22 @@ namespace UIQ.Controllers
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
             //File size
-            var command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $5}'";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $5}'";
             var fileSize = await _uiqService.RunCommandAsync(command);
 
             //File time
-            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $6}'";
+            command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $6}'";
             var fileTime = await _uiqService.RunCommandAsync(command);
 
-            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $7}'";
+            command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $7}'";
             fileTime += " " + await _uiqService.RunCommandAsync(command);
 
-            command = $"rsh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $8}'";
+            command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -l {fullPath}/log/{node}" + " | awk '{print $8}'";
             fileTime += " " + await _uiqService.RunCommandAsync(command);
             fileTime = fileTime.Replace("\n", string.Empty);
 
             //Get last 30 lines of the file
-            command = $"rsh -l {_rshAccount} {_loginIp} tail -n 30 {fullPath}/log/{node}";
+            command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} tail -n 30 {fullPath}/log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
             var files = listData.Split("/\n/").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
 
@@ -120,7 +120,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> DailyResult(string node)
         {
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/daily_log/{node}";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/daily_log/{node}";
             var listData = await _uiqService.RunCommandAsync(command);
 
             var response = new ApiResponse<IEnumerable<string>>(listData.Split("\n")
@@ -136,7 +136,7 @@ namespace UIQ.Controllers
                                                       && x.Nickname == nickname);
             var acnt = modelLogFile?.Acnt;
             var secureAcnt = acnt.GetGetSecureString();
-            var command = $"rsh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -s ";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} /usr/bin/pjstat -s ";
             var data = await _uiqService.RunCommandAsync(command);
             var showDatas = data.Split("[Job Statistical Information]");
 
@@ -195,10 +195,10 @@ namespace UIQ.Controllers
             else
             {
                 var decodeAcnt = secureAcnt.GetSecureStringToString();
-                command = $"rsh -l {decodeAcnt} {_loginIp} {fullPath}{resetModel} {fullPath}";
+                command = $"sudo -u {_rshAccount} ssh -l {decodeAcnt} {_loginIp} {fullPath}{resetModel} {fullPath}";
                 if (decodeAcnt != $"{_prefix}weps")
                 {
-                    command = $"rsh -l {decodeAcnt} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {decodeAcnt} {fullPath}{resetModel} {jobId} {fullPath}";
+                    command = $"sudo -u {_rshAccount} ssh -l {decodeAcnt} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/cancel_job.ksh {decodeAcnt} {fullPath}{resetModel} {jobId} {fullPath}";
                     //result += await _uiqService.RunCommandAsync(command);
                 }
             }
@@ -255,7 +255,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                var command = $"sudo -u {_rshAccount} ssh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
                 datas.Add(command);
                 var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
                 foreach (var item in (result ?? string.Empty).Split("\n"))
@@ -295,7 +295,7 @@ namespace UIQ.Controllers
             var secureAcnt = acnt.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
 
-            var command = $"rsh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {secureAcnt.GetSecureStringToString()} {fullPath} {lid}";
+            var command = $"sudo -u {_rshAccount} ssh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_Lid.ksh {secureAcnt.GetSecureStringToString()} {fullPath} {lid}";
             var result = await _uiqService.RunCommandAsync(command);
 
             var message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")}{modelName} {memberName} {nickname} adjust LID value to {lid}.\r\n";
@@ -314,9 +314,9 @@ namespace UIQ.Controllers
             var acnt = modelLogFile?.Acnt;
             var secureAcnt = acnt.GetGetSecureString();
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
-            command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/Lid";
+            command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/Lid";
             var lid = await _uiqService.RunCommandAsync(command);
 
             var batchs = _uiqService.GetMemberRelay(modelName, memberName, nickname).ToList();
@@ -325,7 +325,7 @@ namespace UIQ.Controllers
             {
                 var item = batchs[i];
                 var dataList_R = string.Empty;
-                var tmpCommand = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{secureAcnt.GetSecureStringToString()}/{modelName}/{memberName}/etc/{item}*";
+                var tmpCommand = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls /{_systemName}/{secureAcnt.GetSecureStringToString()}/{modelName}/{memberName}/etc/{item}*";
                 var output = await _uiqService.RunCommandAsync(tmpCommand);
                 if (!string.IsNullOrEmpty(output))
                 {
@@ -402,7 +402,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh -l {secureAcnt.GetSecureStringToString()} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
+                var command = $"sudo -u {_rshAccount} ssh -l {secureAcnt.GetSecureStringToString()} -n {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/re_run.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{submitModel} {modelName} {memberName} {batch} {fullPath}";
                 message = $"{DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss")} Rerun the {modelName} {memberName} {nickname} with {dtg} in {batch} run \r\n";
                 datas.Add(message);
                 datas.Add(await _uiqService.RunCommandAsync(command));
@@ -418,7 +418,7 @@ namespace UIQ.Controllers
         {
             var dataTypes = _uiqService.GetArchiveDataTypes(modelName, memberName, nickname);
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
             var methodDatas = new List<KeyValuePair<string, string>>();
             foreach (var item in dataTypes)
@@ -510,7 +510,7 @@ namespace UIQ.Controllers
         public async Task<JsonResult> FixShow(string modelName, string memberName, string nickname)
         {
             var fullPath = await _uiqService.GetFullPathAsync(modelName, memberName, nickname);
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat {fullPath}/etc/crdate" + " | awk '{print $1}'";
             var dtg = await _uiqService.RunCommandAsync(command);
             return Json(new ApiResponse<string>(data: dtg));
         }
@@ -526,7 +526,7 @@ namespace UIQ.Controllers
             {
                 foreach (var path in fullPath.Split(' '))
                 {
-                    var command = $"rsh -l {_rshAccount} {_loginIp} ls -ald {path}/*{dtg}* " + " | sed 's%\\/.\\+\\/%%'";
+                    var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -ald {path}/*{dtg}* " + " | sed 's%\\/.\\+\\/%%'";
                     var data = await _uiqService.RunCommandAsync(command);
                     tableDatas = data.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
                 }
@@ -557,7 +557,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                command = $"rsh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/run_Fixfailed.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
+                command = $"sudo -u {_rshAccount} ssh -l {_hpcCtl} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/run_Fixfailed.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{fixFailedModel} {dtg} {method} {modelName} {memberName} {fullPath}";
                 if (string.IsNullOrWhiteSpace(parameter) == false)
                     command += $@" '""\""{parameter}\""""'";
 

@@ -129,13 +129,13 @@ namespace UIQ.Controllers
                 var checkFile = checkDir.EnumerateFiles()?.FirstOrDefault(m => m.Name == realFileName);
                 if (checkFile != null && checkFile.Exists)
                 {
-                    command = $"rsh -l {_typhoonAccount} {_loginIp} mv {realFilePath} {realFilePath}{currentTime}";
+                    command = $"sudo -u {_rshAccount} ssh -l {_typhoonAccount} {_loginIp} mv {realFilePath} {realFilePath}{currentTime}";
                     await _uiqService.RunCommandAsync(command);
                     datas.Add($"Rename {realFilePath} to {realFileName}{currentTime}...");
                 }
 
                 //將檔案傳回HPC主機
-                command = $"rsh -l {_typhoonAccount} {_loginIp} cp {tmpFilePath} {realFilePath}";
+                command = $"sudo -u {_rshAccount} ssh -l {_typhoonAccount} {_loginIp} cp {tmpFilePath} {realFilePath}";
                 await _uiqService.RunCommandAsync(command);
                 datas.Add($"Copy to ${realFilePath}...");
             }
@@ -197,17 +197,17 @@ namespace UIQ.Controllers
             {
                 case "Normal":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Normal");
+                    _uiqService.RunCommandAsync($"sudo -u {_rshAccount} ssh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Normal");
                     break;
 
                 case "Backup":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Backup");
+                    _uiqService.RunCommandAsync($"sudo -u {_rshAccount} ssh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Backup");
                     break;
 
                 case "Typhoon":
                     //Do anything.
-                    _uiqService.RunCommandAsync($"rsh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Typhoon");
+                    _uiqService.RunCommandAsync($"sudo -u {_rshAccount} ssh -l {_hpcCtl} {_cronIp} /{_systemName}/{_hpcCtl}/shfun/shbin/Change_mode.ksh Typhoon");
                     break;
 
                 default:
@@ -384,7 +384,7 @@ namespace UIQ.Controllers
         [HttpPost]
         public async Task<JsonResult> GetShell(CheckPointInfoViewModel data)
         {
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/shfun/shetc/setMode | awk " + " '{print $1}'";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat /{_systemName}/{_hpcCtl}/shfun/shetc/setMode | awk " + " '{print $1}'";
             var cron_mode = await _uiqService.RunCommandAsync(command);
             data.Cron_Mode = Regex.Replace(cron_mode, "/\\s\\s+/", "").Trim();
 

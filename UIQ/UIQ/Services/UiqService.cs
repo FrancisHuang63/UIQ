@@ -108,7 +108,7 @@ namespace UIQ.Services
             var datas = new List<KeyValuePair<string, string>>();
             foreach (var node in selNode.Split(','))
             {
-                var command = $"rsh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/shell/ps.ksh";
+                var command = $"sudo -u {_RshAccount} ssh -l {_RshAccount} {node} /{_SystemName}/{_HpcCtl}/web/shell/ps.ksh";
                 var commandResult = await RunCommandAsync(command);
                 datas.Add(new KeyValuePair<string, string>(node, commandResult));
             }
@@ -704,7 +704,7 @@ namespace UIQ.Services
 
             if (File.Exists(file_path) == false) return message;
 
-            var rtn_code = await RunCommandAsync($"rsh {_loginIp} -l {_HpcCtl} {_UiPath}wwwroot/shell/sms_reject_clean.sh;echo $?");
+            var rtn_code = await RunCommandAsync($"sudo -u {_RshAccount} ssh {_loginIp} -l {_HpcCtl} {_UiPath}wwwroot/shell/sms_reject_clean.sh;echo $?");
             return "status: " + rtn_code;
         }
 
@@ -909,7 +909,7 @@ namespace UIQ.Services
             EditDump(filename);
 
             // copy to TOHOST
-            await RunCommandAsync($"rsh -l {_HpcCtl} {toHost} mysql -u{account} -p{password} {hpcSql} --default-character-set=utf8 < {filename}");
+            await RunCommandAsync($"sudo -u {_RshAccount} ssh -l {_HpcCtl} {toHost} mysql -u{account} -p{password} {hpcSql} --default-character-set=utf8 < {filename}");
         }
 
         public async Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)

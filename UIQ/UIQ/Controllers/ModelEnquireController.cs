@@ -53,7 +53,7 @@ namespace UIQ.Controllers
         [MenuPageAuthorize(Enums.MenuEnum.DailyReport)]
         public IActionResult DailyReport()
         {
-            var command = $"rsh -l {_rshAccount} {_loginIp} ls /{_systemName}/{_hpcCtl}/daily_log/ | grep -v old_log";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls /{_systemName}/{_hpcCtl}/daily_log/ | grep -v old_log";
             var data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
             ViewBag.Data = (data ?? string.Empty).Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToArray();
             return View();
@@ -62,7 +62,7 @@ namespace UIQ.Controllers
         [MenuPageAuthorize(Enums.MenuEnum.TyphoonInitialData)]
         public IActionResult TyphoonInitialData()
         {
-            var command = $"rsh -l {_rshAccount} {_loginIp} cat /{_systemName}/ncsatyp/TYP/M00/tmp/typhoon.ini";
+            var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} cat /{_systemName}/ncsatyp/TYP/M00/tmp/typhoon.ini";
             ViewBag.Data = _uiqService.RunCommandAsync(command).GetAwaiter().GetResult();
             return View();
         }
