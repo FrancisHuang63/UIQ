@@ -255,7 +255,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var command = $"rsh ssh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
+                var command = $"rsh -l {secureAcnt.GetSecureStringToString()} {_loginIp} /{_systemName}/{_hpcCtl}/web/shell/set_dtg.ksh {secureAcnt.GetSecureStringToString()} {fullPath}{dtgAdjust} {dtg} {fullPath}";
                 datas.Add(command);
                 var result = await _uiqService.RunCommandAsync($"{command} 2>&1");
                 foreach (var item in (result ?? string.Empty).Split("\n"))
