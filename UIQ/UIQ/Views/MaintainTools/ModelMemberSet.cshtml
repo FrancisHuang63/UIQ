@@ -425,61 +425,45 @@
 			}
 
 			function addNewCronGroup(e){
-				let crontabCronGroup_New = $('#crontabCronGroup_New')[0].value.toString();
-				crontabCronGroup_New = htmlEncode(crontabCronGroup_New);
-				let crontabStartTime_New = $('#crontabStartTime_New')[0].value.toString();
-				crontabStartTime_New = htmlEncode(crontabStartTime_New);
-				if(e.keyCode === 13 
-					&& crontabCronGroup_New
-				    && crontabStartTime_New){
-						//let trCronTable = document.getElementById('crontabTableItem');
-						//let newTd = document.createElement("td");
-						//$(newTd).attr('valign', 'top')
-						//let newGroupTable = document.createElement("table");
-						//newGroupTable.innerHTML = `<tbody>
-						//								<tr>
-						//									<th scope="col" bgcolor="lightcyan">${crontabCronGroup_New}<img src="@Href("~/images/add_icons.png")" onclick="addSatnamingCrontab('${crontabCronGroup_New}')" alt="新增"></th>
-						//								</tr>
-						//								<tr class="cronTabItem">
-						//									<td>
-						//										<input type="text" name="CronTab.Start_Time" value="${crontabStartTime_New}">(Ex: 17:00:00)
-						//										<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
-						//									</td>
-						//									<input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
-						//									<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
-						//									<input type="hidden" name="CronTab.Group_Validation" value="0" />
-						//								</tr>
-						//							</tbody>`;
-						//$(newGroupTable).attr('id', `crongrpTable_${crontabCronGroup_New}`);
-						//$(newGroupTable).attr('border', 1);
-						//$(newGroupTable).attr('aria-describedby', 'crongrpTable');
-						//newTd.appendChild(newGroupTable);
-						//trCronTable.appendChild(newTd);
+    let crontabCronGroup_New = '';
+    if(document.getElementById('crontabCronGroup_New') != null)
+       crontabCronGroup_New = document.getElementById('crontabCronGroup_New').value;
 
-let newGroupTable = `
+    let crontabStartTime_New = '';
+    if(document.getElementById('crontabStartTime_New') != null)
+       crontabStartTime_New = document.getElementById('crontabStartTime_New').value;
+    if(e.keyCode === 13
+     && crontabCronGroup_New
+        && crontabStartTime_New){
+
+     
+                    let repData = `
 <td valign="top">
-	<table id="crongrpTable_${crontabCronGroup_New}" border="1" aria-describedby="crongrpTable" >
-		<tbody>
-			<tr>
-				<th scope="col" bgcolor="lightcyan">${crontabCronGroup_New}<img src="@Href("~/images/add_icons.png")" onclick="addSatnamingCrontab('${crontabCronGroup_New}')" alt="新增"></th>
-			</tr>
-			<tr class="cronTabItem">
-				<td>
-					<input type="text" name="CronTab.Start_Time" value="${crontabStartTime_New}">(Ex: 17:00:00)
-					<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
-				</td>
-				<input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
-				<input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
-				<input type="hidden" name="CronTab.Group_Validation" value="0" />
-			</tr>
-		</tbody>
-	</table>
+ <table id="crongrpTable_${crontabCronGroup_New}" border="1" aria-describedby="crongrpTable" >
+  <tbody>
+   <tr>
+    <th scope="col" bgcolor="lightcyan">${crontabCronGroup_New}<img src="@Href("~/images/add_icons.png")" onclick="addSatnamingCrontab('${crontabCronGroup_New}')" alt="新增"></th>
+   </tr>
+   <tr class="cronTabItem">
+    <td>
+     <input type="text" name="CronTab.Start_Time" value="${crontabStartTime_New}">(Ex: 17:00:00)
+     <img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingCrontab(this)" alt="移除">
+    </td>
+    <input type="hidden" name="CronTab.Cron_Group" value="${crontabCronGroup_New}">
+    <input type="hidden" name="CronTab.Master_Group" value="@(masterCronGroup)" />
+    <input type="hidden" name="CronTab.Group_Validation" value="0" />
+   </tr>
+  </tbody>
+ </table>
 </td>`;
-//						$('#crontabTableItem').prepend(newGroupTable);
-						$('#crontabTableItem')[0].outerHTML = newGroupTable + $('#crontabTableItem')[0].outerHTML;
-						$('#crongrpTable_New').remove();
-				}
-			}
+                    let pre = $('<td/>');
+                    let htmlEncodeData = htmlEncode(repData);
+                    $('#crontabTableItem')[0].innerHTML = htmlDecode(htmlEncodeData) + $('#crontabTableItem')[0].innerHTML;
+     $('#crongrpTable_New').remove();
+
+      
+    }
+   }
 
 			function addSatnamingCrontab(cronGroup){
 				let groupTable = `crongrpTable_${cronGroup}`;
