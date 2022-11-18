@@ -83,7 +83,7 @@ namespace UIQ.Services.Interfaces
 
         public Task<string> CheckRejectStatusAsync();
 
-        public Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
+        public Task<ApiResponse<string>> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data);
 
         public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, bool isUnPermisson, out int totalCount);
 

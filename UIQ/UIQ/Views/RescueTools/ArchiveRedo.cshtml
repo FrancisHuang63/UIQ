@@ -89,15 +89,15 @@
                         tableDataHtml = 'No data!!';
                     }
                     else{
-                        tableDataHtml = '<br><table><tr>';
-                        response.data.tableDatas.forEach((item, idx) => {
-                            tableDataHtml += `<td>${htmlEncode(item)}</td><tr>`;
-                            if(idx % 9 == 8){
-                                tableDataHtml += '</td></tr><tr>'
-                            }
+                        //tableDataHtml = '<br><table><tr>';
+                        //response.data.tableDatas.forEach((item, idx) => {
+                        //    tableDataHtml += `<td>${htmlEncode(item)}</td><tr>`;
+                        //    if(idx % 9 == 8){
+                        //        tableDataHtml += '</td></tr><tr>'
+                        //    }
                             
-                        });
-                        tableDataHtml += '</table><br><br>';
+                        //});
+                        //tableDataHtml += '</table><br><br>';
                     }
                     
 		            $('#ShowLog').html(`<pre>${displayDataHtml}${tableDataHtml}</pre>`);

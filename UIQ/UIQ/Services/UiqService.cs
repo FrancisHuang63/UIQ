@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Data;
 using System.Text.RegularExpressions;
+using System.Text.Unicode;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -537,8 +538,9 @@ namespace UIQ.Services
             return content.Trim();
         }
 
-        public async Task<bool> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data)
+        public async Task<ApiResponse<string>> SaveModelMemberSetData(ModelMemberSetSaveDataViewModel data)
         {
+            var ApiResult = new ApiResponse<string>();
             var result = 0;
             var memberId = data.Member.Member_Id;
 
@@ -675,8 +677,14 @@ namespace UIQ.Services
                     result += await _dataBaseNcsUiService.InsertAsync("check_point", checkPointData);
                 }
             }
+            if (result > 0)
+                ApiResult.Success = true;
+            else
+                ApiResult.Success = false;
 
-            return result > 0;
+            ApiResult.Data = memberId.ToString();
+
+            return ApiResult;
         }
 
         public IEnumerable<UploadFile> GetUploadFilePageItems(int startIndex, int pageSize, bool isUnPermisson, out int totalCount)
@@ -834,22 +842,6 @@ namespace UIQ.Services
             var toHost = string.Empty;
             switch (myHost)
             {
-                case "datamv03":
-                    toHost = "datamv04";
-                    break;
-
-                case "datamv04":
-                    toHost = "datamv03";
-                    break;
-
-                case "datamv05":
-                    toHost = "datamv06";
-                    break;
-
-                case "datamv06":
-                    toHost = "datamv05";
-                    break;
-
                 case "login13":
                     toHost = "login14";
                     break;
@@ -897,19 +889,15 @@ namespace UIQ.Services
                 case "h6dm22":
                     toHost = "h6dm21";
                     break;
-
-                case "myRedHat":
-                    toHost = "myRedHat";
-                    break;
-
                 default:
-                    return;
+                    break;
             }
 
             EditDump(filename);
 
             // copy to TOHOST
-            await RunCommandAsync($"sudo -u {_RshAccount} ssh -l {_HpcCtl} {toHost} mysql -u{account} -p{password} {hpcSql} --default-character-set=utf8 < {filename}");
+            if (!string.IsNullOrEmpty(toHost))
+                await RunCommandAsync($"sudo -u {_RshAccount} ssh -l {_HpcCtl} {toHost} mysql -u {account} -p {password} --default-character-set=utf8 {hpcSql} < {filename}");
         }
 
         public async Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
@@ -1609,7 +1597,7 @@ namespace UIQ.Services
             options += $" --ignore-table={hpcSql}.model_view";
             options += $" --ignore-table={hpcSql}.ouput_view";
             options += $" --ignore-table={hpcSql}.user_view";
-            var sqldump = $"mysqldump -u{account} -p{password} {hpcSql} {options}";
+            var sqldump = $"mysqldump -u {account} -p {password} {hpcSql} {options}";
             var dump = await RunCommandAsync(sqldump);
             var dumparr = Regex.Split(dump, "/\n /");
             foreach (var i in dumparr)

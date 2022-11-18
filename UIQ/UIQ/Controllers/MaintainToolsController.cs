@@ -242,9 +242,8 @@ namespace UIQ.Controllers
 
             var saveResult = await _uiqService.SaveModelMemberSetData(data);
             await _uiqService.SqlSync();
-
-            result.Success = saveResult;
-            return Json(result);
+            //result.Success = saveResult;
+            return Json(saveResult);
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
