@@ -47,7 +47,6 @@
 		<div>
 			<form id="setting" action="@Url.Action(nameof(MaintainToolsController.ModelMemberSet))" method="post" autocomplete="off"  enctype="multipart/form-data">
 				<input id="memberID" type="hidden" name="memberId" value="@member?.Member_Id">
-				<input id="memberID" type="hidden" name="memberId" value="@member?.Member_Id">
 				@Html.Hidden("IsNew", isNew)
 				<div class="check_point_dialog" id="check_point_dialog" title="Check Points" style="display:none;">
 					<table width="100%" border="1" aria-describedby="check_point_dialog">
@@ -634,115 +633,89 @@
 			}
 
 			function getFormPostDatas(){
-				let postData = {};
-
-				postData.IsNew = $('[name="IsNew"]').val();
-				postData.memberId = $('[name="memberId"]').val();
-				postData.IsNewModelName = $('[name="IsNewModelName"]:checked').val();
-				postData.New_Model_Name = $('[name="New_Model_Name"]').val();
-				postData.New_Model_Position = $('[name="New_Model_Position"]').val();
-				
+				let postData =  new FormData($('#setting')[0]);
+				postData.append('IsNew', $('[name="memberId"]').val());
+				postData.append('memberId', $('#memberID').val());
+				postData.append('IsNewModelName', $('[name="IsNewModelName"]:checked').val());
+				postData.append('New_Model_Name', $('[name="New_Model_Name"]').val());
+				postData.append('New_Model_Position', $('[name="New_Model_Position"]').val());
+								
 				//Model
-				let model = {};
-				model.Model_Id = $('[name="Model.Model_Id"]').val();
-				model.Model_Name = $('[name="Model.Model_Id"] option:selected').text();
-				model.Model_Position = $('[name="Model.Model_Position"]').val();
-				postData.Model = model;
+				postData.append('Model.Model_Id', $('[name="Model.Model_Id"]').val());
+				postData.append('Model.Model_Name', $('[name="Model.Model_Id"] option:selected').text());
+				postData.append('Model.Model_Position', $('[name="Model.Model_Position"]').val());
 
 				//Member
-				let member = {};
-				member.Member_Id = $('[name="memberId"]').val();
-				member.Member_Name = $('[name="Member.Member_Name"]').val();
-				member.Nickname = $('[name="Member.Nickname"]').val();
-				member.Account = $('[name="Member.Account"]').val();
-				member.Model_Group = $('[name="Member.Model_Group"]').val();
-				member.Member_Path = $('[name="Member.Member_Path"]').val();
-				member.Member_Position = $('[name="Member.Member_Position"]').val();
-				member.Member_Dtg_Value = $('[name="Member.Member_Dtg_Value"]').val();
-				member.Reset_Model = $('[name="Member.Reset_Model"]').val();
-				member.Dtg_Adjust = $('[name="Member.Dtg_Adjust"]').val();
-				member.Fix_Failed_Model = $('[name="Member.Fix_Failed_Model"]').val();
-				member.Submit_Model = $('[name="Member.Submit_Model"]').val();
-				member.Fix_Failed_Target_Directory = $('[name="Member.Fix_Failed_Target_Directory"]').val();
-				member.Maintainer_Status = $('[name="maintainer_status"]:checked').val();
-				member.Normal_Pre_Time = $('[name="Member.Normal_Pre_Time"]').val();
-				member.Typhoon_Pre_Time = $('[name="Member.Typhoon_Pre_Time"]').val();
-				member.Typhoon_Model = $('[name="Member.Typhoon_Model"]').prop('checked') ? 1 : 0;
-				postData.Member = member;
-
+				postData.append('Member.Member_Id', $('[name="memberId"]').val());
+				postData.append('Member.Member_Name', $('[name="Member.Member_Name"]').val());
+				postData.append('Member.Nickname', $('[name="Member.Nickname"]').val());
+				postData.append('Member.Account', $('[name="Member.Account"]').val());
+				postData.append('Member.Model_Group', $('[name="Member.Model_Group"]').val());
+				postData.append('Member.Member_Path', $('[name="Member.Member_Path"]').val());
+				postData.append('Member.Member_Position', $('[name="Member.Member_Position"]').val());
+				postData.append('Member.Member_Dtg_Value', $('[name="Member.Member_Dtg_Value"]').val());
+				postData.append('Member.Reset_Model', $('[name="Member.Reset_Model"]').val());
+				postData.append('Member.Dtg_Adjust', $('[name="Member.Dtg_Adjust"]').val());
+				postData.append('Member.Fix_Failed_Model', $('[name="Member.Fix_Failed_Model"]').val());
+				postData.append('Member.Submit_Model', $('[name="Member.Submit_Model"]').val());
+				postData.append('Member.Fix_Failed_Target_Directory', $('[name="Member.Fix_Failed_Target_Directory"]').val());
+				postData.append('Member.Maintainer_Status', $('[name="maintainer_status"]:checked').val());
+				postData.append('Member.Normal_Pre_Time', $('[name="Member.Normal_Pre_Time"]').val());
+				postData.append('Member.Typhoon_Pre_Time', $('[name="Member.Typhoon_Pre_Time"]').val());
+				postData.append('Member.Typhoon_Model', $('[name="Member.Typhoon_Model"]').prop('checked') ? 1 : 0);
+				
 				//CronTab
 				let cronTabs = [];
 				$('tr.cronTabItem').each((idx, item) => {
-					let cronTab = {};
-					cronTab.Member_Id = $('[name="memberId"]').val();
-					cronTab.Start_Time = $(item).find('[name="CronTab.Start_Time"]').val();
-					cronTab.Cron_Group = $(item).find('[name="CronTab.Cron_Group"]').val();
-					cronTab.Master_Group = $(item).find('[name="CronTab.Master_Group"]').val();
-					cronTab.Group_Validation = $(item).find('[name="CronTab.Group_Validation"]').val();
-
-					cronTabs.push(cronTab);
+					postData.append(`CronTabs[${idx}].Member_Id`, $('[name="memberId"]').val());
+					postData.append(`CronTabs[${idx}].Start_Time`, $(item).find('[name="CronTab.Start_Time"]').val());
+					postData.append(`CronTabs[${idx}].Cron_Group`, $(item).find('[name="CronTab.Cron_Group"]').val());
+					postData.append(`CronTabs[${idx}].Master_Group`, $(item).find('[name="CronTab.Master_Group"]').val());
+					postData.append(`CronTabs[${idx}].Group_Validation`, $(item).find('[name="CronTab.Group_Validation"]').val());
 				});
-				postData.CronTabs = cronTabs;
-				
+
 				//Batch
 				let batchs = [];
 				$('tr.batchItem').each((idx, item) => {
-					let batch = {};
-					batch.Batch_Id = $(item).find('[name="Batch.Batch_Id"]').val();
-					batch.Batch_Position = $(item).find('[name="Batch.Batch_Position"]').val();
-					batch.Member_Id = $('[name="memberId"]').val();
-					batch.Batch_Name = $(item).find('[name="Batch.Batch_Name"]').val();
-					batch.Batch_Type = $(item).find('[name="Batch.Batch_Type"]').val();
-					batch.Batch_Dtg = $(item).find('[name="Batch.Batch_Dtg"]').val();
-					batch.Batch_Time = $(item).find('[name="Batch.Batch_Time"]').val();
-					batch.Batch_Relay = $(item).find('[name="Batch.Batch_Relay"]').val();
-
-					batchs.push(batch);
+					postData.append(`Batchs[${idx}].Batch_Id`, $(item).find('[name="Batch.Batch_Id"]').val());
+					postData.append(`Batchs[${idx}].Batch_Position`, $(item).find('[name="Batch.Batch_Position"]').val());
+					postData.append(`Batchs[${idx}].Member_Id`, $('[name="memberId"]').val());
+					postData.append(`Batchs[${idx}].Batch_Name`, $(item).find('[name="Batch.Batch_Name"]').val());
+					postData.append(`Batchs[${idx}].Batch_Type`, $(item).find('[name="Batch.Batch_Type"]').val());
+					postData.append(`Batchs[${idx}].Batch_Dtg`, $(item).find('[name="Batch.Batch_Dtg"]').val());
+					postData.append(`Batchs[${idx}].Batch_Time`, $(item).find('[name="Batch.Batch_Time"]').val());
+					postData.append(`Batchs[${idx}].Batch_Relay`, $(item).find('[name="Batch.Batch_Relay"]').val());
 				});
-				postData.Batchs = batchs;
 
 				//Archive
 				let archives = [];
 				$('tbody.archiveItem').each((idx, item) => {
-					let archive = {};
-					archive.Archive_Id = $(item).find('[name="Archive.Archive_Id"]').val();
-					archive.Member_Id = $('[name="memberId"]').val();
-					archive.Data_Id = $(item).find('[name="Archive.Data_Id"]').val();
-					archive.Archive_Redo = $(item).find('[name="Archive.Archive_Redo"]').val();
-					archive.Target_Directory = $(item).find('[name="Archive.Target_Directory"]').val();
-
-					archives.push(archive);
+					postData.append(`Archives[${idx}].Archive_Id`, $(item).find('[name="Archive.Archive_Id"]').val());
+					postData.append(`Archives[${idx}].Member_Id`, $('[name="memberId"]').val());
+					postData.append(`Archives[${idx}].Data_Id`, $(item).find('[name="Archive.Data_Id"]').val());
+					postData.append(`Archives[${idx}].Archive_Redo`, $(item).find('[name="Archive.Archive_Redo"]').val());
+					postData.append(`Archives[${idx}].Target_Directory`, $(item).find('[name="Archive.Target_Directory"]').val());
 				});
-				postData.Archives = archives;
 
 				//Output
 				let outputs = [];
 				$('tr.outputItem').each((idx, item) => {
-					let output = {};
-					output.Output_Id = $(item).find('[name="Output.Output_Id"]').val();
-					output.Member_Id = $('[name="memberId"]').val();
-					output.Work_Id = $(item).find('[name="Output.Work_Id"]').val();
-					output.Model_Output = $(item).find('[name="Output.Model_Output"]').val();
-
-					outputs.push(output);
+					postData.append(`Outputs[${idx}].Output_Id`, $(item).find('[name="Output.Output_Id"]').val());
+					postData.append(`Outputs[${idx}].Member_Id`, $('[name="memberId"]').val());
+					postData.append(`Outputs[${idx}].Work_Id`, $(item).find('[name="Output.Work_Id"]').val());
+					postData.append(`Outputs[${idx}].Model_Output`, $(item).find('[name="Output.Model_Output"]').val());
 				});
-				postData.Outputs = outputs;
 
 				//CheckPoint
-				let checkPoints = [];
 				$('tr.checkPointItem').each((idx, item) => {
-					let checkPoint = {};
-					checkPoint.Member_Id = $('[name="memberId"]').val();
-					checkPoint.Batch_Id = $(item).find('[name="CheckPoint.Batch_Id"]').val();
-					checkPoint.Batch_Name = $(item).find('[name="CheckPoint.Batch_Name"]').val();
-					checkPoint.Shell_Name = $(item).find('[name="CheckPoint.Shell_Name"]').val();
-					checkPoint.Tolerance_Time = $(item).find('[name="CheckPoint.Tolerance_Time"]').val();
-
-					checkPoints.push(checkPoint);
+					postData.append(`CheckPoints[${idx}].Member_Id`, $('[name="memberId"]').val());
+					postData.append(`CheckPoints[${idx}].Batch_Id`, $(item).find('[name="CheckPoint.Batch_Id"]').val());
+					postData.append(`CheckPoints[${idx}].Batch_Name`, $(item).find('[name="CheckPoint.Batch_Name"]').val());
+					postData.append(`CheckPoints[${idx}].Shell_Name`, $(item).find('[name="CheckPoint.Shell_Name"]').val());
+					postData.append(`CheckPoints[${idx}].Tolerance_Time`, $(item).find('[name="CheckPoint.Tolerance_Time"]').val());
 				});
-				postData.CheckPoints = checkPoints;
 
-				return postData
+				return postData;
 			}
 
 			$('#setting').on('submit', function(e){
@@ -754,29 +727,10 @@
 
 				let form = $(this);
 				let url = form.attr('action');
-				let postData = getFormPostDatas();
-								
-				$.ajax({
-					url: url,
-					type: 'POST',
-					dataType: 'json',
-					data: postData,
-					success: function(response){
-						if(response.success){
-							alert('Save success!');
-							//response.data
-							location.href = encodeURI('@Url.Action(nameof(MaintainToolsController.ModelMemberSet), new{ memberId = member?.Member_Id })');
-						}
-						else{
-							alert('Save error!');
-						}
-					},
-					error: function(error){
-						alert('Save error!');
-					}
-				});
-
-				e.preventDefault();
+				let formData = getFormPostDatas();
+				let request = new XMLHttpRequest();
+				request.open("POST", url);
+				request.send(formData);
 			})
 		</script>
 	</body>

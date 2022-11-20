@@ -25,5 +25,6 @@
         PermissionSetting = 25,
         ParameterSetting = 26,
         DownloadFile = 28,
+        HomePage = 29,
     }
 }

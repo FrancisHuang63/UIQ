@@ -14,6 +14,7 @@
     IEnumerable<MenuViewModel> menus = ViewBag.Menu;
     int refreshTimeSeconds = ViewBag.RefreshTimeSeconds == 0 ? 60000 : ((int)ViewBag.RefreshTimeSeconds) * 1000;
     IndexSideEnum indexSide = ViewBag.IndexSide;
+    bool isHomePagePermissonNotHave = ViewBag.IsHomePagePermissonNotHave;
     var indexSideImageUrl = string.Empty;
     switch (indexSide)
     {
@@ -69,6 +70,8 @@
                     <td height="107" valign="bottom" background="@indexSideImageUrl">
                         <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href="@(Url.Action(nameof(LoginController.Logout), "Login"))">logout</a></div>
                         <div id="menu" class="jqueryslidemenu">
+                        @if (isHomePagePermissonNotHave)
+                        {
                             <ul>
                             @foreach(var menu in menus.OrderBy(x => x.Sort))
                             {
@@ -86,65 +89,70 @@
                             }
                             </ul>
                             <br style="clear: left" />
+                        }
                         </div>
                     </td>
                 </tr>
             </table>
         </div>
-        <div id="main">
-        <table id="tablesorter-demo" class="tablesorter" cellspacing="1" aria-describedby="tablesorter-demo">
-                <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">DTG & RUN</th>
-                        <th scope="col">Start Time -> Predict End</th>
-                        <th scope="col">Stage start (Predict End)</th>
-                        <th scope="col">Run Status</th>
-                        <th scope="col">Comment</th>
-                        <th scope="col">Next Run</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.OrderBy(x =>x.Model_Position))
-                    {
-                        var trClass = item.Status?.ToUpper() == "FAIL" && item.Lid == UIQ.Enums.LidEnum.Zero
-                            ? "failed"
-                            : item.Status == "RUNNING"
-                                ? "running"
-                                : string.Empty;
-                        
-                        <tr class="@(trClass)" id="@($"{item.Model_Name}_{item.Member_Name}_{item.Nickname}")">
-                            <td class="left">
-                                @if (user.IsInRole(UIQ.Enums.GroupNameEnum.ADM.ToString()))
-                                {
-                                    <a href="@Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools", new{ memberId = item.Member_Id })" target="_blank">
-                                        <img alt="Edit" src="~/images/edit.png" width="12"/>
-                                    </a>
-                                }
-                                <a style="text-decoration:none; font-weight:bold" href="@(Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
-                                     @($"{item.Model_Name}_{item.Member_Name} ({item.Nickname})")
-                                </a>
-                            </td>
-                            <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
-                            <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
-                            <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({(item.Sms_Time == null ? string.Empty : item.Sms_Time.Value.ToString("HH:mm"))} -> {item.Pre_End.ToString("HH:mm")})")</td>
-                            <td class="center logData" data-model="@item.Model_Name" data-member="@item.Member_Name" data-account="@item.Account"></td>
-                            <td class="@item.TdClass">@item.Comment</td>
-                            <td>@item.NextRun</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
 
-            <input type=button style="display:scroll;position:fixed;bottom:5px;right:30px;width:80px;" value="Return top" onclick="window.scrollTo(0, 0);">
-        </div>
-
-        @if (Model.Any(x => x.Status?.ToUpper() == "FAIL" && x.Lid != UIQ.Enums.LidEnum.Zero)) 
+        @if (isHomePagePermissonNotHave)
         {
-            <object>
-               <param name='vedio' value='~/media/moscode.midi'>
-               <embed src='~/media/moscode.midi' autostart='true' width=70 height=25></embed>
-            </object>
+            <div id="main">
+                <table id="tablesorter-demo" class="tablesorter" cellspacing="1" aria-describedby="tablesorter-demo">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">DTG & RUN</th>
+                            <th scope="col">Start Time -> Predict End</th>
+                            <th scope="col">Stage start (Predict End)</th>
+                            <th scope="col">Run Status</th>
+                            <th scope="col">Comment</th>
+                            <th scope="col">Next Run</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderBy(x =>x.Model_Position))
+                        {
+                            var trClass = item.Status?.ToUpper() == "FAIL" && item.Lid == UIQ.Enums.LidEnum.Zero
+                                ? "failed"
+                                : item.Status == "RUNNING"
+                                    ? "running"
+                                    : string.Empty;
+                        
+                            <tr class="@(trClass)" id="@($"{item.Model_Name}_{item.Member_Name}_{item.Nickname}")">
+                                <td class="left">
+                                    @if (user.IsInRole(UIQ.Enums.GroupNameEnum.ADM.ToString()))
+                                    {
+                                        <a href="@Url.Action(nameof(MaintainToolsController.ModelMemberSet), "MaintainTools", new{ memberId = item.Member_Id })" target="_blank">
+                                            <img alt="Edit" src="~/images/edit.png" width="12"/>
+                                        </a>
+                                    }
+                                    <a style="text-decoration:none; font-weight:bold" href="@(Url.Action(nameof(LogviewController.Index), "Logview", new { modelName = item.Model_Name, memberName = item.Member_Name, account = item.Account }))" target='_blank'>
+                                         @($"{item.Model_Name}_{item.Member_Name} ({item.Nickname})")
+                                    </a>
+                                </td>
+                                <td class="left">@($"{item.Dtg} {item.Run_Type}")</td>
+                                <td>@($"{item.Start_Time.ToString("HH:mm")} -> {item.End_Time.ToString("HH:mm")}")</td>
+                                <td class="left" title="@(item.Shell_Name)">@($"{item.Sms_Name} ({(item.Sms_Time == null ? string.Empty : item.Sms_Time.Value.ToString("HH:mm"))} -> {item.Pre_End.ToString("HH:mm")})")</td>
+                                <td class="center logData" data-model="@item.Model_Name" data-member="@item.Member_Name" data-account="@item.Account"></td>
+                                <td class="@item.TdClass">@item.Comment</td>
+                                <td>@item.NextRun</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <input type=button style="display:scroll;position:fixed;bottom:5px;right:30px;width:80px;" value="Return top" onclick="window.scrollTo(0, 0);">
+            </div>
+
+            if (Model.Any(x => x.Status?.ToUpper() == "FAIL" && x.Lid != UIQ.Enums.LidEnum.Zero)) 
+            {
+                <object>
+                   <param name='vedio' value='~/media/moscode.midi'>
+                   <embed src='~/media/moscode.midi' autostart='true' width=70 height=25></embed>
+                </object>
+            }
         }
     </body>
 

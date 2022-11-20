@@ -30,25 +30,43 @@ namespace UIQ.Controllers
 
         public IActionResult Index()
         {
-            var models = _uiqService.GetHomeTableDatas();
-            var menus = GenerateMenuItems();
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
-
-            ViewBag.Menu = menus;
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
+
+            var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
+            if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
+            {
+                ViewBag.IsHomePagePermissonNotHave = false;
+                return View();
+            }
+
+            var models = _uiqService.GetHomeTableDatas();
+            var menus = GenerateMenuItems();
+
+            ViewBag.Menu = menus;
+            ViewBag.IsHomePagePermissonNotHave = true;
             return View(models);
         }
 
         public IActionResult DetailedStatus(string modelMemberNickname)
         {
-            var models = _uiqService.GetHomeTableDatas();
-            var menus = GenerateMenuItems();
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
-
-            ViewBag.Menu = menus;
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
+
+            var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
+            if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
+            {
+                ViewBag.IsHomePagePermissonNotHave = false;
+                return View();
+            }
+
+            var models = _uiqService.GetHomeTableDatas();
+            var menus = GenerateMenuItems();
+
+            ViewBag.Menu = menus;
+            ViewBag.IsHomePagePermissonNotHave = true;
             return View(models);
         }
 

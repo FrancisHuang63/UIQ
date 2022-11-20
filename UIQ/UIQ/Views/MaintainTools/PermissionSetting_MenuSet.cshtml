@@ -1,4 +1,5 @@
 ﻿@using UIQ.Controllers
+@using UIQ.Enums
 @using UIQ.ViewModels
 @model IEnumerable<MenuRoleSetViewModel>
 @{
@@ -41,7 +42,12 @@
                                 <input type="hidden" name="roleId" value="@(role == null ? null : (int?)role.Role_Id)">
                             </td>
                         </tr>
-                        @foreach (var mainMenu in Model.Where(x => x.Parent_Id == null))
+                        <tr>
+                            @{ var homePageMenu =  Model.FirstOrDefault(x => x.Menu_Id == (int)MenuEnum.HomePage);}
+                            <td>@MenuEnum.HomePage.ToString()</td>
+                            <td><input type="checkbox" id="menu_@(homePageMenu?.Menu_Id)" name="menuIds" value="@((int)MenuEnum.HomePage)" @(homePageMenu.Is_Selected ? "checked" : string.Empty)> <label for="menu_@(homePageMenu.Menu_Id)">@homePageMenu.Name</label></td>
+                        </tr>
+                        @foreach (var mainMenu in Model.Where(x => x.Parent_Id == null && x.Menu_Id != (int)MenuEnum.HomePage))
                         {
                             var subMenus = Model.Where(x => x.Parent_Id == mainMenu.Menu_Id);
 

@@ -219,31 +219,47 @@ namespace UIQ.Controllers
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
-        public IActionResult ModelMemberSet(int? memberId)
+        public async Task<IActionResult> ModelMemberSet(int? memberId)
         {
             ViewBag.IsNew = memberId == null;
-            ViewBag.ModelItems = _uiqService.GetModelItemsAsync().GetAwaiter().GetResult();
-            ViewBag.DataItems = _uiqService.GetDataItemsAsync().GetAwaiter().GetResult();
-            ViewBag.WorkItems = _uiqService.GetWorkItemsAsync().GetAwaiter().GetResult();
-            ViewBag.CronTabItems = memberId.HasValue ? _uiqService.GetCronTabItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<CronTab> { new CronTab { Cron_Group = "Normal", Master_Group = "Normal" } };
-            ViewBag.BatchItems = memberId.HasValue ? _uiqService.GetBatchItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Batch> { new Batch() };
-            ViewBag.ArchiveItems = memberId.HasValue ? _uiqService.GetArchiveItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Archive> { new Archive() };
-            ViewBag.OutputItems = memberId.HasValue ? _uiqService.GetOutputItemsAsync(memberId.Value).GetAwaiter().GetResult() : new List<Output> { new Output() };
-            ViewBag.Member = memberId.HasValue ? _uiqService.GetMemberItemAsync(memberId.Value).GetAwaiter().GetResult() : null;
+            ViewBag.ModelItems = await _uiqService.GetModelItemsAsync();
+            ViewBag.DataItems = await _uiqService.GetDataItemsAsync();
+            ViewBag.WorkItems = await _uiqService.GetWorkItemsAsync();
+            ViewBag.CronTabItems = memberId.HasValue ? await _uiqService.GetCronTabItemsAsync(memberId.Value) : new List<CronTab> { new CronTab { Cron_Group = "Normal", Master_Group = "Normal" } };
+            ViewBag.BatchItems = memberId.HasValue ? await _uiqService.GetBatchItemsAsync(memberId.Value) : new List<Batch> { new Batch() };
+            ViewBag.ArchiveItems = memberId.HasValue ? await _uiqService.GetArchiveItemsAsync(memberId.Value) : new List<Archive> { new Archive() };
+            ViewBag.OutputItems = memberId.HasValue ? await _uiqService.GetOutputItemsAsync(memberId.Value) : new List<Output> { new Output() };
+            ViewBag.Member = memberId.HasValue ? await _uiqService.GetMemberItemAsync(memberId.Value) : null;
             return View();
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
         [HttpPost]
-        public async Task<JsonResult> ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
+        public async Task<IActionResult> ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
         {
             var result = new ApiResponse<string>("Error");
             if (data == null) return Json(result);
 
             var saveResult = await _uiqService.SaveModelMemberSetData(data);
             await _uiqService.SqlSync();
-            //result.Success = saveResult;
-            return Json(saveResult);
+
+            return RedirectToAction(nameof(ModelMemberSetResult), new { memberId = data.Member.Member_Id, isNewModel = data.IsNewModelName });
+        }
+
+        [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
+        public IActionResult ModelMemberSetResult(int memberId, bool isNewModel)
+        {
+            ViewBag.Member = _uiqService.GetMemberItemAsync(memberId).GetAwaiter().GetResult();
+            ViewBag.ModelItems = _uiqService.GetModelItemsAsync().GetAwaiter().GetResult().FirstOrDefault();
+            ViewBag.DataItems = _uiqService.GetDataItemsAsync().GetAwaiter().GetResult();
+            ViewBag.WorkItems = _uiqService.GetWorkItemsAsync().GetAwaiter().GetResult();
+            ViewBag.CronTabItems = _uiqService.GetCronTabItemsAsync(memberId).GetAwaiter().GetResult();
+            ViewBag.BatchItems = _uiqService.GetBatchItemsAsync(memberId).GetAwaiter().GetResult();
+            ViewBag.ArchiveItems = _uiqService.GetArchiveItemsAsync(memberId).GetAwaiter().GetResult();
+            ViewBag.OutputItems = _uiqService.GetOutputItemsAsync(memberId).GetAwaiter().GetResult();
+            ViewBag.CheckPointItems = _uiqService.GetCheckPointsItemsAsync(memberId).GetAwaiter().GetResult();
+            ViewBag.IsNewModel = isNewModel;
+            return View();
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]

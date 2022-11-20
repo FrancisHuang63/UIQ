@@ -1,0 +1,96 @@
+﻿@{
+    Layout = null;
+    var isNewModel = ViewBag.IsNewModel ?? false;
+	Member member = ViewBag.Member ?? new Member();
+    Model modelItem = ViewBag.ModelItems ?? new Model();
+	IEnumerable<Data> dataItems = ViewBag.DataItems ?? new List<Data>();
+	IEnumerable<Work> workItems = ViewBag.WorkItems ?? new List<Work>();
+	IEnumerable<CronTab> cronTabItems = ViewBag.CronTabItems ?? new List<CronTab>();
+	IEnumerable<Batch> batchItems = ViewBag.BatchItems ?? new List<Batch>();
+	IEnumerable<CheckPoint> checkPointItems = ViewBag.CheckPointItems ?? new List<CheckPoint>();
+	IEnumerable<Archive> archiveItems = ViewBag.ArchiveItems ?? new List<Archive>();
+	IEnumerable<Output> outputItems = ViewBag.OutputItems ?? new List<Output>();
+}
+
+<body>
+	@*Model*@
+    @(isNewModel ? "New Model" : "Old Model") : @modelItem.Model_Id, Position: @modelItem.Model_Position<br>
+	<br>
+	<br>
+
+	@*Member*@
+	Member ID: @member.Member_Id<br>
+	member_name: @member.Member_Name<br>
+	member_nickname: @member.Nickname<br>
+	member_position: @member.Member_Position<br>
+	member_account: @member.Account<br>
+	member_path: @member.Member_Path<br>
+	model_group: @member.Model_Group<br>
+	member_reset_model: @member.Reset_Model<br>
+	member_dtg_adjust: @member.Dtg_Adjust<br>
+	member_fix_fialed_model: @member.Fix_Failed_Model<br>
+	member_submit_model: @member.Submit_Model<br>
+	<br>
+	normal_pre_time: @member.Normal_Pre_Time<br>
+	typhoon_pre_time: @member.Typhoon_Pre_Time<br>
+	typhoon_model: @member.Typhoon_Model<br>
+	<br>
+
+	@*CronTab*@
+	@foreach (var cronTab in cronTabItems)
+	{
+		@($"Cron Tab: {cronTab.Start_Time}")<br>
+		<br>
+	}
+	
+	@*Batch and CheckPoint*@
+	@foreach (var batch in batchItems)
+	{
+		var checkpPoints = checkPointItems.Where(x => x.Batch_Id == batch.Batch_Id);
+		@($"Batch :")<br>
+		@($"batchInputPosition: {batch.Batch_Position}")<br>
+		@($"batchInputName: {batch.Batch_Name}")<br>
+		@($"batchInputRelay: {batch.Batch_Relay}")<br>
+		@($"batchInputType: {batch.Batch_Type}")<br>
+		@($"batchInputDtg: {batch.Batch_Dtg}")<br>
+		@($"batchInputTime: {batch.Batch_Time}")<br>
+		<br>
+		@foreach (var checkPoint in checkpPoints)
+		{
+			@($"Check Points :")<br>
+			@($"batch_name: {batch.Batch_Name}")<br>
+			@($"shell_name: {checkPoint.Shell_Name}")<br>
+			@($"tolerance_time: {checkPoint.Tolerance_Time}")<br>
+			<br>
+		}
+	}
+	
+	@*Archive*@
+	@foreach (var archive in archiveItems)
+	{
+		var data = dataItems.FirstOrDefault(x => x.Data_Id == archive.Data_Id);
+
+		@($"Archive :")<br>
+		@($"archive_data: {data.Data_Name}")<br>
+		@($"archiveInput: {archive.Archive_Redo}")<br>
+		@($"target directory: {archive.Target_Directory}")<br>
+		<br>
+	}
+	
+
+	@*Output*@
+	@foreach (var output in outputItems)
+	{
+		var work = workItems.FirstOrDefault(x => x.Work_Id == output.Work_Id);
+
+		@($"Output :")<br>
+		@($"output_work: {work.Work_Name}")<br>
+		@($"outputInput: {output.Model_Output}")<br>
+		<br>
+	}
+	
+	maintainer :<br>
+	status: @(member?.Maintainer_Status)<br>
+	<br>
+</body>
+

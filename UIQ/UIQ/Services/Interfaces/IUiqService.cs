@@ -126,5 +126,7 @@ namespace UIQ.Services.Interfaces
         public Task<IEnumerable<CheckPointInfoResultViewModel>> GetUnselectedShell(CheckPointInfoViewModel data);
 
         public Task<IEnumerable<ShowCheckPointInfoViewModel>> GetShowCheckPointInfoDatas(int memberId);
+
+        public Task<IEnumerable<CheckPoint>> GetCheckPointsItemsAsync(int memberId);
     }
 }

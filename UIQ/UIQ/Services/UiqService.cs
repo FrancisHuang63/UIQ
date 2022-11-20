@@ -1024,6 +1024,12 @@ namespace UIQ.Services
             return result;
         }
 
+        public async Task<IEnumerable<CheckPoint>> GetCheckPointsItemsAsync(int memberId)
+        {
+            var result = await _dataBaseNcsUiService.GetAllAsync<CheckPoint>("check_point", new { member_id = memberId });
+            return result;
+        }
+
         #region Private Methods
 
         private void Parse(IEnumerable<ModelConfigViewModel> modelInfos, IEnumerable<CronInfoViewModel> cronInfos, string checkPointLid)
