@@ -52,7 +52,7 @@ else
 {
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
     {
-        options.LoginPath = "/Login/Index";
+        options.LoginPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromSeconds(1800);
     });
 }

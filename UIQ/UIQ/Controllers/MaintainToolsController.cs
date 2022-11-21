@@ -235,7 +235,7 @@ namespace UIQ.Controllers
 
         [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
         [HttpPost]
-        public async Task<IActionResult> ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
+        public async Task<JsonResult> ModelMemberSet(ModelMemberSetSaveDataViewModel data, int? memberId)
         {
             var result = new ApiResponse<string>("Error");
             if (data == null) return Json(result);
@@ -243,7 +243,7 @@ namespace UIQ.Controllers
             var saveResult = await _uiqService.SaveModelMemberSetData(data);
             await _uiqService.SqlSync();
 
-            return RedirectToAction(nameof(ModelMemberSetResult), new { memberId = data.Member.Member_Id, isNewModel = data.IsNewModelName });
+            return Json(new ApiResponse<dynamic>(new { memberId = data.Member.Member_Id, isNewModel = data.IsNewModelName }));
         }
 
         [MenuPageAuthorize(Enums.MenuEnum.ModelMemberSet)]
@@ -280,13 +280,13 @@ namespace UIQ.Controllers
 
         [MenuPageAuthorize(Enums.MenuEnum.PermissionSetting)]
         [HttpPost]
-        public IActionResult PermissionSetting_MenuSet(int? roleId, string roleName, int[] menuIds)
+        public async Task<IActionResult> PermissionSetting_MenuSetAsync(int? roleId, string roleName, int[] menuIds)
         {
             var actualRoleId = roleId ?? 0;
             if (roleId == null) _uiqService.AddNewRole(roleName, out actualRoleId);
-            else _uiqService.UpdateRoleAsync(roleId.Value, roleName);
+            else await _uiqService.UpdateRoleAsync(roleId.Value, roleName);
 
-            _uiqService.UpdateMenuToRole(actualRoleId, menuIds);
+            await _uiqService.UpdateMenuToRole(actualRoleId, menuIds);
             return RedirectToAction(nameof(PermissionSetting));
         }
 

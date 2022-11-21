@@ -897,7 +897,7 @@ namespace UIQ.Services
 
             // copy to TOHOST
             if (!string.IsNullOrEmpty(toHost))
-                await RunCommandAsync($"sudo -u {_RshAccount} ssh -l {_HpcCtl} {toHost} mysql -u {account} -p {password} --default-character-set=utf8 {hpcSql} < {filename}");
+                await RunCommandAsync($"sudo -u {_RshAccount} ssh -l {_HpcCtl} {toHost} mysql -u{account} -p{password} --default-character-set=utf8 {hpcSql} < {filename}");
         }
 
         public async Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
@@ -1603,7 +1603,7 @@ namespace UIQ.Services
             options += $" --ignore-table={hpcSql}.model_view";
             options += $" --ignore-table={hpcSql}.ouput_view";
             options += $" --ignore-table={hpcSql}.user_view";
-            var sqldump = $"mysqldump -u {account} -p {password} {hpcSql} {options}";
+            var sqldump = $"mysqldump -u{account} -p{password} {hpcSql} {options}";
             var dump = await RunCommandAsync(sqldump);
             var dumparr = Regex.Split(dump, "/\n /");
             foreach (var i in dumparr)

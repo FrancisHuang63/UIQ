@@ -1,4 +1,5 @@
-﻿@{
+﻿@using UIQ.Controllers
+@{
     Layout = null;
     var isNewModel = ViewBag.IsNewModel ?? false;
 	Member member = ViewBag.Member ?? new Member();
@@ -92,5 +93,8 @@
 	maintainer :<br>
 	status: @(member?.Maintainer_Status)<br>
 	<br>
+	<br>
+
+	<button id="btnBack" onclick="window.location.href='@(Url.Action(nameof(MaintainToolsController.ModelMemberSet), new { memberId = member?.Member_Id }))'">Back</button>
 </body>
 
