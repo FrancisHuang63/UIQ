@@ -33,6 +33,7 @@ namespace UIQ.Controllers
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
+            ViewBag.Menu = GenerateMenuItems(); 
 
             var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
             if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
@@ -42,9 +43,6 @@ namespace UIQ.Controllers
             }
 
             var models = _uiqService.GetHomeTableDatas();
-            var menus = GenerateMenuItems();
-
-            ViewBag.Menu = menus;
             ViewBag.IsHomePagePermissonNotHave = true;
             return View(models);
         }
@@ -54,6 +52,7 @@ namespace UIQ.Controllers
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
+            ViewBag.Menu = GenerateMenuItems();
 
             var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
             if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
@@ -63,9 +62,6 @@ namespace UIQ.Controllers
             }
 
             var models = _uiqService.GetHomeTableDatas();
-            var menus = GenerateMenuItems();
-
-            ViewBag.Menu = menus;
             ViewBag.IsHomePagePermissonNotHave = true;
             return View(models);
         }

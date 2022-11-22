@@ -84,8 +84,7 @@
                         <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href='@Url.Action(nameof(LoginController.Logout), "Login")'>logout</a></div>
                         
                         <div id="menu" class="jqueryslidemenu">
-                            @if (isHomePagePermissonNotHave)
-                            {
+                            
                                     <ul>
                                         @foreach(var menu in menus.OrderBy(x => x.Sort))
                                         {
@@ -103,7 +102,7 @@
                                         }
                                     </ul>
                                     <br style="clear: left" />
-                            }
+                            
                         </div>
                     </td>
                 </tr>
