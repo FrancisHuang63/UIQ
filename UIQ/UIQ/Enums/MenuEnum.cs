@@ -25,6 +25,7 @@
         PermissionSetting = 25,
         ParameterSetting = 26,
         DownloadFile = 28,
-        HomePage = 29,
+        ModelNode = 30,
+        HomePage = 33,
     }
 }

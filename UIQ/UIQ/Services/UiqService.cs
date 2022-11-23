@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Data;
-using System.Text.RegularExpressions;
-using System.Text.Unicode;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -889,6 +887,7 @@ namespace UIQ.Services
                 case "h6dm22":
                     toHost = "h6dm21";
                     break;
+
                 default:
                     break;
             }
@@ -1603,9 +1602,11 @@ namespace UIQ.Services
             options += $" --ignore-table={hpcSql}.model_view";
             options += $" --ignore-table={hpcSql}.ouput_view";
             options += $" --ignore-table={hpcSql}.user_view";
-            var sqldump = $"mysqldump -u{account} -p{password} {hpcSql} {options}";
+
+            //var sqldump = $"sudo -u {_RshAccount} mysqldump -u{account} -p{password} {hpcSql} {options} > {fileName}";
+            var sqldump = $"sudo -u {_RshAccount} mysqldump -u{account} -p{password} {hpcSql} > {fileName}";
             var dump = await RunCommandAsync(sqldump);
-            var dumparr = Regex.Split(dump, "/\n /");
+            /* var dumparr = Regex.Split(dump, "/\n /");
             foreach (var i in dumparr)
             {
                 var printStr = string.Empty;
@@ -1635,7 +1636,7 @@ namespace UIQ.Services
                     printStr = $"{i}\n";
                     _logFileService.WriteDataIntoLogFileAsync(baseDir, fileName, printStr);
                 }
-            }
+            }*/
         }
 
         #endregion Private Methods
