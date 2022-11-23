@@ -478,14 +478,14 @@
 			}
 
 			function addSatnamingBatch(){
-				let isNewOne = $('tr.batchItem').length == 0;
+				//let isNewOne = $('tr.batchItem').length == 0;
 				let newBatch = `<tr class="batchItem">
 									<td>
 										<table width="100%">
 											<tr>
 												<td>Batch Position<font color="red">*</font></td>
 												<td>
-													<input name="Batch.Batch_Position" type="text" value="">${isNewOne ? '(Ex: 1, 2 ,3)' : ''}
+													<input name="Batch.Batch_Position" type="text" value="">(Ex: 1, 2 ,3)
 													<img src="@Href("~/images/delete_icons.png")" onclick="deleteSatnamingBatch(this)" alt="移除" align="right"/>
 												</td>
 											</tr>
@@ -493,25 +493,25 @@
 												<td>Batch Name<font color="red">*</font></td>
 												<td>
 													<input class="batchName" name="Batch.Batch_Name" type="text" size="17" value="">
-													<input name="Batch.Batch_Relay" type="checkbox" value="1">${isNewOne ? '(Ex: Rnwpnfs1&是否為中繼點)' : ''}
+													<input name="Batch.Batch_Relay" type="checkbox" value="1">(Ex: Rnwpnfs1&是否為中繼點)
 												</td>
 											</tr>
 											<tr>
 												<td>Batch Type</td>
 												<td>
-													<input name="Batch.Batch_Type" type="text" value="">${isNewOne ? '(Ex: Major, Post)' : ''}
+													<input name="Batch.Batch_Type" type="text" value="">(Ex: Major, Post)
 												</td>
 											</tr>
 											<tr>
 												<td>Batch Dtg</td>
 												<td>
-													<input name="Batch.Batch_Dtg" type="text" value="">${isNewOne ? '(Ex: 00, 06)' : ''}
+													<input name="Batch.Batch_Dtg" type="text" value="">(Ex: 00, 06)
 												</td>
 											</tr>
 											<tr>
 												<td>Batch Time<font color="red">*</font></td>
 												<td>
-													<input name="Batch.Batch_Time" type="text" size="15" value="">分鐘&nbsp;${isNewOne ? '(Ex: 44)' : ''}
+													<input name="Batch.Batch_Time" type="text" size="15" value="">分鐘&nbsp;(Ex: 44)
 												</td>
 											</tr>
 											<tr>
