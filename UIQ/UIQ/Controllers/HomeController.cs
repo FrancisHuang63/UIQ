@@ -33,7 +33,7 @@ namespace UIQ.Controllers
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
-            ViewBag.Menu = GenerateMenuItems(); 
+            ViewBag.Menu = GenerateMenuItems().Where(x => x.Menu_Id != (int)MenuEnum.HomePage);
 
             var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
             if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
@@ -52,7 +52,7 @@ namespace UIQ.Controllers
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
             ViewBag.RefreshTimeSeconds = refreshSeconds;
             ViewBag.IndexSide = _indexSide;
-            ViewBag.Menu = GenerateMenuItems();
+            ViewBag.Menu = GenerateMenuItems().Where(x => x.Menu_Id != (int)MenuEnum.HomePage);
 
             var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
             if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
