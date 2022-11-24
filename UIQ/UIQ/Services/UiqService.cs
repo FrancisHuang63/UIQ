@@ -1181,7 +1181,10 @@ namespace UIQ.Services
 
                 var nextTime = string.Empty;
                 var cronStartTimes = cronInfos.Where(x => x.Model_Member_Nick == $"{modelInfo.Model_Name}{modelInfo.Member_Name}{modelInfo.Nickname}").Select(x => x.Start);
-                if (modelInfo.Status == "PAUSING" || modelInfo.Status == "Cancelled")
+
+                //if (modelInfo.Status == "PAUSING" || modelInfo.Status == "Cancelled")
+                //移除halt設計
+                if (false)
                 {
                     var lastCount = 0;
 
@@ -1553,6 +1556,7 @@ namespace UIQ.Services
                         LEFT JOIN `monitoring_info` ON `monitoring_info`.`model` = `model`.`model_name`
                                                    AND  `monitoring_info`.`member` = `member`.`member_name`
                                                    AND `monitoring_info`.`nickname` = `member`.`nickname`
+                                                   AND `monitoring_info`.`account` = `member`.`account`
                         ORDER BY `model`.`model_position` ASC, `member`.`member_position` ASC";
 
             return _dataBaseNcsUiService.QueryAsync<ModelConfigViewModel>(sql).Result;
