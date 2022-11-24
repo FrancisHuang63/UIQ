@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Data;
+using System.Net;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -21,6 +22,7 @@ namespace UIQ.Services
         private string _SystemDirectoryName { get; set; }
         private string _RshAccount { get; set; }
         private string _UiPath { get; set; }
+        private string _SqlSyncApiUrl { get; set; }
         private string _HostName => System.Net.Dns.GetHostName();
 
         public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices
@@ -39,6 +41,7 @@ namespace UIQ.Services
             _SystemDirectoryName = configuration.GetValue<string>("SystemDirectoryName");
             _RshAccount = configuration.GetValue<string>("RshAccount");
             _UiPath = configuration.GetValue<string>("UiPath");
+            _SqlSyncApiUrl = configuration.GetValue<string>("SqlSyncApiUrl");
 
             var hostName = System.Net.Dns.GetHostName();
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
@@ -830,73 +833,26 @@ namespace UIQ.Services
 
         public async Task SqlSync()
         {
-            var hpcSql = _dataBaseNcsUiService.DataBaseName;
-            var account = _dataBaseNcsUiService.DataBaseUid;
-            var password = _dataBaseNcsUiService.DataBasePwd;
-            var baseDir = $"/{_SystemName}/{_HpcCtl}/web";
-            var dateString = DateTime.Now.ToString("yyMMdd");
-            var filename = $"{baseDir}/{hpcSql}{dateString}.sql";
-            var myHost = _HostName.Trim();
-            var toHost = string.Empty;
-            switch (myHost)
+            var request = (HttpWebRequest)WebRequest.Create(_SqlSyncApiUrl);
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            var postData = new { HostName = _HostName.Trim() };
+            var postBody = System.Text.Json.JsonSerializer.Serialize(postData);
+            var byteArray = System.Text.Encoding.UTF8.GetBytes(postBody);
+
+            using (Stream reqStream = request.GetRequestStream())
             {
-                case "login13":
-                    toHost = "login14";
-                    break;
-
-                case "login14":
-                    toHost = "login13";
-                    break;
-
-                case "datamv13":
-                    toHost = "datamv14";
-                    break;
-
-                case "datamv14":
-                    toHost = "datamv13";
-                    break;
-
-                case "h6dm13":
-                    toHost = "h6dm14";
-                    break;
-
-                case "h6dm14":
-                    toHost = "h6dm13";
-                    break;
-
-                case "login21":
-                    toHost = "login22";
-                    break;
-
-                case "login22":
-                    toHost = "login21";
-                    break;
-
-                case "datamv21":
-                    toHost = "datamv22";
-                    break;
-
-                case "datamv22":
-                    toHost = "datamv21";
-                    break;
-
-                case "h6dm21":
-                    toHost = "h6dm22";
-                    break;
-
-                case "h6dm22":
-                    toHost = "h6dm21";
-                    break;
-
-                default:
-                    break;
+                reqStream.Write(byteArray, 0, byteArray.Length);
             }
 
-            EditDump(filename);
-
-            // copy to TOHOST
-            if (!string.IsNullOrEmpty(toHost))
-                await RunCommandAsync($"sudo -u {_RshAccount} ssh -l {_HpcCtl} {toHost} mysql -u{account} -p{password} --default-character-set=utf8 {hpcSql} < {filename}");
+            var responseStr = string.Empty;
+            using (var response = request.GetResponse())
+            {
+                using (var streamReader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8))
+                {
+                    responseStr = streamReader.ReadToEnd();
+                }
+            }
         }
 
         public async Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
@@ -1583,60 +1539,6 @@ namespace UIQ.Services
         {
             var data = await _dataBaseNcsUiService.GetAllAsync<UploadFile>("upload_file", new { file_id = fileId });
             return data.FirstOrDefault();
-        }
-
-        private async void EditDump(string fileName)
-        {
-            var hpcSql = _dataBaseNcsUiService.DataBaseName;
-            var account = _dataBaseNcsUiService.DataBaseUid;
-            var password = _dataBaseNcsUiService.DataBasePwd;
-            var baseDir = $"/{_SystemName}/{_HpcCtl}/web";
-
-            var options = $"--ignore-table={hpcSql}.history_batch";
-            options += $" --ignore-table={hpcSql}.history_batch_model_view";
-            options += $" --ignore-table={hpcSql}.history_batch_stage_view";
-            options += $" --ignore-table={hpcSql}.archive_view";
-            options += $" --ignore-table={hpcSql}.batch_view";
-            options += $" --ignore-table={hpcSql}.cron_view";
-            options += $" --ignore-table={hpcSql}.model_member_view";
-            options += $" --ignore-table={hpcSql}.model_view";
-            options += $" --ignore-table={hpcSql}.ouput_view";
-            options += $" --ignore-table={hpcSql}.user_view";
-
-            //var sqldump = $"sudo -u {_RshAccount} mysqldump -u{account} -p{password} {hpcSql} {options} > {fileName}";
-            var sqldump = $"sudo -u {_RshAccount} mysqldump -u{account} -p{password} {hpcSql} > {fileName}";
-            var dump = await RunCommandAsync(sqldump);
-            /* var dumparr = Regex.Split(dump, "/\n /");
-            foreach (var i in dumparr)
-            {
-                var printStr = string.Empty;
-                if (Regex.IsMatch(i, "/^INSERT INTO .+\\(.+$/", RegexOptions.IgnoreCase))
-                {
-                    var SQLDATA = Regex.Replace(i, "/\\)\\,/", ");\n");
-                    var SQLarr = Regex.Split(SQLDATA, "/\n/");
-                    foreach (var j in SQLarr)
-                    {
-                        var prefix = string.Empty;
-
-                        if (Regex.IsMatch(j, "/INSERT INTO/", RegexOptions.IgnoreCase))
-                        {
-                            var tmparr = Regex.Split(j, "/\\(/");
-                            prefix = tmparr[0];
-                            printStr = $"{j}\n";
-                        }
-                        else
-                        {
-                            printStr = $"{prefix}{j}\n";
-                        }
-                        _logFileService.WriteDataIntoLogFileAsync(baseDir, fileName, printStr);
-                    }
-                }
-                else
-                {
-                    printStr = $"{i}\n";
-                    _logFileService.WriteDataIntoLogFileAsync(baseDir, fileName, printStr);
-                }
-            }*/
         }
 
         #endregion Private Methods
