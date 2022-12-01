@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.CodeAnalysis.Options;
 using UIQ;
 using UIQ.Filters;
 using UIQ.Services;
@@ -53,7 +54,8 @@ else
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
     {
         options.LoginPath = "/Login";
-        options.ExpireTimeSpan = TimeSpan.FromSeconds(1800);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(1800);
+        options.SlidingExpiration = true;
     });
 }
 

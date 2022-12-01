@@ -452,6 +452,7 @@ namespace UIQ.Controllers
             fullPath = fullPath.Replace("{mm}", mm);
             if (string.IsNullOrWhiteSpace(fullPath))
             {
+                displayDatas.Add("請上班時間通知NCS調整UI設定");
                 //displayDatas.AddRange(new string[]
                 //{
                 //    "No target directory!! Please edit MySQL data.",
@@ -464,8 +465,7 @@ namespace UIQ.Controllers
             }
             else
             {
-                var pathArray = fullPath.Split(' ');
-                foreach (var pathTok in pathArray)
+                foreach (var pathTok in fullPath.Split(' '))
                 {
                     var command = $"sudo -u {_rshAccount} ssh -l archive hsmsvr1a ls -al {pathTok} | sed 's%\\/.\\+\\/%%' | grep -v ^total";
                     var commandResult = await _uiqService.RunCommandAsync(command);
@@ -477,8 +477,7 @@ namespace UIQ.Controllers
                     }
                     else
                     {
-                        //tableDatas.Add("No data!!");
-                        tableDatas.Add("請聯絡NCS小組");
+                        displayDatas.Add("No data!!");
                     }
                 }
             }
@@ -523,16 +522,27 @@ namespace UIQ.Controllers
             var fullPath = (await _uiqService.GetModelMemberPathAsync(modelName, memberName, nickname)).FirstOrDefault() ?? string.Empty;
             fullPath = fullPath.Replace("{dtg}", dtg);
             var tableDatas = new List<string>();
-            if (string.IsNullOrWhiteSpace(fullPath) == false)
+            if (string.IsNullOrWhiteSpace(fullPath))
+            {
+                tableDatas.Add("請上班時間通知NCS調整UI設定");
+            }
+            else
             {
                 foreach (var path in fullPath.Split(' '))
                 {
                     var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -ald {path}/*{dtg}* " + " | sed 's%\\/.\\+\\/%%'";
                     var data = await _uiqService.RunCommandAsync(command);
                     tableDatas.Add(command);
-                    var items = data.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
-                    foreach (string item in items)
-                        tableDatas.Add(item);
+                    if (string.IsNullOrWhiteSpace(data) == false)
+                    {
+                        var items = data.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
+                        foreach (string item in items)
+                            tableDatas.Add(item);
+                    }
+                    else
+                    {
+                        tableDatas.Add("No data!!");
+                    }
                 }
             }
 
