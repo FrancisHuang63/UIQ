@@ -477,7 +477,8 @@ namespace UIQ.Controllers
                     }
                     else
                     {
-                        tableDatas.Add("No data!!");
+                        //tableDatas.Add("No data!!");
+                        tableDatas.Add("請聯絡NCS小組");
                     }
                 }
             }
@@ -528,7 +529,10 @@ namespace UIQ.Controllers
                 {
                     var command = $"sudo -u {_rshAccount} ssh -l {_rshAccount} {_loginIp} ls -ald {path}/*{dtg}* " + " | sed 's%\\/.\\+\\/%%'";
                     var data = await _uiqService.RunCommandAsync(command);
-                    tableDatas = data.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
+                    tableDatas.Add(command);
+                    var items = data.Split("\n").Where(x => string.IsNullOrWhiteSpace(x) == false).ToList();
+                    foreach (string item in items)
+                        tableDatas.Add(item);
                 }
             }
 

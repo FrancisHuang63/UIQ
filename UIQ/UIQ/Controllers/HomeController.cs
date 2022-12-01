@@ -30,24 +30,15 @@ namespace UIQ.Controllers
 
         public IActionResult Index()
         {
-            int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
-            ViewBag.RefreshTimeSeconds = refreshSeconds;
-            ViewBag.IndexSide = _indexSide;
-            ViewBag.Menu = GenerateMenuItems().Where(x => x.Menu_Id != (int)MenuEnum.HomePage);
-
-            var permissonMenus = _uiqService.GetMenuItemsWithPermissonAsync().GetAwaiter().GetResult();
-            if (permissonMenus.Any(x => x.Menu_Id == (int)MenuEnum.HomePage) == false)
-            {
-                ViewBag.IsHomePagePermissonNotHave = false;
-                return View();
-            }
-
-            var models = _uiqService.GetHomeTableDatas();
-            ViewBag.IsHomePagePermissonNotHave = true;
-            return View(models);
+            return GetStatus();
         }
 
         public IActionResult DetailedStatus(string modelMemberNickname)
+        {
+            return GetStatus(modelMemberNickname);
+        }
+
+        private IActionResult GetStatus(string modelMemberNickname = "")
         {
             int.TryParse(_uiqService.GetParameterItemAsync().GetAwaiter().GetResult()?.Parameter_Value, out var refreshSeconds);
             ViewBag.RefreshTimeSeconds = refreshSeconds;
@@ -62,6 +53,9 @@ namespace UIQ.Controllers
             }
 
             var models = _uiqService.GetHomeTableDatas();
+            if (_httpContextAccessor.HttpContext.User.IsInRole(GroupNameEnum.ADM.ToString()) == false)
+                models = models.Where(x => x.Maintainer_Status == 0).ToList();
+
             ViewBag.IsHomePagePermissonNotHave = true;
             return View(models);
         }
