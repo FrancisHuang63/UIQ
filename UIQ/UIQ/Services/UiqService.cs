@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Data;
-using System.Net;
+using System.Diagnostics;
 using UIQ.Enums;
 using UIQ.Models;
 using UIQ.Services.Interfaces;
@@ -22,7 +22,7 @@ namespace UIQ.Services
         private string _SystemDirectoryName { get; set; }
         private string _RshAccount { get; set; }
         private string _UiPath { get; set; }
-        private string _SqlSyncApiUrl { get; set; }
+        private string _SqlSyncConsolePath { get; set; }
         private string _HostName => System.Net.Dns.GetHostName();
 
         public UiqService(IHttpContextAccessor httpContextAccessor, IEnumerable<IDataBaseService> dataBaseServices
@@ -41,7 +41,7 @@ namespace UIQ.Services
             _SystemDirectoryName = configuration.GetValue<string>("SystemDirectoryName");
             _RshAccount = configuration.GetValue<string>("RshAccount");
             _UiPath = configuration.GetValue<string>("UiPath");
-            _SqlSyncApiUrl = configuration.GetValue<string>("SqlSyncApiUrl");
+            _SqlSyncConsolePath = configuration.GetValue<string>("SqlSyncConsolePath");
 
             var hostName = System.Net.Dns.GetHostName();
             var runningJobInfo = runningJobInfoOption.Value?.GetRunningJobInfo(hostName);
@@ -833,26 +833,42 @@ namespace UIQ.Services
 
         public async Task SqlSync()
         {
-            var request = (HttpWebRequest)WebRequest.Create(_SqlSyncApiUrl);
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            var postData = new { HostName = _HostName.Trim() };
-            var postBody = System.Text.Json.JsonSerializer.Serialize(postData);
-            var byteArray = System.Text.Encoding.UTF8.GetBytes(postBody);
+            //var request = (HttpWebRequest)WebRequest.Create(_SqlSyncConsolePath);
+            //request.Method = "POST";
+            //request.ContentType = "application/json";
+            //var postData = new { HostName = _HostName.Trim() };
+            //var postBody = System.Text.Json.JsonSerializer.Serialize(postData);
+            //var byteArray = System.Text.Encoding.UTF8.GetBytes(postBody);
 
-            using (Stream reqStream = request.GetRequestStream())
-            {
-                reqStream.Write(byteArray, 0, byteArray.Length);
-            }
+            //using (Stream reqStream = request.GetRequestStream())
+            //{
+            //    reqStream.Write(byteArray, 0, byteArray.Length);
+            //}
 
-            var responseStr = string.Empty;
-            using (var response = request.GetResponse())
+            //var responseStr = string.Empty;
+            //using (var response = request.GetResponse())
+            //{
+            //    using (var streamReader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8))
+            //    {
+            //        responseStr = streamReader.ReadToEnd();
+            //    }
+            //}
+
+            var process = new Process
             {
-                using (var streamReader = new StreamReader(response.GetResponseStream(), System.Text.Encoding.UTF8))
+                StartInfo = new ProcessStartInfo
                 {
-                    responseStr = streamReader.ReadToEnd();
+                    FileName = _SqlSyncConsolePath,
+                    Arguments = $"SqlSync {_HostName.Trim()}",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false
                 }
-            }
+            };
+            process.Start();
+            await process.StandardOutput.ReadToEndAsync();
+            process.WaitForExit();
         }
 
         public async Task<string> GetArchiveExecuteShellAsync(string modelName, string memberName, string nickname, string method)
