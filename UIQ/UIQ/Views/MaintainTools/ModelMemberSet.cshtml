@@ -172,7 +172,7 @@
 									</tr>
 									<tr>
 										<td>Normal Prediction Time：</td>
-										<td><input type="text" name="normal_pre_time" value="@member?.Normal_Pre_Time">(Ex: 300)</td>
+										<td><input type="text" name="Member.Normal_Pre_Time" value="@member?.Normal_Pre_Time">(Ex: 300)</td>
 									</tr>
 									<tr>
 										<td>Typhoon Prediction Time：</td>
@@ -250,7 +250,7 @@
 														<td>Batch Name<font color="red">*</font></td>
 														<td>
 															<input class="batchName" name="Batch.Batch_Name" type="text" size="17" value="@item?.Batch_Name">
-															<input name="Batch.Batch_Relay" type="checkbox" value="1" @(item?.Batch_Relay == 1 ? "checked" : string.Empty)>(Ex: Rnwpnfs1&是否為中繼點)
+															<input name="Batch.Batch_Relay" type="checkbox" @(item?.Batch_Relay == 1 ? "checked" : string.Empty)>(Ex: Rnwpnfs1&是否為中繼點)
 														</td>
 													</tr>
 													<tr>
@@ -694,7 +694,7 @@
 					batch.Batch_Type = $(item).find('[name="Batch.Batch_Type"]').val();
 					batch.Batch_Dtg = $(item).find('[name="Batch.Batch_Dtg"]').val();
 					batch.Batch_Time = $(item).find('[name="Batch.Batch_Time"]').val();
-					batch.Batch_Relay = $(item).find('[name="Batch.Batch_Relay"]').val();
+					batch.Batch_Relay = $(item).find('[name="Batch.Batch_Relay"]').prop('checked') ? 1 : 0;
 
 					batchs.push(batch);
 				});

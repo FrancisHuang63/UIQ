@@ -85,10 +85,10 @@
                     response.data.displayDatas.forEach(item => displayDataHtml += `${htmlEncode(item)}<br>`);
                     
                     let tableDataHtml = '';
-                    if(response.data.tableDatas.length == 0){
-                        tableDataHtml = 'No data!!';
-                    }
-                    else{
+                    //if(response.data.tableDatas.length == 0){
+                    //    tableDataHtml = 'No data!!';
+                    //}
+                    //else{
                         //tableDataHtml = '<br><table><tr>';
                         //response.data.tableDatas.forEach((item, idx) => {
                         //    tableDataHtml += `<td>${htmlEncode(item)}</td><tr>`;
@@ -98,7 +98,7 @@
                             
                         //});
                         //tableDataHtml += '</table><br><br>';
-                    }
+                    //}
                     
 		            $('#ShowLog').html(`<pre>${displayDataHtml}${tableDataHtml}</pre>`);
 	            }
