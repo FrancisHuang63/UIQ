@@ -81,7 +81,11 @@
                 <tr style="display:none;"><th scope="col"></th></tr>
                 <tr>
                     <td height="107" valign="bottom" background="@indexSideImageUrl">
-                        <div id="topright">welcome! <strong>@(user.Identity?.Name)</strong> <a href='@Url.Action(nameof(LoginController.Logout), "Login")'>logout</a></div>
+                        <div id="topright">
+                            welcome! 
+                            <a href="@Url.Action(nameof(LoginController.ChangeProfile), "Login")"><strong>@(user.Identity?.Name)</strong></a> 
+                            <a href='@Url.Action(nameof(LoginController.Logout), "Login")'>logout</a>
+                        </div>
                         
                         <div id="menu" class="jqueryslidemenu">
                             

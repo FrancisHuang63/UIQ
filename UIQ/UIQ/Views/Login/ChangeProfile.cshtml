@@ -1,0 +1,112 @@
+﻿@using UIQ.Controllers
+@inject IHttpContextAccessor httpContextAccessor
+@{
+	var user = httpContextAccessor.HttpContext?.User;
+	Layout = null;
+}
+
+<script src="~/js/jquery-1.3.2.min.js"></script>
+<script type="text/javascript" src="~/js/tool.js"></script>
+<link rel=stylesheet type="text/css" href="~/css/style.css">
+
+<title>Change profile</title>
+<div class="topic">Change profile</div>
+
+<span>Account : </span>
+<label>@user.Identity?.Name</label>
+<br>
+<strong>Old Password<span style="color:red;">* </span></strong>
+<input type="password" id="oldPassword" />
+<br>
+<strong>New Password<span style="color:red;">* </span></strong>
+<input type="password" id="newPassword" />
+<p class="input_description"> (只允許英文數字符號, 由大小寫組成, 長度至少為12碼)</p>
+<br>
+<strong>Confirm Password<span style="color:red;">* </span></strong>
+<input type="password" id="confirmPassword" />
+<p class="input_description"> (只允許英文數字符號, 由大小寫組成, 長度至少為12碼)</p>
+<br>
+<input type="button" id="btnSubmit" value="Submit">
+<input type="button" value="Calcel" onclick="location.href='@(Url.Action(nameof(HomeController.Index), "Home"))'" />
+
+<script>
+	function setPassword(){
+		$.ajax({
+			url: '@Url.Action(nameof(LoginController.ChangeProfile), "Login")',
+			type: 'POST',
+			data: { newPwd: $('#newPassword').val().trim() },
+			success: function(resp){
+				let response = JSON.parse(resp);
+				if(response.success){
+					if(response.data === false){
+						alert('Change password error!!');
+						return false;
+					}
+
+					alert('Change password success!!');
+					location.href = '@(Url.Action(nameof(HomeController.Index), "Home"))';
+				}
+				else{
+					 alert(htmlEncode(response.message ?? ''));
+				}
+			}
+		});
+	}
+
+	$('#btnSubmit').click(() => {
+		let oldPassword = $('#oldPassword').val().trim();
+		let newPassword = $('#newPassword').val().trim();
+		let confirmPassword = $('#confirmPassword').val().trim();
+
+		if(!(oldPassword)){
+			alert('Old password is required!!');
+			return false;
+		}
+
+		if(!(newPassword)){
+			alert('New password is required!!');
+			return false;
+		}
+
+		if(!(confirmPassword)){
+			alert('Confirm password is required!!');
+			return false;
+		}
+
+		if(newPassword !== confirmPassword){
+			alert('Confirm password is not match!!');
+			return false;
+		}
+
+		var reg = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[`~!@@#$%^&*()_+<>?:"{},.\/\\;'[\]])[A-Za-z\d`~!@@#$%^&*()_+<>?:"{},.\/\\;'[\]]{12,}$/;
+		if(reg.test(newPassword) === false){
+			alert('Password is not match rule!!');
+			return false;
+		}
+
+		$.ajax({
+			url: '@Url.Action(nameof(LoginController.CheckPassword), "Login")',
+			type: 'POST',
+			data: { pwd: oldPassword },
+			success: function(resp){
+				let response = JSON.parse(resp);
+				if(response.success == true){
+					
+					if(response.data == false){
+						alert('Old password is error!!');
+						return false;
+					}
+
+					setPassword();
+				}
+				else{
+					alert(htmlEncode(response.message ?? ''));
+				}
+			},
+			error: function(err){
+				alert(err);
+			}
+		});
+	})
+</script>
+

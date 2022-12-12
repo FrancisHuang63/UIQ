@@ -43,5 +43,31 @@ namespace UIQ.Controllers
             await _userService.Logout();
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize]
+        public async Task<IActionResult> ChangeProfile()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<JsonResult> CheckPassword(string pwd)
+        {
+            var checkResult = await _userService.CheckPasswordCorrect(pwd);
+            var response = new ApiResponse<bool>(data: checkResult);
+
+            return Json(response);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<JsonResult> ChangeProfile(string newPwd)
+        {
+            var result = await _userService.ChangePassword(newPwd);
+            var response = new ApiResponse<bool>(data: result);
+
+            return Json(response);
+        }
     }
 }

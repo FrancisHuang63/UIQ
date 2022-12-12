@@ -15,6 +15,16 @@ namespace UIQ.Services
             _httpContext = _httpContextAccessor.HttpContext;
         }
 
+        public Task<bool> ChangePassword(string newPassword)
+        {
+            return Task.FromResult(false);
+        }
+
+        public Task<bool> CheckPasswordCorrect(string password)
+        {
+            return Task.FromResult(false);
+        }
+
         public async Task<bool> Login(string userId, string password)
         {
             throw new NotImplementedException();

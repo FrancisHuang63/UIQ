@@ -34,6 +34,24 @@ namespace UIQ.Services
             return;
         }
 
+        public async Task<bool> CheckPasswordCorrect(string password)
+        {
+            var userId = _httpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value ?? string.Empty;
+            var sql = @"SELECT COUNT(1) FROM `user`
+                        WHERE `user_id` = @UserId
+                        AND `passwd` = @Password";
+
+            var result = await _dataBaseNcsUiService.QueryAsync<int>(sql, new { UserId = userId, Password = password.ToMD5() });
+            return result.FirstOrDefault() > 0;
+        }
+
+        public async Task<bool> ChangePassword(string newPassword)
+        {
+            var userId = _httpContext.User.Claims.FirstOrDefault(x => x.Type == "Id").Value ?? string.Empty;
+            var result = await _dataBaseNcsUiService.UpdateAsync("user", new { passwd = newPassword.ToMD5() }, new { user_id = userId });
+            return result > 0;
+        }
+
         #region Private Methods
 
         private async Task<UserViewModel> GetUserInfo(string userId, string password)
