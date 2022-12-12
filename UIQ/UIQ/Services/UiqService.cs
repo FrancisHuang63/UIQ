@@ -1054,14 +1054,14 @@ namespace UIQ.Services
                     var start3 = new DateTime(modelInfo.Start_Time.Ticks);    //工作起始時間
                     if (now < start3)
                     {
-                        start3 = start3.AddDays(-2);
+                        start3 = start3.AddDays(-1);
                         end1 = (start3 < end1 && (end1.GetUnixTimestamp() - start3.GetUnixTimestamp()) > maxPerRunTime)
-                            ? end1.AddDays(-2)
+                            ? end1.AddDays(-1)
                             : end1;
                     }
                     else
                     {
-                        end1 = start3 > end1 ? end1.AddDays(2) : end1;
+                        end1 = start3 > end1 ? end1.AddDays(1) : end1;
                     }
 
                     diffMinutes = (now.GetUnixTimestamp() - end1.GetUnixTimestamp()) / 60D;

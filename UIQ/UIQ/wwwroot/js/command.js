@@ -189,7 +189,7 @@ function exeCommand(exe_url, ajax_data) {
         success: function (response) {
             if (response.success) {
                 if (response.data !== 0) {
-                    let responsedate = $('<span/>');
+                    let responsedate = $('<pre/>');
                     responsedate.text(`${response.data.result}`);
                     $('#show').append(responsedate);
                 }
