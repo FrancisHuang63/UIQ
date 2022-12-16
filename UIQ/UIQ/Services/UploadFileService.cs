@@ -37,7 +37,7 @@ namespace UIQ.Services
             var checkFileName = Path.GetFileName(filePath);
             var checkDir = new DirectoryInfo(checkDirPath);
 
-            using (var fileStream = new FileStream(Path.Combine(checkDirPath, file.Name), FileMode.Create, FileAccess.Write))
+            using (var fileStream = new FileStream(Path.Combine(checkDirPath, file.FileName), FileMode.Create, FileAccess.Write))
             {
                 await file.CopyToAsync(fileStream);
             }
